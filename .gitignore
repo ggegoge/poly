@@ -1,0 +1,101 @@
+
+# untracked directories
+tests/*
+release/
+debug/
+
+# execs
+poly
+
+### C ###
+
+# Object files
+*.o
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+### Valgrind ###
+# Callgrind output files
+callgrind.out
+callgrind.out.*
+
+# Cachegrind output files
+cachegrind.out
+cachegrind.out.*
+
+# Massif output files
+massif.out
+massif.out.*
+
+# BBV output files
+bb.out
+bb.out.*
+
+### Emacs ###
+# -*- mode: gitignore; -*-
+*~
+\#*\#
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Org-mode
+.org-id-locations
+*_archive
+
+# Flycheck
+flycheck_*.el
+
+# projectiles files
+.projectile
+
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+### Tags ###
+# Ignore tags created by etags, ctags, gtags (GNU global) and cscope
+TAGS
+.TAGS
+!TAGS/
+tags
+.tags
+!tags/
+gtags.files
+GTAGS
+GRTAGS
+GPATH
+GSYMS
+cscope.files
+cscope.out
+cscope.in.out
+cscope.po.out
+
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json

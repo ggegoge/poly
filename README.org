@@ -1,0 +1,4 @@
+* Poly
+  Zadanie duże z IPP 2021 dotyczące wielomianów rzadkich. Szczegóły poleceniowe do ujrzenia w
+  [[file:task.org][task.org]]
+  

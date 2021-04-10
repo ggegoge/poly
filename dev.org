@@ -1,0 +1,119 @@
+#+TITLE: ważne dokumentowanie procesu twórczego
+Wielomiany: co robić i jak
+
+* TODO 
+
+** ważne
+   - [ ] lista vs tablica?
+   - [ ] zacząć
+   - [ ] dodawanie
+   - [ ] mnożenie
+
+
+** różne
+   - [X] polimorficzne tablice
+     zrobione przy okazji wierszarza
+   - [ ] polimorficzne listy
+     - =add=, =append=
+     - =map=
+     - =car=, =cdr=
+     - =fold_left=, =fold_right=
+     - =filter=
+   - [ ] symulacja pattern matchingu w C
+
+
+* Pytania
+  1. czy można jakoś gita ssh?
+  2. czy raczej używanie tego danego gita mimu jest wskazane?
+  3. lista, nie tabl?
+  4. =PascalCase= to obowiązek?
+
+* Rozumienie def
+  Mamy sobie jednomiany. $m_i = p_{i+1} x_i^n$.
+  
+  Wtedy $p_{i+1} = \sum p_{i+2} m_{i+1}^k$
+  
+  Czyli każdy *jednomian* (=Mono=) ma swoją potęgę i jest na jakimś levelu. Level to jest to $i$
+  stojące przy iksie. Prócz tego ma współczynnik $p$ będący /sumą jednomianów/ czyli
+  *wielomianem*. Ten wielomian traktujemy jako lvl wyżej. Tj każdy jego jednomian składowy jest
+  względem $x_{i+1}$.
+
+** Diagram
+   *Jednomian* typu $p x_0^n$ można ogólnie rozpatrzeć jako jednomian na poziomie $i$, z wykładnikiem
+   $n$ i swoim *wielomianem* tj /przybocznymi jednomianami/ zsumowanymi (ale level wyżej --> $i+1$).
+
+   Rycina następująca
+   #+begin_example
+     +---------+
+     | Mono    |
+     |         |
+     | n, i    |
+     |        p|
+     +--------|+
+              |
+             Poly
+              |
+              +--> +------+     +------+     +------+
+                   | Mono |  +  | Mono |  +  | Mono |  + ...
+                   |      |     |      |     |      |
+                   |n, i+1|     |n, i+1|     |n, i+1|
+                   |    p |     |    c |     |   p/c|
+                   +----|-+     +------+     +------+
+                        |
+                        +->...
+   #+end_example
+   gdzie mogą być różne $n$ wszędzie, ale te same $i$. Trochę to może być mylące, ale po prostu
+   chodzi mi o to, że mają /jakieś/ potęgi, ale określone zmienne. Oznaczenie ~p/c~ oznacza, że albo
+   jest tam kolejny wielomian (swoiście pogłębiając rekurencję) albo jest tam jakaś stała liczba i
+   koniec.
+
+   
+* Implementacja
+  Czy powinienem użyć na wielomian jednomianu (tj ten współczynnik) tablicy czy może raczej linked
+  listy?
+  | własność              | tablica       | linked lista            |
+  |-----------------------+---------------+-------------------------|
+  | utrzymanie kolejności | bad           | good                    |
+  | alokacje              | good          | bad                     |
+  | ile mem               | bad           | good                    |
+  | prostota              | good          | bad                     |
+  | free                  | good          | not good                |
+  | indeksowanie          | good          | bad, ale czy potrzebne? |
+  | nadmiarowa pamięć     | bad           | good                    |
+  | wyszukiwanie          | $n$           | $n$                     |
+  | dodanie przód         | $1$           | $n$                     |
+  | dodanie tył           | ~$n~$ (amort) | $n$                     |
+  | insert                | $n$, ale easy | $n$, ale hard           |
+  | implementacja?        | mam już       | jeszcze nie             |
+  | fajne rzeczy          | tak se        | masa -- patrz =ocaml=   |
+
+  Są rzadkie więc na pewno nie warto trzymać tych z zerowymi współczynnikami.  Jednakże redukcja
+  wyr. podobn. byłaby o wiele wygodniejsza z listą -- można trzymać po prostu w liście wynik mnożeń
+  i wtedy się ułożą elegancko w kolejności potęgi.
+
+** dodawanie
+   coś à la merge sort z całą pewnością. to jest tabelarno-listowo analogicznie good. Warto by sobie
+   rozpisać to z jakimś pseudo pattern matchingiem (zwłaszcza wersję listowną). swoją drogą dobre
+   pytanie: czy jakimś zestawem makr da się osiągnąć pattern matching w C?
+
+** mnożenie
+   problematyczne -- jak rozsądzić podobieństwo wyrazów, gdy te powstają w różnej kolejności?
+
+*** lista
+    miałbym łatwą insercję w środek elegancko
+
+    mógłbym użyć techniki [[https://www.youtube.com/watch?v=0ZEX_l0DFK0][triple ref pointerów]]
+    
+*** tablica
+    insercja odpada. musiałbym wszystko zresztą sortować. Na pewno musiałbym mieć tutaj jakiegoś
+    rodzaju osobne funkcje na dodanie jednomianu.
+    
+    pomysł np taki: dodawanie jednomianu $p x_i^n$ do wielomianowej tabliczki
+    1. szukam po całej tablicy czegoś z $^n$
+       - *jeśli znajduję* --> dodaję to =mono= jakąś inną funkcyjką do tego co już jest. bo mam
+         $p x_i^n + q x_i^n = (p + q)x_i^n$ -- używam funkcji do dodawania.
+       - *nie znajduję* w całej +lub mijam ten indeks+ (minięcie odpada gdyż dorzucam bez insercji)
+         --> robię zwykłe =array_append= na =poly.arr= i dorzucam tam ten jednomian 
+    2. dodaję kolejny jednomian
+    3. jeśli nie ma kolejnych to mam każdej potęgi po sztuce, ale zlosowiałe -- sortuję całą tablicę
+       jeśli brak kolejnych
