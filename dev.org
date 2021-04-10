@@ -1,11 +1,38 @@
 #+TITLE: ważne dokumentowanie procesu twórczego
 Wielomiany: co robić i jak
 
+* Lista jednomianów
+  Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
+  tym pole =size= wtedy traci rację bytu mając listę. 
+
+* dodanie elemtnu do listy, a kopiowanie danych
+  mówię o tym
+  #+begin_src C
+      while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) < 1))
+        tracer = &(*tracer)->tail;
+  
+      if (cmp != 0) {
+        /* nowy element o wykładniku niepojawionym jeszcze */
+        new->tail = *tracer;
+        ,*tracer = new;
+      } else {
+        /* już jest element z takim wykładnikiem. muszę jakoś zsumować je, ale...
+         ,* czy nie chciałbym pamięci marnować. najlepiej byłoby mieć wersję Add
+         ,* która by zmieniała jeden z tych dwóch, a nie tworzyła nowy, ale.. ech */
+        new->m = MonosAdd(&new->m, &(*tracer)->m);
+        MonoDestroy(&(*tracer)->m);
+        (*tracer)->m = new->m;
+      }
+    
+    }
+  #+end_src
+  -- jak tu dodać ten element new, gdy go ,,wtłaczamy'' w ten nowy?
 * TODO 
 
 ** ważne
-   - [ ] lista vs tablica?
-   - [ ] zacząć
+   - [X] lista vs tablica?
+     na gałęzi ~use-list~ lista
+   - [X] zacząć
    - [ ] dodawanie
    - [ ] mnożenie
 
