@@ -1,40 +1,19 @@
 #+TITLE: ważne dokumentowanie procesu twórczego
 Wielomiany: co robić i jak
 
-* Lista jednomianów
-  Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
-  tym pole =size= wtedy traci rację bytu mając listę. 
-
-* dodanie elemtnu do listy, a kopiowanie danych
-  mówię o tym
-  #+begin_src C
-      while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) < 1))
-        tracer = &(*tracer)->tail;
-  
-      if (cmp != 0) {
-        /* nowy element o wykładniku niepojawionym jeszcze */
-        new->tail = *tracer;
-        ,*tracer = new;
-      } else {
-        /* już jest element z takim wykładnikiem. muszę jakoś zsumować je, ale...
-         ,* czy nie chciałbym pamięci marnować. najlepiej byłoby mieć wersję Add
-         ,* która by zmieniała jeden z tych dwóch, a nie tworzyła nowy, ale.. ech */
-        new->m = MonosAdd(&new->m, &(*tracer)->m);
-        MonoDestroy(&(*tracer)->m);
-        (*tracer)->m = new->m;
-      }
-    
-    }
-  #+end_src
-  -- jak tu dodać ten element new, gdy go ,,wtłaczamy'' w ten nowy?
 * TODO 
-
-** ważne
-   - [X] lista vs tablica?
-     na gałęzi ~use-list~ lista
-   - [X] zacząć
-   - [ ] dodawanie
-   - [ ] mnożenie
+  - [X] lista vs tablica?
+    na gałęzi ~use-list~ lista
+  - [X] zacząć
+  - [ ] obrócić kolejność jednomów
+  - [ ] co zrobić, jeśli gdzieś głęboko jest *zero*
+    najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
+    pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
+    porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
+  - [ ] =PolyAt= *!!!!!*
+  - [ ] dodawanie
+  - [ ] mnożenie
+  - [ ] _niech to działa_
 
 
 ** różne
@@ -49,6 +28,205 @@ Wielomiany: co robić i jak
    - [ ] symulacja pattern matchingu w C
 
 
+* Lista jednomianów
+  Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
+  tym pole =size= wtedy traci rację bytu mając listę. 
+
+** TODO dodanie elemtnu do listy, a kopiowanie danych
+*** wariant kodu
+    mówię o tym
+    #+begin_src C
+        while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) < 1))
+          tracer = &(*tracer)->tail;
+  
+        if (cmp != 0) {
+          /* nowy element o wykładniku niepojawionym jeszcze */
+          new->tail = *tracer;
+          ,*tracer = new;
+        } else {
+          /* już jest element z takim wykładnikiem. muszę jakoś zsumować je, ale...
+           ,* czy nie chciałbym pamięci marnować. najlepiej byłoby mieć wersję Add
+           ,* która by zmieniała jeden z tych dwóch, a nie tworzyła nowy, ale.. ech */
+          new->m = MonosAdd(&new->m, &(*tracer)->m);
+          MonoDestroy(&(*tracer)->m);
+          (*tracer)->m = new->m;
+        }
+    
+      }
+    #+end_src
+    -- jak tu dodać ten element new, gdy go ,,wtłaczamy'' w ten nowy?
+  
+*** koncepcja: najpierw ~+=~, a później ~+~
+    Jak to ma działać? Otóż może uściślę z czym problem pierwiej. 
+
+**** Chcąc dodać do siebie dwa
+     wielomiany $p + q$ oczekiwalibyśby, że robiąc ~Poly new = PolyAdd(&p, &q)~ ani ~q~ ani ~p~ nie
+     ulegną zmianie. Zatem ~MonoAdd(m, t)~ siłą rzeczy zadziała podobnie.
+
+     *jednakże*
+
+     problem pojawia się przy wymnażaniu. Celem jest oczywiście pomnożenie każdego elementu z każdym i
+     późniejsze zwrócenie wyniku tej operacji. Dostaniemy np
+
+     \[ (x + 1) (x + 1) = x * x + x * 1 + 1 * x + 1 * 1 = x^2 + x + x + 1 = x^2 + 2x + 1  \]
+
+     gdzie kluczowe jest to przejście w ostatnim znaku $=$. W ogólności mając już
+     \( ... + p x^n + ... \) gdy wymnożymy kolejne jednomy, możemy dostać \( q x^ n \). Wtedy chcemy
+     jedodać i *zmerege'ować*. Tj rezultat taki: \(  ... + (p + q) x^n + ... \). Ale mając funkcje
+     ~MonoAdd~ i ~PolyAdd~ we wspomnianej formie, _może to się skomplikować_ -- dodając =m1= do =m2=
+     otrzymamy *zupełnie nowe* =m3=, a chcielibyśmy aby =m1 --> m3=. Możemy spróbować to zrobić, ale
+     wtedy musimy wcześniej zniszczyć =m1= i jego pamięć. Troszkę bez sensu to się wydaje. 
+
+**** możliwe rozwiązania
+    
+***** utworzenie nowego, usunięcie starego i podstawienie tam tego utworzonego
+      yikes. to co opisałem właśnie tuż powyżej
+
+***** operacje ~+=~
+      Jak można przeczytać w [[https://stackoverflow.com/a/4421719][dyskusjach dot. przeciążania operatorów w C++]] wskazanym może
+      być pierwiej utworzenie funkcji ~+=~ i później dopiero ~+~ *opartej na tej
+      pierwszej*. Łatwo widać czemu to podejście ma sens w tej sytuacji. Kopia następuje
+      *jedynie gdy to konieczne*. To rozwiązanie wymaga co prawda pewnego skomplikowania
+      operacji ~MonoListsMerge~ (asymetria: dodając elementy z /lewej listy/ dodajemy je ot
+      tak, dodając z obydwu robimy na ichnich jednomach ~+=~, a dodając z /prawej/
+      dokonujemy /kopii/. Będzie tutaj pewna zabawa, ale może warto
+
+****** szkic merge'u w poważnych językach
+       #+begin_src ocaml
+         type pseudo_mono = { p : int; exp : int }
+
+         let rec merge_monos ll rl =
+           match (ll, rl) with
+           | [], [] -> []
+           | _, [] -> ll
+           | [], _ -> rl
+           | lh::lt, rh::rt ->
+              let c = compare lh.exp rh.exp in
+              match c with
+              | 0 -> { p = lh.p + rh.p; exp = lh.exp } :: merge_monos lt rt
+              | -1 -> lh :: merge_monos lt rl
+              | _ -> rh :: merge_monos ll rt
+       #+end_src
+
+       #+begin_src emacs-lisp
+         (cl-defstruct mono poly exp)
+
+         (defun merge-monos (l r)
+           (if (null l) r
+             (if (null r) l
+               (let ((lexp (mono-exp (car l)))
+                     (rexp (mono-exp (car r))))
+                 (if (< lexp rexp)
+                     (cons (car l) (merge-monos (cdr l) r))
+                   (if (= lexp rexp)
+                       (cons (make-mono
+                              :poly (+ (mono-poly (car l)) (mono-poly (car r)))
+                              :exp lexp)
+                             (merge-monos (cdr l) (cdr r)))
+                     (cons (car l) (merge-monos l (cdr r)))))))))
+       #+end_src
+***** operacji ~*=~ *нет*
+      Nie ma żadnego sensu i użytku -- mnożąc wielomiany /nie chcemy zmieniać jednomianów/ -- każego
+      użyjemy $n$ razy. To nie jest operacja, gdzie ze starego budujemy nowe...
+***** negacja
+      Ten pomysł ma jeszcze więcej sensu niż pierwotnie myślałem.
+
+      Jak ma działać odejmowanie wielomianów? Zapewne fakt $p - q = p + (-q)$ bardzo ułatwi
+      w pewnych aspektach tę sprawę. Można po prostu napisać, że bierzemy najpierw ~PolyNeg~
+      i... oj. *oj*. =PolyNeg= zwraca *nowy wielomian*. Czyli dostaniemy $p$ i $q$,
+      stworzymy $q_2 = -q$ i dopiero wtedy =PolyAdd= zwróci nam $r = p + q_2$... Ale
+      przecież $q_2$ nam nie jest potrzebne później i musimy je jeszcze zniszczyć! Powoduje
+      to masę niekoniecznego ględzenia.
+
+      Tu znów warto byłoby mieć ~+=~. Wtedy rzecz by się zbanalniła. Negacja oczywiście jest
+      wygodniejsza w formie ~p *= -1~ ponieważ chcemy zanegować go samego. Zatem
+      #+begin_example
+        p - q =
+          nq = PolyClone(q);     # kopia
+          nq *= -1;              # -q
+          nq += p;               # -q + p
+          return nq;
+      #+end_example
+      załatwiłoby sprawę...?
+* Implementacja
+** TODO problem niemały -- =PolyAt=
+   Czyli zamieniam zmienną na samym dole w jakąś wartość.
+   \[ \sum_n p_n x^n \]
+   co tu poczynić???
+
+   mogę obliczyć oczywiśie potęgę. Wtedy awansują zmienne wszystkie. Czyli muszę jakby tę
+   /listę list/ zde-awansować do /listy/. Mam
+   #+begin_example
+     +-----+
+     | m   |  +--->  
+     |     |  |
+     |tail-----
+     +-----+
+   #+end_example
+   takich komórek nie mało i każde =m= trzyma swoją listę też. Teraz chcę przelać tę listę
+   do środka... Ech. Mógłbym wziąć pierwszą listę po prostu i robić =PolyAdd= każdej
+   kolejnej.
+   #+begin_example
+     +-----------------------+    +-->  +-----------------------+   +--> ...
+     | m { ax_1 + bx_1 + ... |    |     | m { cx_1 + dx_1 + ... |   |
+     |                       |    |     |                       |   |
+     |  x_0 = x^n        tl ------+     |  x_0 = x^n        tl -----+
+     +-----------------------+          +-----------------------+
+
+     ======>>>
+
+     (ax^n + bx^n + cx^n + dx_n) x_0         ????
+   #+end_example
+   meaning -- flattuję listę. *ech*
+** DONE arr v list
+   Czy powinienem użyć na wielomian jednomianu (tj ten współczynnik) tablicy czy może raczej linked
+   listy?
+   | własność              | tablica       | linked lista            |
+   |-----------------------+---------------+-------------------------|
+   | utrzymanie kolejności | bad           | good                    |
+   | alokacje              | good          | bad                     |
+   | ile mem               | bad           | good                    |
+   | prostota              | good          | bad                     |
+   | free                  | good          | not good                |
+   | indeksowanie          | good          | bad, ale czy potrzebne? |
+   | nadmiarowa pamięć     | bad           | good                    |
+   | wyszukiwanie          | $n$           | $n$                     |
+   | dodanie przód         | $1$           | $n$                     |
+   | dodanie tył           | ~$n~$ (amort) | $n$                     |
+   | insert                | $n$, ale easy | $n$, ale hard           |
+   | implementacja?        | mam już       | jeszcze nie             |
+   | fajne rzeczy          | tak se        | masa -- patrz =ocaml=   |
+
+   Są rzadkie więc na pewno nie warto trzymać tych z zerowymi współczynnikami.  Jednakże redukcja
+   wyr. podobn. byłaby o wiele wygodniejsza z listą -- można trzymać po prostu w liście wynik mnożeń
+   i wtedy się ułożą elegancko w kolejności potęgi.
+
+** dodawanie
+   coś à la merge sort z całą pewnością. to jest tabelarno-listowo analogicznie good. Warto by sobie
+   rozpisać to z jakimś pseudo pattern matchingiem (zwłaszcza wersję listowną). swoją drogą dobre
+   pytanie: czy jakimś zestawem makr da się osiągnąć pattern matching w C?
+
+** mnożenie
+   problematyczne -- jak rozsądzić podobieństwo wyrazów, gdy te powstają w różnej kolejności?
+
+*** lista
+    miałbym łatwą insercję w środek elegancko
+
+    mógłbym użyć techniki [[https://www.youtube.com/watch?v=0ZEX_l0DFK0][triple ref pointerów]]
+    
+*** tablica
+    insercja odpada. musiałbym wszystko zresztą sortować. Na pewno musiałbym mieć tutaj jakiegoś
+    rodzaju osobne funkcje na dodanie jednomianu.
+    
+    pomysł np taki: dodawanie jednomianu $p x_i^n$ do wielomianowej tabliczki
+    1. szukam po całej tablicy czegoś z $^n$
+       - *jeśli znajduję* --> dodaję to =mono= jakąś inną funkcyjką do tego co już jest. bo mam
+         $p x_i^n + q x_i^n = (p + q)x_i^n$ -- używam funkcji do dodawania.
+       - *nie znajduję* w całej +lub mijam ten indeks+ (minięcie odpada gdyż dorzucam bez insercji)
+         --> robię zwykłe =array_append= na =poly.arr= i dorzucam tam ten jednomian 
+    2. dodaję kolejny jednomian
+    3. jeśli nie ma kolejnych to mam każdej potęgi po sztuce, ale zlosowiałe -- sortuję całą tablicę
+       jeśli brak kolejnych
 * Pytania
   1. czy można jakoś gita ssh?
   2. czy raczej używanie tego danego gita mimu jest wskazane?
@@ -95,52 +273,3 @@ Wielomiany: co robić i jak
    koniec.
 
    
-* Implementacja
-  Czy powinienem użyć na wielomian jednomianu (tj ten współczynnik) tablicy czy może raczej linked
-  listy?
-  | własność              | tablica       | linked lista            |
-  |-----------------------+---------------+-------------------------|
-  | utrzymanie kolejności | bad           | good                    |
-  | alokacje              | good          | bad                     |
-  | ile mem               | bad           | good                    |
-  | prostota              | good          | bad                     |
-  | free                  | good          | not good                |
-  | indeksowanie          | good          | bad, ale czy potrzebne? |
-  | nadmiarowa pamięć     | bad           | good                    |
-  | wyszukiwanie          | $n$           | $n$                     |
-  | dodanie przód         | $1$           | $n$                     |
-  | dodanie tył           | ~$n~$ (amort) | $n$                     |
-  | insert                | $n$, ale easy | $n$, ale hard           |
-  | implementacja?        | mam już       | jeszcze nie             |
-  | fajne rzeczy          | tak se        | masa -- patrz =ocaml=   |
-
-  Są rzadkie więc na pewno nie warto trzymać tych z zerowymi współczynnikami.  Jednakże redukcja
-  wyr. podobn. byłaby o wiele wygodniejsza z listą -- można trzymać po prostu w liście wynik mnożeń
-  i wtedy się ułożą elegancko w kolejności potęgi.
-
-** dodawanie
-   coś à la merge sort z całą pewnością. to jest tabelarno-listowo analogicznie good. Warto by sobie
-   rozpisać to z jakimś pseudo pattern matchingiem (zwłaszcza wersję listowną). swoją drogą dobre
-   pytanie: czy jakimś zestawem makr da się osiągnąć pattern matching w C?
-
-** mnożenie
-   problematyczne -- jak rozsądzić podobieństwo wyrazów, gdy te powstają w różnej kolejności?
-
-*** lista
-    miałbym łatwą insercję w środek elegancko
-
-    mógłbym użyć techniki [[https://www.youtube.com/watch?v=0ZEX_l0DFK0][triple ref pointerów]]
-    
-*** tablica
-    insercja odpada. musiałbym wszystko zresztą sortować. Na pewno musiałbym mieć tutaj jakiegoś
-    rodzaju osobne funkcje na dodanie jednomianu.
-    
-    pomysł np taki: dodawanie jednomianu $p x_i^n$ do wielomianowej tabliczki
-    1. szukam po całej tablicy czegoś z $^n$
-       - *jeśli znajduję* --> dodaję to =mono= jakąś inną funkcyjką do tego co już jest. bo mam
-         $p x_i^n + q x_i^n = (p + q)x_i^n$ -- używam funkcji do dodawania.
-       - *nie znajduję* w całej +lub mijam ten indeks+ (minięcie odpada gdyż dorzucam bez insercji)
-         --> robię zwykłe =array_append= na =poly.arr= i dorzucam tam ten jednomian 
-    2. dodaję kolejny jednomian
-    3. jeśli nie ma kolejnych to mam każdej potęgi po sztuce, ale zlosowiałe -- sortuję całą tablicę
-       jeśli brak kolejnych
