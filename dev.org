@@ -2,6 +2,7 @@
 Wielomiany: co robić i jak
 
 * TODO 
+  - [ ] poprawić na ~use-list+=~ wszystko -- kolejność + reformat
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
   - [X] zacząć

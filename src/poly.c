@@ -67,6 +67,80 @@ Poly PolyClone(const Poly* p)
   };
 }
 
+/* TODO */
+static int MonoCmp(const void* m, const void* t);
+static void MonosAddComp(Mono* m, const Mono* t);
+
+
+/**
+ * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
+ * tychże. Jest to robione w formie `+=` -- zmienia się @p lh w oparciu o @p rh,
+ * które pozostaje niezmienne.
+ * @param[in] lh : pierwsza z list jednomianów
+ * @param[in] rh : druga z list jednomianów
+ * @return lista jednomianów zawierająca zsumowane wszystkie jednomiany
+ * z oryginalnych. */
+static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
+{
+  int cmp;
+  MonoList* cpy;
+
+  /* złączenie list à la merge sort dopóki obydwie nie są puste. wstawiam
+   * elementy w kolejności malejącej względem expów */
+  if (lh == NULL && rh == NULL)
+    return NULL;
+
+  if (lh == NULL)
+    cmp = 1;
+  else if (rh == NULL)
+    cmp = -1;
+  else
+    cmp = MonoCmp(&lh->m, &rh->m);
+
+  switch (cmp) {
+
+  case 0 :
+    MonosAddComp(&lh->m, &rh->m);
+
+    if (!PolyIsZero(&lh->m.p)) {
+      lh->tail = MonoListsMerge(lh->tail, rh->tail);
+      return lh;
+    } else {
+      MonoDestroy(&lh->m);
+      return MonoListsMerge(lh->tail, rh->tail);
+    }
+
+  case 1 :
+    lh->tail = MonoListsMerge(lh->tail, rh);
+    return lh;
+
+  case -1 :
+    cpy = malloc(sizeof(MonoList));
+    *cpy = (MonoList) {.m = MonoClone(&rh->m), .tail = NULL };
+    cpy->tail = MonoListsMerge(lh, rh->tail);
+    return cpy;
+
+  default :
+    return NULL;
+
+  }
+}
+
+/* TODO
+ * Poly += */
+static void PolyAddComp(Poly* p, const Poly* q)
+{
+  p->list = MonoListsMerge(p->list, q->list);
+}
+
+/* TODO
+ * Mono += */
+static void MonosAddComp(Mono* m, const Mono* t)
+{
+  assert(m->exp == t->exp);
+  PolyAddComp(&m->p, &t->p);
+}
+
 /** Dodanie do siebie dwóch jednomianów pod założeniem, że stopnie @p m i @p t
  * są sobie równe.
  * @param[in] m : jednomian @f$ p x_i^n @f$
@@ -94,63 +168,9 @@ static int MonoCmp(const void* m, const void* t)
   return (mm->exp > tt->exp) < (mm->exp < tt->exp);
 }
 
-/**
- * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
- * tychże.
- * @param[in] h1 : pierwsza z list jednomianów
- * @param[in] h2 : druga z list jednomianów
- * @return lista jednomianów zawierająca zsumowane wszystkie jednomiany
- * z oryginalnych. */
-static MonoList* MonoListsMerge(MonoList* h1, MonoList* h2)
-{
-  int cmp;
-  Mono sum;
-  MonoList* elem;
-
-  /* złączenie list à la merge sort dopóki obydwie nie są puste */
-  if (h1 == NULL && h2 == NULL)
-    return NULL;
-
-  if (h1 == NULL)
-    cmp = 1;
-  else if (h2 == NULL)
-    cmp = -1;
-  else
-    cmp = MonoCmp(&h1->m, &h2->m);
-
-  elem = malloc(sizeof(MonoList));
-
-  switch (cmp) {
-
-  case 0 :
-    sum = MonosAdd(&h1->m, &h2->m);
-
-    if (!PolyIsZero(&sum.p)) {
-      elem->m = sum;
-      elem->tail = MonoListsMerge(h1->tail, h2->tail);
-      return elem;
-    } else
-      return MonoListsMerge(h1->tail, h2->tail);
-
-  case -1 :
-    elem->m = h1->m;
-    elem->tail = MonoListsMerge(h1->tail, h2);
-    return elem;
-
-  case 1 :
-    elem->m = h2->m;
-    elem->tail = MonoListsMerge(h2->tail, h1);
-    return elem;
-
-  default :
-    return NULL;
-
-  }
-}
-
 Poly PolyAdd(const Poly* p, const Poly* q)
 {
-  MonoList* list;
+  Poly new;
 
   if (PolyIsCoeff(p))
     return PolyClone(q);
@@ -158,14 +178,10 @@ Poly PolyAdd(const Poly* p, const Poly* q)
   if (PolyIsCoeff(q))
     return PolyClone(p);
 
-  list = MonoListsMerge(p->list, q->list);
-
-  if (!list)
-    return PolyZero();
-
-  return (Poly) {
-    .size = 2137, .list = list
-  };
+  new = PolyClone(p);
+  PolyAddComp(&new, q);
+  
+  return new;
 }
 
 /* Mono MonosCombine(const Mono* m, const Mono* t)
@@ -237,7 +253,7 @@ Poly PolyMul(const Poly* p, const Poly* q)
 /**
  * Uprzeciwnienie wielomianu samego w sobie. Nie zwraca nowego wielomianu tylko
  * neguje ten otrzymany. Dokładniej rzecz biorąc neguje jego współczynniki
- * liczbowe.
+ * liczbowe. Coś a la `p *= -1`.
  * @param[in] p : wielomian @f$ p @f$
 */
 void PolyNegComp(Poly* p)
