@@ -180,15 +180,21 @@ static void MonoAddComp(Mono* m, const Mono* t)
  *   };
  * } */
 
+/* TODO */
+Poly PolyAddCoeff(poly_coeff_t c, const Poly* p);
+
 Poly PolyAdd(const Poly* p, const Poly* q)
 {
   Poly new;
 
+  if (PolyIsCoeff(p) && PolyIsCoeff(q))
+    return (Poly) { .coeff = p->coeff + q->coeff, .list = NULL };
+  
   if (PolyIsCoeff(p))
-    return PolyClone(q);
+    return PolyAddCoeff(p->coeff, q);
 
   if (PolyIsCoeff(q))
-    return PolyClone(p);
+    return PolyAddCoeff(q->coeff, p);
 
   new = PolyClone(p);
   PolyAddComp(&new, q);
