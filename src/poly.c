@@ -77,7 +77,7 @@ static int MonoCmp(const void* m, const void* t)
 {
   Mono* mm = (Mono*) m;
   Mono* tt = (Mono*) t;
-  return (mm->exp > tt->exp) < (mm->exp < tt->exp);
+  return (mm->exp > tt->exp) - (mm->exp < tt->exp);
 }
 
 /* TODO */
