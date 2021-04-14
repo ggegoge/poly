@@ -8,6 +8,13 @@
 
 #include "poly.h"
 
+#define CheckPtr(p) \
+  do {              \
+    if (!p) {       \
+      exit(1);      \
+    }               \
+  } while (0)
+
 /**
  * Usunięcie z pamięci listy jednomianów.
  * @param[in] head : głowa listy do usunięcia.
@@ -29,8 +36,6 @@ void PolyDestroy(Poly* p)
 {
   if (!PolyIsCoeff(p))
     MonoListDestroy(p->list);
-
-  free(p);
 }
 
 /**
@@ -45,7 +50,8 @@ static MonoList* MonoListClone(MonoList* head)
     return NULL;
 
   elem = malloc(sizeof(MonoList));
-  elem->m = head->m;
+  CheckPtr(elem);
+  elem->m = MonoClone(&head->m);
   elem->tail = MonoListClone(head->tail);
 
   return elem;
@@ -53,106 +59,15 @@ static MonoList* MonoListClone(MonoList* head)
 
 Poly PolyClone(const Poly* p)
 {
-  MonoList* list;
+  Poly np;
 
-  if (PolyIsCoeff(p))
-    return (Poly) {
-    .coeff = p->coeff, .list = NULL
-  };
+  if (PolyIsCoeff(p)) {
+    np.coeff = p->coeff;
+    np.list = NULL;
+  } else
+    np.list = MonoListClone(p->list);
 
-  list = MonoListClone(p->list);
-
-  return (Poly) {
-    .size = p->size, .list = list
-  };
-}
-
-/* TODO */
-static int MonoCmp(const void* m, const void* t);
-static void MonosAddComp(Mono* m, const Mono* t);
-
-
-/**
- * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
- * tychże. Jest to robione w formie `+=` -- zmienia się @p lh w oparciu o @p rh,
- * które pozostaje niezmienne.
- * @param[in] lh : pierwsza z list jednomianów
- * @param[in] rh : druga z list jednomianów
- * @return lista jednomianów zawierająca zsumowane wszystkie jednomiany
- * z oryginalnych. */
-static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
-{
-  int cmp;
-  MonoList* cpy;
-
-  /* złączenie list à la merge sort dopóki obydwie nie są puste. wstawiam
-   * elementy w kolejności malejącej względem expów */
-  if (lh == NULL && rh == NULL)
-    return NULL;
-
-  if (lh == NULL)
-    cmp = 1;
-  else if (rh == NULL)
-    cmp = -1;
-  else
-    cmp = MonoCmp(&lh->m, &rh->m);
-
-  switch (cmp) {
-
-  case 0 :
-    MonosAddComp(&lh->m, &rh->m);
-
-    if (!PolyIsZero(&lh->m.p)) {
-      lh->tail = MonoListsMerge(lh->tail, rh->tail);
-      return lh;
-    } else {
-      MonoDestroy(&lh->m);
-      return MonoListsMerge(lh->tail, rh->tail);
-    }
-
-  case 1 :
-    lh->tail = MonoListsMerge(lh->tail, rh);
-    return lh;
-
-  case -1 :
-    cpy = malloc(sizeof(MonoList));
-    *cpy = (MonoList) {.m = MonoClone(&rh->m), .tail = NULL };
-    cpy->tail = MonoListsMerge(lh, rh->tail);
-    return cpy;
-
-  default :
-    return NULL;
-
-  }
-}
-
-/* TODO
- * Poly += */
-static void PolyAddComp(Poly* p, const Poly* q)
-{
-  p->list = MonoListsMerge(p->list, q->list);
-}
-
-/* TODO
- * Mono += */
-static void MonosAddComp(Mono* m, const Mono* t)
-{
-  assert(m->exp == t->exp);
-  PolyAddComp(&m->p, &t->p);
-}
-
-/** Dodanie do siebie dwóch jednomianów pod założeniem, że stopnie @p m i @p t
- * są sobie równe.
- * @param[in] m : jednomian @f$ p x_i^n @f$
- * @param[in] t : jednomian @f$ q x_i^n @f$
- * @return jednomian @f$ (p + q) x_i^n @f$ */
-static Mono MonosAdd(const Mono* m, const Mono* t)
-{
-  /* assert(("Only monomials of equal exponent are addable", m->exp == t->exp)); */
-  assert(m->exp == t->exp);
-  return (Mono) {
-    .exp = m->exp, .p = PolyAdd(&m->p, &t->p)
-  };
+  return np;
 }
 
 /**
@@ -168,6 +83,106 @@ static int MonoCmp(const void* m, const void* t)
   return (mm->exp > tt->exp) < (mm->exp < tt->exp);
 }
 
+/* TODO */
+static void MonoAddComp(Mono* m, const Mono* t);
+
+
+/**
+ * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
+ * tychże. Jest to robione w formie `+=` -- zmienia się @p lh w oparciu o @p rh,
+ * które pozostaje niezmienne.
+ * @param[in] lh : głowa lewej listy
+ * @param[in] rh : głowa prawej listy
+ * @return lista jednomianów zawierająca zsumowane wszystkie jednomiany
+ * z oryginalnych @p lh i @p rh. */
+static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
+{
+  int cmp;
+  MonoList* cpy;
+
+  /* złączenie list à la merge sort dopóki obydwie nie są puste. */
+  if (lh == NULL && rh == NULL)
+    return NULL;
+
+  /* chcę podłączyć lh jeśli rh jest puste i na odwrót. jeśli obydwa niepuste,
+   * to podłączam w kolejności malejącej expów */
+  if (lh == NULL)
+    cmp = -1;
+  else if (rh == NULL)
+    cmp = 1;
+  else
+    cmp = MonoCmp(&lh->m, &rh->m);
+
+  /* celem jest zmodyfikowanie listy lh i pozostawienie bez szwanku listy rh,
+   * zatem elementy z lh pozostawiam takie jakimi są, elementy z rh wkopiowuję,
+   * a trafiając na równe potęgi dokonuję lh ->m += rh->m */
+  switch (cmp) {
+
+  case 0 :                      /* lh == rh */
+    /* lh->m += rh->m */
+    MonoAddComp(&lh->m, &rh->m);
+
+    if (!PolyIsZero(&lh->m.p)) {
+      lh->tail = MonoListsMerge(lh->tail, rh->tail);
+      return lh;
+    } else {
+      MonoDestroy(&lh->m);
+      return MonoListsMerge(lh->tail, rh->tail);
+    }
+
+  case 1 :                      /* lh > rh */
+    lh->tail = MonoListsMerge(lh->tail, rh);
+    return lh;
+
+  case -1 :                     /* lh < rh */
+    cpy = malloc(sizeof(MonoList));
+    CheckPtr(cpy);
+    cpy->m = MonoClone(&rh->m);
+    cpy->tail = MonoListsMerge(lh, rh->tail);
+    return cpy;
+
+  default :
+    return NULL;
+
+  }
+}
+
+/**
+ * Suma dwu wielomianów, ale w wersji `compound assignment' tj. nie tworzy
+ * nowego wielomianu, a jedynie modyfikuje ten ,,po lewej''. Odpowiednik
+ * operatora `+=`.
+ * @param[in] p : wielomian @f$ p @f$
+ * @param[in] p : wielomian @f$ q @f$
+ * Wykonuje `p += q`. */
+static void PolyAddComp(Poly* p, const Poly* q)
+{
+  p->list = MonoListsMerge(p->list, q->list);
+}
+
+/**
+ * Suma dwóch jednomów równych stopni, również modyfikująca jeden z nich
+ * (analogiczny mechanizm jak opisany w `PolyAddComp`).
+ * @param[in] m : jednomian
+ * @param[in] t : jednomian */
+static void MonoAddComp(Mono* m, const Mono* t)
+{
+  assert(m->exp == t->exp);
+  PolyAddComp(&m->p, &t->p);
+}
+
+/* /\** Dodanie do siebie dwóch jednomianów pod założeniem, że stopnie @p m i @p t
+ *  * są sobie równe.
+ *  * @param[in] m : jednomian @f$ p x_i^n @f$
+ *  * @param[in] t : jednomian @f$ q x_i^n @f$
+ *  * @return jednomian @f$ (p + q) x_i^n @f$ *\/
+ * static Mono MonoAdd(const Mono* m, const Mono* t)
+ * {
+ *   assert(m->exp == t->exp);
+ *   return (Mono) {
+ *     .exp = m->exp, .p = PolyAdd(&m->p, &t->p)
+ *   };
+ * } */
+
 Poly PolyAdd(const Poly* p, const Poly* q)
 {
   Poly new;
@@ -180,26 +195,22 @@ Poly PolyAdd(const Poly* p, const Poly* q)
 
   new = PolyClone(p);
   PolyAddComp(&new, q);
-  
+
   return new;
 }
-
-/* Mono MonosCombine(const Mono* m, const Mono* t)
- * {
- *   /\* assert(("Only monomials of equal exponent are addable", m->exp == t->exp)); *\/
- *
- * } */
 
 /**
  * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
  * @param[in] head : głowa listy
- * @param[in] new : komórka listy z nowym elementem */
+ * @param[in] new : komórka listy z nowym elementem
+ */
 void MonoListInsert(MonoList** head, MonoList* new)
 {
   MonoList** tracer = head;
-  int cmp = !0;
+  int cmp = 1;
 
-  while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) < 1))
+  /* czy to działa???? */
+  while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) > 0))
     tracer = &(*tracer)->tail;
 
   if (cmp != 0) {
@@ -207,42 +218,65 @@ void MonoListInsert(MonoList** head, MonoList* new)
     new->tail = *tracer;
     *tracer = new;
   } else {
-    /* już jest element z takim wykładnikiem. muszę jakoś zsumować je, ale...
-     * czy nie chciałbym pamięci marnować. najlepiej byłoby mieć wersję Add
-     * która by zmieniała jeden z tych dwóch, a nie tworzyła nowy, ale.. ech */
-    new->m = MonosAdd(&new->m, &(*tracer)->m);
-    MonoDestroy(&(*tracer)->m);
-    (*tracer)->m = new->m;
+    /* nowy element jest merge'owany z już istniejącym o równym stopniu */
+    MonoAddComp(&(*tracer)->m, &new->m);
+    MonoDestroy(&new->m);
   }
+}
 
+/**
+ * Iloczyn jednomianów.
+ * @param[in] m : jednomian
+ * @param[in] t : jednomian
+ * @return iloczyn @f$ m \cdot p @f$
+ */
+static Mono MonoMul(const Mono* m, const Mono* t)
+{
+  Mono mt;
+  mt.exp = m->exp + t->exp;
+  mt.p = PolyMul(&m->p, &t->p);
+
+  return mt;
 }
 
 /* TODO */
-Mono MonoMul(const Mono* m, const Mono* t);
+static void PolyMulCoeffComp(Poly* p, poly_coeff_t coeff)
+{
+  if (PolyIsCoeff(p))
+    p->coeff *= coeff;
+  else {
+    for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
+      PolyMulCoeffComp(&pl->m.p, coeff);
+  }
+}
 
 /* TODO */
-Poly PolyMulCoeff(const Poly* p, const Poly* coeff);
+Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p)
+{
+  Poly pc = PolyClone(p);
+  PolyMulCoeffComp(&pc, coeff);
+
+  return pc;
+}
 
 Poly PolyMul(const Poly* p, const Poly* q)
 {
   Poly pq;
-  Mono pm, qm, pqm;
+  Mono pm, qm;
   MonoList new;
 
   if (PolyIsCoeff(p))
-    return PolyMulCoeff(q, p);
+    return PolyMulCoeff(p->coeff, q);
 
   if (PolyIsCoeff(q))
-    return PolyMulCoeff(p, q);
+    return PolyMulCoeff(q->coeff, p);
 
   for (MonoList* pl = p->list; pl != NULL; pl = pl->tail) {
     for (MonoList* ql = q->list; ql != NULL; ql = ql->tail) {
       pm = pl->m;
       qm = ql->m;
-      pqm = MonoMul(&pm, &qm);
-      new = (MonoList) {
-        .tail = NULL, .m = pqm
-      };
+      new.m = MonoMul(&pm, &qm);
+      new.tail = NULL;
       MonoListInsert(&pq.list, &new);
     }
   }
@@ -276,9 +310,19 @@ Poly PolyNeg(const Poly* p)
   return np;
 }
 
+Poly PolySub(const Poly* p, const Poly* q)
+{
+  /* nq = q; nq *= -1; nq += p <--> nq = (-q) + p */
+  Poly nq = PolyClone(q);
+  PolyNegComp(&nq);
+  PolyAddComp(&nq, p);
+
+  return nq;
+}
+
 static poly_exp_t MonoListDeg(const MonoList* head)
 {
-  assert(head);
+  assert(head != NULL);
   return head->m.exp;
 }
 
@@ -363,7 +407,93 @@ bool PolyIsEq(const Poly* p, const Poly* q)
   return eq && !pl && !ql;
 }
 
+/* https://stackoverflow.com/a/18581693 */
+
+/*
+Function exp_by_squaring_iterative(x, n)
+    if n < 0 then
+      x := 1 / x;
+      n := -n;
+    if n = 0 then return 1
+    y := 1;
+    while n > 1 do
+      if n is even then
+        x := x * x;
+        n := n / 2;
+      else
+        y := x * y;
+        x := x * x;
+        n := (n – 1) / 2;
+    return x * y
+ */
+
+static int QuickPow(int a, int n)
+{
+  int b;
+
+  assert(n >= 0);
+
+  if (n == 0)
+    return 1;
+
+  b = 1;
+
+  while (n > 1) {
+    if (n % 2 == 0) {
+      a *= a;
+      n /= 2;
+    } else {
+      b *= a;
+      a *= a;
+      n = (n - 1) / 2;
+    }
+  }
+
+  return a * b;
+}
+
+
+
 /* jak to zrb */
-/* Poly PolyAt(const Poly* p, poly_coeff_t x)
- * {
- * } */
+Poly PolyAt(const Poly* p, poly_coeff_t x)
+{
+  /* wszystkie x_0^n zmieniam na x^n, mnożę je przez te koeficje i robię
+   * sumę wielomianów wielu. czyli każdemu wielomianowi robię *koef gdzie koef
+   * to x^n i później kumsum (suma akumulatywna) jest robiona tak jakby.
+   * wait mam tam listę jednomów... hm. no to tak, z każego biorę ->p i multypl,
+   * a następnie je wszystkie robię += */
+  Poly res;
+  Poly mul;
+  poly_coeff_t coeff;
+
+  if (PolyIsCoeff(p))
+    return PolyClone(p);
+
+  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail) {
+    coeff = QuickPow(x, pl->m.exp);
+    mul = PolyMulCoeff(coeff, &pl->m.p);
+    PolyAddComp(&res, &mul);
+    PolyDestroy(&mul);
+  }
+
+  return res;
+}
+
+Poly PolyAddMonos(size_t count, const Mono monos[])
+{
+  MonoList* head = NULL;
+  MonoList elem;
+
+  for (size_t i = count; i -- > 0; ) {
+    elem.m = monos[i];
+    elem.tail = NULL;
+    MonoListInsert(&head, &elem);
+  }
+
+  /* skąd wiedzieć czy to nie koeficja? trzeba uważać jakoś ech */
+  return (Poly) {
+    .list = head
+  };
+}
+
+

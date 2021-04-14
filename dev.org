@@ -2,18 +2,19 @@
 Wielomiany: co robić i jak
 
 * TODO 
-  - [ ] poprawić na ~use-list+=~ wszystko -- kolejność + reformat
+  - [X] poprawić na ~use-list+=~ wszystko -- kolejność + reformat
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
   - [X] zacząć
-  - [ ] obrócić kolejność jednomów
+  - [X] obrócić kolejność jednomów
   - [ ] co zrobić, jeśli gdzieś głęboko jest *zero*
     najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
     pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
     porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
-  - [ ] =PolyAt= *!!!!!*
-  - [ ] dodawanie
-  - [ ] mnożenie
+  - [ ] dualizm koeficji
+  - [X] =PolyAt= *!!!!!*
+  - [X] dodawanie
+  - [X] mnożenie
   - [ ] _niech to działa_
 
 
@@ -150,6 +151,17 @@ Wielomiany: co robić i jak
       #+end_example
       załatwiłoby sprawę...?
 * Implementacja
+** TODO dualizm koeficji
+   Zachodzi ewidentnie pewien /dualizm/ swoisty w strefie koeficji (ang. /coefficient/)
+   wielomianowych. Otóż jest dwuznacznośc pewna. Można albo zapisać je zarazem jako
+   wielomian z pustą listą oraz jako jednomian $c x^0$. Wręcz tak trzeba je chyba trzymać
+   mając listę dla $x^3 + x^2 + 5$ np. Ale jak wtedy to rozkminiać...
+
+   1. komparator mondry
+   2. nie tworzyć któregoś rodzaju
+
+   Trzymanie jednomianu pojedynczego jako koeficji? być może to byłoby najlepsze. hm
+   
 ** TODO problem niemały -- =PolyAt=
    Czyli zamieniam zmienną na samym dole w jakąś wartość.
    \[ \sum_n p_n x^n \]
