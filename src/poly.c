@@ -218,6 +218,8 @@ void MonoListInsert(MonoList** head, MonoList* new)
     /* nowy element jest merge'owany z już istniejącym o równym stopniu */
     MonoAddComp(&(*tracer)->m, &new->m);
     MonoDestroy(&new->m);
+    /* new powstaje przez moj malloc */
+    free(new);
   }
 }
 
@@ -260,7 +262,7 @@ Poly PolyMul(const Poly* p, const Poly* q)
 {
   Poly pq;
   Mono pm, qm;
-  MonoList new;
+  MonoList* new;
 
   if (PolyIsCoeff(p))
     return PolyMulCoeff(p->coeff, q);
@@ -272,9 +274,11 @@ Poly PolyMul(const Poly* p, const Poly* q)
     for (MonoList* ql = q->list; ql != NULL; ql = ql->tail) {
       pm = pl->m;
       qm = ql->m;
-      new.m = MonoMul(&pm, &qm);
-      new.tail = NULL;
-      MonoListInsert(&pq.list, &new);
+      new = malloc(sizeof(MonoList));
+      CheckPtr(new);
+      new->m = MonoMul(&pm, &qm);
+      new->tail = NULL;
+      MonoListInsert(&pq.list, new);
     }
   }
 
@@ -479,12 +483,15 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 Poly PolyAddMonos(size_t count, const Mono monos[])
 {
   MonoList* head = NULL;
-  MonoList elem;
+  MonoList* elem;
 
-  for (size_t i = count; i -- > 0; ) {
-    elem.m = monos[i];
-    elem.tail = NULL;
-    MonoListInsert(&head, &elem);
+  for (size_t i = count; i -- > 0; ) {    
+    elem = malloc(sizeof(MonoList));
+    CheckPtr(elem);
+
+    elem->m = monos[i];
+    elem->tail = NULL;
+    MonoListInsert(&head, elem);
   }
 
   /* skąd wiedzieć czy to nie koeficja? trzeba uważać jakoś ech */
