@@ -42,7 +42,7 @@ void PolyDestroy(Poly* p)
  * Utworzenie pełnej kopii listy jednomianów.
  * @param[in] head : głowa listy jednomianów
  * @return pełna kopia listy */
-static MonoList* MonoListClone(MonoList* head)
+static MonoList* MonoListClone(const MonoList* head)
 {
   MonoList* elem;
 
@@ -61,12 +61,9 @@ Poly PolyClone(const Poly* p)
 {
   Poly np;
 
-  if (PolyIsCoeff(p)) {
-    np.coeff = p->coeff;
-    np.list = NULL;
-  } else
-    np.list = MonoListClone(p->list);
-
+  np.coeff = p->coeff;
+  np.list = MonoListClone(p->list);
+  
   return np;
 }
 

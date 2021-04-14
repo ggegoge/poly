@@ -1,7 +1,58 @@
 #+TITLE: ważne dokumentowanie procesu twórczego
 Wielomiany: co robić i jak
 
+* TODO debug
+
+** =PolyAddMonos=
+   ok. robiąc =PolyAddMonos= robię zawsze ten sam =elem=. Z tym samym adresem. Przez co
+   dodaje się ta sama rzecz kilka raz!
+
+*** =MonoListInsert=
+    Przez powyższego buga robię destroy na tej samej rzeczy!
+    
+** =PolyAddComp=
+   czyli *+=*. Niestety *nie działa* -- nie sprawdzam przypadku gdy $p$ i $q$ to
+   wielomiany stałe (lub jeden z nich, tam też dualizm koeficji wejdzie w grę)
+
+** =MakePolyHelper=...
+   Po teście =SimpleAddTest= (ln 117) gdzie wywołuję w helperze PolyAddMonos jakoś po
+   powrocie dostaję w wyniku syf
+   #+begin_example
+     (gdb) p head
+     $54 = (MonoList *) 0x7ffeefbfe958
+     (gdb) p *head
+     $55 = {m = {p = {coeff = 2, list = 0x0}, exp = 0}, tail = 0x0}
+     (gdb) s
+     492	    .list = head
+     (gdb) s
+     491	  return (Poly) {
+     (gdb) s
+     MakePolyHelper (dummy=0) at /Users/grzegorz/Dropbox/C/poly/src/poly_example.c:44
+     44	  free(arr);
+     (gdb) s
+     45	  return res;
+     (gdb) p res
+     $56 = {coeff = 0, list = 0x7ffeefbfe958}
+     (gdb) p *res.list
+     $58 = {m = {p = {coeff = 4298113024, list = 0xefbfe9a0}, exp = 7680}, tail = 0x100110000}
+   #+end_example
+   clearly miałem ładny head (choć błędny vide powyższe bugi), podstawiłem pointer nań do
+   tam list, a po zreturnowaniu otrzymałem jakiś syf pod listą... Czemu? Bo to nie był
+   wynik mallokacji? wydaje mi się, że wcześniej działało. Chyba head to jest tam zmienna
+   stosowa jak i elem i takie coś się dzieje dlatego.
+
+***    *TAK*
+    Zwracam head źle. Drugi test to pokazuje. Powinienem malokować tę pamięć, a ja ją
+    zwracam cymbalsko. Później gdy przed merge'ując =PolyClone= klona listy to sięgam tam
+    pod same nieznane lokacje losowe.
+
+    ergo /wina segmentacyjna/.
+
+    _zwracam wskaźniki na zmienne na stosie!!!_
+
+    Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
+  - [ ] nie alokować  na stosie!!!
   - [X] poprawić na ~use-list+=~ wszystko -- kolejność + reformat
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
@@ -28,7 +79,6 @@ Wielomiany: co robić i jak
      - =fold_left=, =fold_right=
      - =filter=
    - [ ] symulacja pattern matchingu w C
-
 
 * Lista jednomianów
   Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
