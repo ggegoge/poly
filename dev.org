@@ -3,18 +3,18 @@ Wielomiany: co robić i jak
 
 * TODO debug
 
-** =PolyAddMonos=
+** DONE =PolyAddMonos= czyli $\sum$
    ok. robiąc =PolyAddMonos= robię zawsze ten sam =elem=. Z tym samym adresem. Przez co
    dodaje się ta sama rzecz kilka raz!
 
-*** =MonoListInsert=
+*** =MonoListInsert= -- triple ref
     Przez powyższego buga robię destroy na tej samej rzeczy!
     
-** =PolyAddComp=
+** =PolyAddComp= czyli $+=$
    czyli *+=*. Niestety *nie działa* -- nie sprawdzam przypadku gdy $p$ i $q$ to
-   wielomiany stałe (lub jeden z nich, tam też dualizm koeficji wejdzie w grę)
+   wielomiany stałe (lub jeden z nich, tam też /dualizm koeficji/ wejdzie w grę)
 
-** =MakePolyHelper=...
+** =MakePolyHelper=... czyli ten syf
    Po teście =SimpleAddTest= (ln 117) gdzie wywołuję w helperze PolyAddMonos jakoś po
    powrocie dostaję w wyniku syf
    #+begin_example
@@ -53,19 +53,19 @@ Wielomiany: co robić i jak
     Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
   - [ ] nie alokować  na stosie!!!
-  - [X] poprawić na ~use-list+=~ wszystko -- kolejność + reformat
+  - [ ] dualizm koeficji
+    - [ ] co zrobić, jeśli gdzieś głęboko jest *zero*
+      najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
+      pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
+      porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
-  - [X] zacząć
   - [X] obrócić kolejność jednomów
-  - [ ] co zrobić, jeśli gdzieś głęboko jest *zero*
-    najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
-    pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
-    porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
-  - [ ] dualizm koeficji
+  - [X] poprawić na ~use-list+=~ wszystko -- kolejność + reformat
   - [X] =PolyAt= *!!!!!*
   - [X] dodawanie
   - [X] mnożenie
+  - [X] zacząć
   - [ ] _niech to działa_
 
 
@@ -209,38 +209,59 @@ Wielomiany: co robić i jak
 
    1. komparator mondry
    2. nie tworzyć któregoś rodzaju
+   3. ???
 
    Trzymanie jednomianu pojedynczego jako koeficji? być może to byłoby najlepsze. hm
    
 ** TODO problem niemały -- =PolyAt=
-   Czyli zamieniam zmienną na samym dole w jakąś wartość.
-   \[ \sum_n p_n x^n \]
-   co tu poczynić???
+   
+*** rozw?
+    Potencjalnie rozwiązałem tę zagwozdkę. Mając to swoje ~+=~ mogę wykonywać taką pętlę:
+    #+begin_example
+      PolyAt(p, x)
+      {
+        Poly res, mul;
+        for Mono m in p->list do {
+          mul = m.p * x^m->exp
+          res += mul
+          delete mul
+        }
 
-   mogę obliczyć oczywiśie potęgę. Wtedy awansują zmienne wszystkie. Czyli muszę jakby tę
-   /listę list/ zde-awansować do /listy/. Mam
-   #+begin_example
-     +-----+
-     | m   |  +--->  
-     |     |  |
-     |tail-----
-     +-----+
-   #+end_example
-   takich komórek nie mało i każde =m= trzyma swoją listę też. Teraz chcę przelać tę listę
-   do środka... Ech. Mógłbym wziąć pierwszą listę po prostu i robić =PolyAdd= każdej
-   kolejnej.
-   #+begin_example
-     +-----------------------+    +-->  +-----------------------+   +--> ...
-     | m { ax_1 + bx_1 + ... |    |     | m { cx_1 + dx_1 + ... |   |
-     |                       |    |     |                       |   |
-     |  x_0 = x^n        tl ------+     |  x_0 = x^n        tl -----+
-     +-----------------------+          +-----------------------+
+        return res.
+      }
+    #+end_example
+    Czyli tworzę pomnożony przez koeficję zawsze i *kumsum*.
 
-     ======>>>
+    minus: konieczność destrukcji wyniku mnożenia za każdym razem
+*** prblm
+    Czyli zamieniam zmienną na samym dole w jakąś wartość.
+    \[ \sum_n p_n x^n \]
+    co tu poczynić???
 
-     (ax^n + bx^n + cx^n + dx_n) x_0         ????
-   #+end_example
-   meaning -- flattuję listę. *ech*
+    mogę obliczyć oczywiśie potęgę. Wtedy awansują zmienne wszystkie. Czyli muszę jakby tę
+    /listę list/ zde-awansować do /listy/. Mam
+    #+begin_example
+      +-----+
+      | m   |  +--->  
+      |     |  |
+      |tail-----
+      +-----+
+    #+end_example
+    takich komórek nie mało i każde =m= trzyma swoją listę też. Teraz chcę przelać tę listę
+    do środka... Ech. Mógłbym wziąć pierwszą listę po prostu i robić =PolyAdd= każdej
+    kolejnej.
+    #+begin_example
+      +-----------------------+    +-->  +-----------------------+   +--> ...
+      | m { ax_1 + bx_1 + ... |    |     | m { cx_1 + dx_1 + ... |   |
+      |                       |    |     |                       |   |
+      |  x_0 = x^n        tl ------+     |  x_0 = x^n        tl -----+
+      +-----------------------+          +-----------------------+
+
+      ======>>>
+
+      (ax^n + bx^n + cx^n + dx_n) x_0         ????
+    #+end_example
+    meaning -- flattuję listę. *ech*
 ** DONE arr v list
    Czy powinienem użyć na wielomian jednomianu (tj ten współczynnik) tablicy czy może raczej linked
    listy?

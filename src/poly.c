@@ -8,6 +8,9 @@
 
 #include "poly.h"
 
+/**
+ * Sprawdzian powodzenia (m)allokacyjnego.
+ */
 #define CheckPtr(p) \
   do {              \
     if (!p) {       \
@@ -145,11 +148,11 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
 }
 
 /**
- * Suma dwu wielomianów, ale w wersji `compound assignment' tj. nie tworzy
+ * Suma dwu wielomianów, ale w wersji `compound assignment' tj nie tworzy
  * nowego wielomianu, a jedynie modyfikuje ten ,,po lewej''. Odpowiednik
  * operatora `+=`.
  * @param[in] p : wielomian @f$ p @f$
- * @param[in] p : wielomian @f$ q @f$
+ * @param[in] q : wielomian @f$ q @f$
  * Wykonuje `p += q`. */
 static void PolyAddComp(Poly* p, const Poly* q)
 {
@@ -181,7 +184,19 @@ static void MonoAddComp(Mono* m, const Mono* t)
  * } */
 
 /* TODO */
-Poly PolyAddCoeff(poly_coeff_t c, const Poly* p);
+Poly PolyAddCoeff(poly_coeff_t c, const Poly* p)
+{
+  Poly new;
+  
+  if (PolyIsCoeff(p)) {
+    new.coeff = c + p->coeff;
+    new.list = NULL;
+  } else {
+    /* TODO */
+    new.list = NULL;
+  }
+  return new;
+}
 
 Poly PolyAdd(const Poly* p, const Poly* q)
 {
@@ -468,7 +483,8 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
    * sumę wielomianów wielu. czyli każdemu wielomianowi robię *koef gdzie koef
    * to x^n i później kumsum (suma akumulatywna) jest robiona tak jakby.
    * wait mam tam listę jednomów... hm. no to tak, z każego biorę ->p i multypl,
-   * a następnie je wszystkie robię += */
+   * a następnie je wszystkie robię +=.
+   * minus -- konieczność destrukcji mul */
   Poly res;
   Poly mul;
   poly_coeff_t coeff;
