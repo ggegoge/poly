@@ -3,6 +3,26 @@ Wielomiany: co robić i jak
 
 * TODO debug
 
+** TODO SimpleAddMonos:
+   linijka 190 w [[file:src/poly_example.c][poly_example.c]]
+   #+begin_src C
+     {
+       Mono m[] = {M(C(1), 0), M(C(1), 0)};
+       res &= TestAddMonos(2, m, C(2));
+     }
+   #+end_src
+   jedyny test w =SimpleAddMonosTest= na którym się wywala, ważne dość *todo*
+   #+begin_example
+     67	  bool is_eq = PolyIsEq(&b, &res);
+     (gdb) p b
+     $33 = {coeff = 0, list = 0x1003040c0}
+     (gdb) p *b.list
+     $34 = {m = {p = {coeff = 2, list = 0x0}, exp = 0}, tail = 0x0}
+     (gdb) p res
+     $35 = {coeff = 2, list = 0x0}
+   #+end_example
+   Taki błąd -- tworząc z mono ~n == 0~ dostaję nie koef, a ten pseudo koef. Mimo, że
+   wynik poprawny, to się popsuje wynik. Brak dekoefizacji?
 ** DONE =PolyAddMonos= czyli $\sum$
    ok. robiąc =PolyAddMonos= robię zawsze ten sam =elem=. Z tym samym adresem. Przez co
    dodaje się ta sama rzecz kilka raz!
@@ -53,7 +73,9 @@ Wielomiany: co robić i jak
     Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
   - [ ] nie alokować  na stosie!!!
+  - [ ] poukładać kod logicznie, modularyzacja perhaps?
   - [ ] dualizm koeficji
+    - [ ] sprawdzian pseudo koeficji naprawić
     - [ ] co zrobić, jeśli gdzieś głęboko jest *zero*
       najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
       pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
