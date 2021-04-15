@@ -147,6 +147,43 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
   }
 }
 
+
+static MonoList* PolyPseduoCoeff(poly_coeff_t c)
+{
+  MonoList* head = malloc(sizeof(MonoList));
+  CheckPtr(head);
+  head->m.p = (Poly) {
+    .coeff = c, .list = NULL
+  };
+  head->m.exp = 0;
+  head->tail = NULL;
+  return head;
+}
+
+/* TODO -- sprawdzian czy to nie pseudo koeficja czyli coś jak c * x^0 */
+static bool PolyIsPseudoCoeff(const Poly* p)
+{
+  MonoList* head;
+
+  if (p->list) {
+    head = p->list;
+    return head->m.exp == 0 && PolyIsCoeff(&head->m.p)
+           /* && head->tail == NULL */;
+  }
+
+  return false;
+}
+/* TODO -- zamiana pseudo koefu c * x^0 na zwykły --> c */
+static void Decoeffise(Poly* p)
+{
+  assert(p->list);
+  MonoList* head = p->list;
+  poly_coeff_t c = head->m.p.coeff;
+  Poly np = {.coeff = c, .list = NULL};
+  MonoListDestroy(head);
+  *p = np;
+}
+
 /**
  * Suma dwu wielomianów, ale w wersji `compound assignment' tj nie tworzy
  * nowego wielomianu, a jedynie modyfikuje ten ,,po lewej''. Odpowiednik
@@ -156,7 +193,22 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
  * Wykonuje `p += q`. */
 static void PolyAddComp(Poly* p, const Poly* q)
 {
-  p->list = MonoListsMerge(p->list, q->list);
+  MonoList* l;
+
+  if (PolyIsCoeff(p) && PolyIsCoeff(q))
+    p->coeff += q->coeff;
+  else if (PolyIsCoeff(p)) {
+    l = PolyPseduoCoeff(p->coeff);
+    p->list = l;
+    p->list = MonoListsMerge(p->list, q->list);
+  } else if (PolyIsCoeff(q)) {
+    l = PolyPseduoCoeff(q->coeff);
+    MonoListInsert(&p->list, l);
+  } else
+    p->list = MonoListsMerge(p->list, q->list);
+
+  if (PolyIsPseudoCoeff(p))
+    Decoeffise(p);
 }
 
 /**
@@ -183,18 +235,23 @@ static void MonoAddComp(Mono* m, const Mono* t)
  *   };
  * } */
 
-/* TODO */
+/* TODO -- próba rozwiązania dualizmu koeficji */
 Poly PolyAddCoeff(poly_coeff_t c, const Poly* p)
 {
   Poly new;
-  
-  if (PolyIsCoeff(p)) {
+  MonoList* coeff_wrapper;
+
+  if (c == 0)
+    new = PolyClone(p);
+  else if (PolyIsCoeff(p)) {
     new.coeff = c + p->coeff;
     new.list = NULL;
   } else {
-    /* TODO */
-    new.list = NULL;
+    coeff_wrapper = PolyPseduoCoeff(c);
+    new.list = MonoListClone(p->list);
+    MonoListInsert(&new.list, coeff_wrapper);
   }
+
   return new;
 }
 
@@ -203,8 +260,10 @@ Poly PolyAdd(const Poly* p, const Poly* q)
   Poly new;
 
   if (PolyIsCoeff(p) && PolyIsCoeff(q))
-    return (Poly) { .coeff = p->coeff + q->coeff, .list = NULL };
-  
+    return (Poly) {
+    .coeff = p->coeff + q->coeff, .list = NULL
+  };
+
   if (PolyIsCoeff(p))
     return PolyAddCoeff(p->coeff, q);
 

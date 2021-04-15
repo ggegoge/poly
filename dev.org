@@ -213,6 +213,37 @@ Wielomiany: co robić i jak
 
    Trzymanie jednomianu pojedynczego jako koeficji? być może to byłoby najlepsze. hm
    
+*** rozw nr 1 -- *x^0 * c*
+    Zgodnie z tym co żem napisał powyżej jako 1. W przyrodzie istnieć będą obydwa rodzaje
+    koeficji (/yikes/).
+    
+    1. wielomian -- =(Poly) { .coeff = c, .list = NULL }=
+    2. jednomowy wrapper -- =(Mono) { .p = PolyCoeff, .exp = 0 }= czyli w sensie
+       matematycznym jest to $c * x^0$... Trochę głupie, wiem. Aczkolwiek chyba jest to
+       *jedyny* sposób aby zachować integrację z dotychczasowym interfejsem. Wtedy trzeba
+       dokonać przemyślunku jeszcze w tych kilku kwestiach:
+       
+**** dodawanie koeficji
+     Mając koeficję typu pierwszego i dodając ją do wielomianu muszę ją zwrapować
+     zawczasu. Czyli tworzę =MonoList= z tym wielomianem i ją wciskam w miejsce
+     odpowiednie. jeśli w procesie dodawanie trafi mi się zerowy koeff, co wtedy? tj jeśli
+     mam $x+1$ i dodam doń $-1$. Oczekiwałbym $x$. Musiałbym wtedy do funkcji insertującej
+     się doglądać. to jest zdecydowane *TODO*. Hm.
+     +Dotychczas dodawałem element i robiłem+
+     +~+=~ na tracerze, ale teraz widzę, że być może słuszniej byłoby zrobić ~+=~ na nowym+
+     +i jeśli niewyjdzie zero to podmiankę, a jeśli wyjdzie, to czyszczę co pod tracerem i+
+     +robię jakoś relink. tj ~*tracer = &(*tracer)->tail~ -- podmieniam cały wskaźnik.+
+
+     chociaż........... hm. być może jednak /lepiej/ zostawić tak jak jest. =MonoAddComp=
+     zadziała i tak jedynie na tracerze i jego tail pozostanie bez szwanku. zatem w
+     przypadku zerowania po prostu nisczę mono tracera i podstawiam pod niego jego ogon.
+
+**** czy może mi się trafić wywołanie =is_coeff= na takim pseudo koefie?
+     innymi słowy... czy powinienem dodać warunek do is coeff? *bardzo* by to
+     popsuło. Muszę zatem po operacjach sprawdzać, czy nie został koef jedynie
+
+*** nierozw nr 2 -- /lista jednoelementowa/
+    
 ** TODO problem niemały -- =PolyAt=
    
 *** rozw?
