@@ -66,7 +66,7 @@ Poly PolyClone(const Poly* p)
 
   np.coeff = p->coeff;
   np.list = MonoListClone(p->list);
-  
+
   return np;
 }
 
@@ -147,6 +147,47 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
   }
 }
 
+/**
+ * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
+ * @param[in] head : głowa listy
+ * @param[in] new : komórka listy z nowym elementem
+ */
+void MonoListInsert(MonoList** head, MonoList* new)
+{
+  MonoList** tracer = head;
+  int cmp = 1;
+
+  /* czy to działa???? */
+  while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) > 0))
+    tracer = &(*tracer)->tail;
+
+  if (cmp != 0) {
+    /* nowy element o wykładniku niepojawionym jeszcze */
+    new->tail = *tracer;
+    *tracer = new;
+  } else {
+    /* nowy element jest merge'owany z już istniejącym o równym stopniu */
+    /* MonoAddComp(&new->m, &(*tracer)->m);
+     * /\* jeśli sumacja wyzerowała ten element, to... *\/
+     * if (PolyIsZero(&new->m.p)) {
+     *   MonoDestroy(&(*tracer)->m);
+     *   MonoDestroy(&new->m);
+     *
+     *   *tracer = (*tracer)->tail;
+     * } */
+    MonoAddComp(&(*tracer)->m, &new->m);
+
+    if (PolyIsZero(&(*tracer)->m.p)) {
+      /* wyzerowanie -- podłączam po prostu ogon pod tracera */
+      MonoDestroy(&(*tracer)->m);
+      *tracer = (*tracer)->tail;
+    }
+
+    MonoDestroy(&new->m);
+    /* new powstaje przez moj malloc */
+    free(new);
+  }
+}
 
 static MonoList* PolyPseduoCoeff(poly_coeff_t c)
 {
@@ -215,7 +256,8 @@ static void PolyAddComp(Poly* p, const Poly* q)
  * Suma dwóch jednomów równych stopni, również modyfikująca jeden z nich
  * (analogiczny mechanizm jak opisany w `PolyAddComp`).
  * @param[in] m : jednomian
- * @param[in] t : jednomian */
+ * @param[in] t : jednomian
+ */
 static void MonoAddComp(Mono* m, const Mono* t)
 {
   assert(m->exp == t->exp);
@@ -274,33 +316,6 @@ Poly PolyAdd(const Poly* p, const Poly* q)
   PolyAddComp(&new, q);
 
   return new;
-}
-
-/**
- * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
- * @param[in] head : głowa listy
- * @param[in] new : komórka listy z nowym elementem
- */
-void MonoListInsert(MonoList** head, MonoList* new)
-{
-  MonoList** tracer = head;
-  int cmp = 1;
-
-  /* czy to działa???? */
-  while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) > 0))
-    tracer = &(*tracer)->tail;
-
-  if (cmp != 0) {
-    /* nowy element o wykładniku niepojawionym jeszcze */
-    new->tail = *tracer;
-    *tracer = new;
-  } else {
-    /* nowy element jest merge'owany z już istniejącym o równym stopniu */
-    MonoAddComp(&(*tracer)->m, &new->m);
-    MonoDestroy(&new->m);
-    /* new powstaje przez moj malloc */
-    free(new);
-  }
 }
 
 /**
@@ -566,7 +581,7 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
   MonoList* head = NULL;
   MonoList* elem;
 
-  for (size_t i = count; i -- > 0; ) {    
+  for (size_t i = 0; i < count; ++i) {
     elem = malloc(sizeof(MonoList));
     CheckPtr(elem);
 
