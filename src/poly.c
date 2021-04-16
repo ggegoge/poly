@@ -166,6 +166,9 @@ void MonoListInsert(MonoList** head, MonoList* new)
   MonoList* tmp;
   int cmp = 1;
 
+  assert(new);
+  assert(!PolyIsZero(&new->m.p));
+
   /* czy to działa???? */
   while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) > 0))
     tracer = &(*tracer)->tail;
@@ -237,11 +240,11 @@ static void PolyAddComp(Poly* p, const Poly* q)
     return;
   }
 
-  if (PolyIsCoeff(p)) {
+  if (PolyIsCoeff(p) && !PolyIsZero(p)) {
     l = PolyPseduoCoeff(p->coeff);
     p->list = l;
     p->list = MonoListsMerge(p->list, q->list);
-  } else if (PolyIsCoeff(q)) {
+  } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
     l = PolyPseduoCoeff(q->coeff);
     MonoListInsert(&p->list, l);
   } else
@@ -387,7 +390,11 @@ Poly PolyMul(const Poly* p, const Poly* q)
       CheckPtr(new);
       new->m = MonoMul(&pm, &qm);
       new->tail = NULL;
-      MonoListInsert(&pq.list, new);
+
+      if (PolyIsZero(&new->m.p))
+        MonoListDestroy(new);
+      else
+        MonoListInsert(&pq.list, new);
     }
   }
 
@@ -579,6 +586,9 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
   Poly sum = PolyZero();
 
   for (size_t i = 0; i < count; ++i) {
+    if (PolyIsZero(&monos[i].p))
+      continue;
+
     elem = malloc(sizeof(MonoList));
     CheckPtr(elem);
 
