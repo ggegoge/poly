@@ -99,6 +99,7 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
 {
   int cmp;
   MonoList* cpy;
+  MonoList* tmp;
 
   /* złączenie list à la merge sort dopóki obydwie nie są puste. */
   if (lh == NULL && rh == NULL)
@@ -126,8 +127,11 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
       lh->tail = MonoListsMerge(lh->tail, rh->tail);
       return lh;
     } else {
+      /* jeśli dostałem zero, to go nie chcę utrzymywać */
       MonoDestroy(&lh->m);
-      return MonoListsMerge(lh->tail, rh->tail);
+      tmp = lh->tail;
+      free(lh);
+      return MonoListsMerge(tmp, rh->tail);
     }
 
   case 1 :                      /* lh > rh */
@@ -159,6 +163,7 @@ static void Decoeffise(Poly* p);
 void MonoListInsert(MonoList** head, MonoList* new)
 {
   MonoList** tracer = head;
+  MonoList* tmp;
   int cmp = 1;
 
   /* czy to działa???? */
@@ -184,7 +189,9 @@ void MonoListInsert(MonoList** head, MonoList* new)
     if (PolyIsZero(&(*tracer)->m.p)) {
       /* wyzerowanie -- podłączam po prostu ogon pod tracera */
       MonoDestroy(&(*tracer)->m);
+      tmp = *tracer;
       *tracer = (*tracer)->tail;
+      free(tmp);
     }
 
     MonoDestroy(&new->m);
@@ -342,14 +349,35 @@ static Mono MonoMul(const Mono* m, const Mono* t)
 }
 
 /* TODO */
+static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff);
+
+/* TODO */
 static void PolyMulCoeffComp(Poly* p, poly_coeff_t coeff)
 {
   if (PolyIsCoeff(p))
     p->coeff *= coeff;
-  else {
-    for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
-      PolyMulCoeffComp(&pl->m.p, coeff);
+  else
+    p->list = MonoListMulCoeff(p->list, coeff);
+}
+
+static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff)
+{
+  MonoList* tail;
+
+  if (!head)
+    return NULL;
+
+  PolyMulCoeffComp(&head->m.p, coeff);
+
+  if (PolyIsZero(&head->m.p)) {
+    MonoDestroy(&head->m);
+    tail = head->tail;
+    free(head);
+    return MonoListMulCoeff(tail, coeff);
   }
+
+  head->tail = MonoListMulCoeff(head->tail, coeff);
+  return head;
 }
 
 /* TODO */
