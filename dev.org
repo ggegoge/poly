@@ -1,13 +1,69 @@
 #+TITLE: ważne dokumentowanie procesu twórczego
 Wielomiany: co robić i jak
 
-* TODO debug
+* DONE debug (/na poly_example.c.../)
 
-** TODO *VALGRIND*
+** DONE *VALGRIND*
    
-*** TODO zeracja
+*** DONE invalid read
+    
+**** *fixed!*
+     kluczem było zajęcie się funkcją =PolyMulCoeffComp=, która się kiełbasiła jak nie
+     wiem. na stashu schowałem tę sprytną, acz ułomną wersję. miast tego napisałem
+     rekurencyjną -- ta śmiga natomiast
+    
+**** prblm
+     mam invalid ready przez =free= w =PolyMulCoeffComp=
+     #+begin_example
+       (gdb) n
+       PolyMulCoeffComp (p=0x7ffeefbff6d0, coeff=4294967296) at /Users/grzegorz/Dropbox/C/poly/src/poly.c:365
+       365	      if (PolyIsZero(&pl->m.p)) {
+       1: *prev = (MonoList *) 0x1004040d0
+       2: **prev = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       368	        *prev = pl->tail;
+       1: *prev = (MonoList *) 0x1004040d0
+       2: **prev = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       369	        MonoDestroy(&pl->m);
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       370	        prev = &pl->tail;
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       371	        free(pl);
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       372	        pl = *prev;
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       373	      } else {
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x0
+       4: *pl = <error: Cannot access memory at address 0x0>
+     #+end_example
+
+*** DONE zeracja
     wygląda na to, że nie usuwam elementów listy, które następnie się zerują
     
+
 ** DONE dualizm koeficyjny, a mnożenie zerujące
    oczywiście jedno to mnożenie przez zero. drugie to gdy mnożymy przez =1 << 32= czyli
    $2^32$. Wtedy też pójdzie zero
@@ -124,13 +180,16 @@ Wielomiany: co robić i jak
   - [ ] poukładać kod logicznie, modularyzacja perhaps?
   - [-] dualizm koeficji
     - [X] sprawdzian pseudo koeficji naprawić
-    - [ ] co zrobić, jeśli gdzieś głęboko jest *zero*
+    - [X] co zrobić, jeśli gdzieś głęboko jest *zero*
       najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
       pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
       porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
     - [ ] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
+  - [X] *przechodzi example*
+    - [X] poprawnie
+    - [X] bez wycieków
   - [X] obrócić kolejność jednomów
   - [X] poprawić na ~use-list+=~ wszystko -- kolejność + reformat
   - [X] =PolyAt= *!!!!!*
