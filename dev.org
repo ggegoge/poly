@@ -1,6 +1,80 @@
 #+TITLE: ważne dokumentowanie procesu twórczego
 Wielomiany: co robić i jak
 
+* TODO  debug (/testy gitlabowskie../)
+  [[https://gitlab.com/mimuw-ipp-2021/testy-duze-zadanie-1][link do testów o tu]]
+
+  problem z tymi testami jest taki -- nie działają! na moim komputerze z burżuazyjnym
+  systemem MacOs generator liczb losowych się zupełnie nie zgadza! przez to muszę
+  debugować w koślawym gdb terminalowym na studentsie
+  
+** TODO stress correct   
+
+*** TODO ans[9][11]
+    straszne obrzydlistwo
+    #+begin_example
+      ans[9][11] = P(P(P(C(3107301932000000), 0, C(5548753450), 9), 0, P(C(1938779255430), 0, C(80), 9), 1, C(27952), 2, C(-2840961766400), 3, C(-40960), 4, P(C(-3107307532000), 0, C(-10), 9), 5, C(-48294), 6, C(-3495714668380), 8, C(-50400), 9, P(C(-57711514077160), 0, C(-70), 9), 10, C(-36067753947), 11, P(C(-196000520), 0, C(-350), 9), 12, C(57706955730), 13, C(832), 14, P(C(57662558288), 0, C(-80), 9), 15, C(-27055), 16, C(196000), 17, C(64920500321), 18, C(936), 19, C(993252), 20, C(455), 21, C(3640280), 22, C(51830), 23, C(827696), 25, C(520), 26, C(-3640), 27, C(-1651), 28, C(-4927), 30, C(-936), 33), 0, P(C(290914484879360), 0, C(4194304), 1, C(-524288), 5, C(-3670016), 10, C(-18350080), 12, C(-4194304), 15), 4, P(C(-44390027600000), 0, C(-27744407250), 1, C(-400), 2, C(37731523460), 3, C(544), 4, C(44390107600), 5, C(690), 6, C(49938780982), 8, C(720), 9, C(559920), 10, C(350), 11, C(2800000), 12, C(1184), 13, C(637060), 15, C(400), 16, C(-2800), 17, C(-1174), 18, C(-3790), 20, C(-720), 23), 6, P(C(-1566080208698605568), 0, C(7087246163312640), 1, C(-885905770414080), 5, C(-6201340392898560), 10, C(-31006701964492800), 12, C(-7087246163312640), 15), 7, P(C(-4750521706123402240), 0, C(1187437322772480), 1, C(-148429665346560), 5, C(-1039007657425920), 10, C(-5195038287129600), 12, C(-1187437322772480), 15), 13, P(C(1963672772935680), 0, C(28311552), 1, C(-3538944), 5, C(-24772608), 10, C(-123863040), 12, C(-28311552), 15), 14, P(C(-199755124200000), 0, C(-124849832625), 1, C(-1800), 2, C(199755124200), 3, C(2880), 4, C(199755484200), 5, C(3105), 6, C(224724514365), 8, C(3240), 9, C(2519640), 10, C(1575), 11, C(12600000), 12, C(4950), 13, C(2864880), 15, C(1800), 16, C(-12600), 17, C(-5715), 18, C(-17055), 20, C(-3240), 23), 16);
+    #+end_example
+    ech. nie wiem jak ja to zdebuguję.
+
+    może breakpointa z ifem jakoś?
+
+    tak żem zrobił i...
+    #+begin_example
+      (gdb) b stress.c:48 if dep == 9 && i == 11
+      Breakpoint 1 at 0x3c424: file /home/students/inf/g/gc429174/test/poly/src/testy-duze-zadanie-1/stress.c, line 48.
+      Breakpoint 1, StressCorrect () at /home/students/inf/g/gc429174/test/poly/src/testy-duze-zadanie-1/stress.c:48
+      48	            if ((!PolyIsEq(&p, &ans[dep][i])))
+      (gdb) p i
+      $1 = 11
+      (gdb) p dep
+      $2 = 9
+      (gdb) p p
+      $3 = {coeff = 0, list = 0x5555555c78d0}
+      (gdb) p ans[dep][i]
+      $4 = {coeff = 0, list = 0x5555555c9ff0}
+      (gdb) s
+      PolyIsEq (p=0x7fffffffdea0, q=0x555555595230 <ans+4496>) at /home/students/inf/g/gc429174/test/poly/src/poly.c:556
+      556	  bool eq = true;
+      (gdb) s
+      558	  if (PolyIsCoeff(p)) {
+      (gdb) n
+      562	  } else if (PolyIsCoeff(q))
+      (gdb) n
+      565	  pl = p->list;
+      (gdb) n
+      566	  ql = q->list;
+      (gdb) n
+      568	  while (pl && ql && eq) {
+      (gdb) n
+      569	    eq = MonoIsEq(&pl->m, &ql->m);
+      (gdb) display pl->m
+      1: pl->m = {p = {coeff = 553329315, list = 0x5555555c7300}, exp = 18}
+      (gdb) display ql->m
+      2: ql->m = {p = {coeff = 0, list = 0x5555555c8980}, exp = 16}
+    #+end_example
+    jak widzimy te dwa wielomiany różnią się *już na pierwszym miejscu* i to nawet expem,
+    ale jak patrzyłem głębiej, to też.
+    Skąd to mogło się wziąć?
+    
+*** DONE ans[2][5]
+**** *fixd!*
+     kłopotem było istotnie niesprawdzanie czy przypadkiem nie dodaję zerowych wielomianów
+     w insercie
+**** prblm
+     najwidoczniej są jakieś błędy z potęgą zerową w niektórych sytuacjach? no jest to
+     kłopotliwe w każdym razie
+
+     a nie. może składniki typu 0x^0 gdzieś pojawiające się? nie wiem. dziwne w każdym
+     razie to jest.. Pojawia mi się takie coś:
+     #+begin_example
+       (gdb) p *res.list.tail.tail 
+       $24 = {m = {p = {coeff = 0, list = 0x0}, exp = 0}, tail = 0x0}
+     #+end_example
+     to akurat dla ~dep = 3~ i ~i = 2~
+
+     podejrzane. skąd się może brać? bonne question.
+    
 * DONE debug (/na poly_example.c.../)
 
 ** DONE *VALGRIND*
@@ -176,7 +250,6 @@ Wielomiany: co robić i jak
 
     Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
-  - [X] nie alokować  na stosie!!!
   - [ ] poukładać kod logicznie, modularyzacja perhaps?
   - [-] dualizm koeficji
     - [X] sprawdzian pseudo koeficji naprawić
@@ -187,6 +260,11 @@ Wielomiany: co robić i jak
     - [ ] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
+  - [ ] naprawić ten dziwaczny test z gitlaba
+  - [ ] *przechodzi gitlabne*
+    - [ ] bez wycieków
+    - [ ] poprawnie
+  - [X] nie alokować  na stosie!!!
   - [X] *przechodzi example*
     - [X] poprawnie
     - [X] bez wycieków
@@ -196,7 +274,9 @@ Wielomiany: co robić i jak
   - [X] dodawanie
   - [X] mnożenie
   - [X] zacząć
-  - [ ] _niech to działa_
+  - [-] _niech to działa_
+    - [X] jakoś
+    - [ ] w pełni
 
 
 ** różne
