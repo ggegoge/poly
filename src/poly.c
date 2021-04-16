@@ -546,7 +546,7 @@ poly_exp_t PolyDeg(const Poly* p)
  * @return czy @p m i @p t są równe */
 static bool MonoIsEq(const Mono* m, const Mono* t)
 {
-  return (m->exp == t->exp) ? PolyIsEq(&m->p, &t->p) : false;
+  return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
 }
 
 bool PolyIsEq(const Poly* p, const Poly* q)
