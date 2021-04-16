@@ -147,6 +147,10 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
   }
 }
 
+/* todo */
+static bool PolyIsPseudoCoeff(const MonoList* ml);
+static void Decoeffise(Poly* p);
+
 /**
  * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
  * @param[in] head : głowa listy
@@ -202,13 +206,10 @@ static MonoList* PolyPseduoCoeff(poly_coeff_t c)
 }
 
 /* TODO -- sprawdzian czy to nie pseudo koeficja czyli coś jak c * x^0 */
-static bool PolyIsPseudoCoeff(const Poly* p)
+static bool PolyIsPseudoCoeff(const MonoList* ml)
 {
-  MonoList* head;
-
-  if (p->list) {
-    head = p->list;
-    return head->m.exp == 0 && PolyIsCoeff(&head->m.p)
+  if (ml) {
+    return ml->m.exp == 0 && PolyIsCoeff(&ml->m.p)
            /* && head->tail == NULL */;
   }
 
@@ -236,9 +237,12 @@ static void PolyAddComp(Poly* p, const Poly* q)
 {
   MonoList* l;
 
-  if (PolyIsCoeff(p) && PolyIsCoeff(q))
+  if (PolyIsCoeff(p) && PolyIsCoeff(q)) {
     p->coeff += q->coeff;
-  else if (PolyIsCoeff(p)) {
+    return;
+  }
+
+  if (PolyIsCoeff(p)) {
     l = PolyPseduoCoeff(p->coeff);
     p->list = l;
     p->list = MonoListsMerge(p->list, q->list);
@@ -595,10 +599,11 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
     MonoListInsert(&head, elem);
   }
 
+  sum.list = head;
+  if (PolyIsPseudoCoeff(sum.list))
+    Decoeffise(&sum);
   /* skąd wiedzieć czy to nie koeficja? trzeba uważać jakoś ech */
-  return (Poly) {
-    .list = head
-  };
+  return sum;
 }
 
 
