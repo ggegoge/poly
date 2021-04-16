@@ -248,7 +248,11 @@ static void PolyAddComp(Poly* p, const Poly* q)
   } else
     p->list = MonoListsMerge(p->list, q->list);
 
-  if (PolyIsPseudoCoeff(p))
+  /* nawet jeśli lista się znullyfikowała, to dzięki ścisłemu reżimowi
+   * inicjalizacji koeficji możemy spać spokojnie -- są one z defaultu zerowe
+   * zatem zostanie nam po prostu lista z 0 i NULLem */
+
+  if (PolyIsPseudoCoeff(p->list))
     Decoeffise(p);
 }
 
@@ -280,7 +284,7 @@ static void MonoAddComp(Mono* m, const Mono* t)
 /* TODO -- próba rozwiązania dualizmu koeficji */
 Poly PolyAddCoeff(poly_coeff_t c, const Poly* p)
 {
-  Poly new;
+  Poly new = {.coeff = 0, .list = NULL};
   MonoList* coeff_wrapper;
 
   if (c == 0)
@@ -299,7 +303,7 @@ Poly PolyAddCoeff(poly_coeff_t c, const Poly* p)
 
 Poly PolyAdd(const Poly* p, const Poly* q)
 {
-  Poly new;
+  Poly new = {.coeff = 0, .list = NULL};
 
   if (PolyIsCoeff(p) && PolyIsCoeff(q))
     return (Poly) {
@@ -355,7 +359,7 @@ Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p)
 
 Poly PolyMul(const Poly* p, const Poly* q)
 {
-  Poly pq;
+  Poly pq = {.coeff = 0, .list = NULL};
   Mono pm, qm;
   MonoList* new;
 
@@ -580,6 +584,7 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
 {
   MonoList* head = NULL;
   MonoList* elem;
+  Poly sum = {.coeff = 0, .list = NULL};
 
   for (size_t i = 0; i < count; ++i) {
     elem = malloc(sizeof(MonoList));

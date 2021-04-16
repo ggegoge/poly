@@ -3,7 +3,25 @@ Wielomiany: co robić i jak
 
 * TODO debug
 
-** TODO SimpleAddMonos:
+** DONE inicjalizacja koeficji
+   wyobraźmy sobie taką sytuację. Sumacja np $x$ i $-x$. Wyjdzie ofc zero. W programie
+   mamy tam wielomian z listą jednoelementową z jednomianem o współczynniku 1. Drugi ma
+   tam -1. Zatem merge'ując listy dostaniemy rzecz jasna w pewnym momencie ~+=~ na
+   jednomianach, które zwróci nam jednomian z zerem w sobie. Więc się go oczywiście
+   pozbędziemy. Czyli rezultatem merge'u będzie... NULL! w tym przypadku. Zatem w
+   =PolyAddComp= trzeba chyba sprawdzić to. Wielomianowi jeśli z nienull listy zrobi się
+   null, to wtw gdy zeracja
+   
+** DONE SimpleAddMonos:
+   teraz wcześniej
+   #+begin_src C
+     {
+       Mono m[] = {M(C(-1), 1), M(C(1), 1)};
+       res &= TestAddMonos(2, m, C(0));
+     }
+   #+end_src
+   
+   
    linijka 190 w [[file:src/poly_example.c][poly_example.c]]
    #+begin_src C
      {
@@ -80,6 +98,7 @@ Wielomiany: co robić i jak
       najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
       pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
       porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
+    - [ ] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
   - [X] obrócić kolejność jednomów
