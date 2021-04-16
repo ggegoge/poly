@@ -83,7 +83,6 @@ static int MonoCmp(const void* m, const void* t)
   return (mm->exp > tt->exp) - (mm->exp < tt->exp);
 }
 
-/* TODO */
 static void MonoAddComp(Mono* m, const Mono* t);
 
 
@@ -151,7 +150,6 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
   }
 }
 
-/* todo */
 static bool PolyIsPseudoCoeff(const MonoList* ml);
 static void Decoeffise(Poly* p);
 
@@ -195,6 +193,11 @@ void MonoListInsert(MonoList** head, MonoList* new)
   }
 }
 
+/**
+ * Tworzy pseudowykładnik dla danej liczby. Więcej szczegółów w Decoeffise.
+ * @param[in] c : wykładnik
+ * @return komórka listy będąca pseudowykładnikiem
+ */
 static MonoList* PolyPseduoCoeff(poly_coeff_t c)
 {
   MonoList* head = malloc(sizeof(MonoList));
@@ -207,13 +210,24 @@ static MonoList* PolyPseduoCoeff(poly_coeff_t c)
   return head;
 }
 
-/* TODO -- sprawdzian czy to nie pseudo koeficja czyli coś jak c * x^0 */
+/**
+ * Sprawdzian czy komórka listy @p ml nie jest przypadkiem ,,pseudo
+ * wykładnikiem''. Funkcja mówi czy nie jest to przypadkiem lista, w którą
+ * zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
+ * typu @f$ c * x^0 @f$.
+ * @param[in] ml : wskaźnik na komórkę listy
+ * @return czy to nie pseudowykładnik?
+ */
 static bool PolyIsPseudoCoeff(const MonoList* ml)
 {
   return ml && ml->m.exp == 0 && PolyIsCoeff(&ml->m.p) && ml->tail == NULL;
 }
 
-/* TODO -- zamiana pseudo koefu c * x^0 na zwykły --> c */
+/**
+ * Zmiana pseudowykładnika w normalny. Funkcja bierze wielomian @p p będący
+ * pseudowykładnikiem (patrz: `PolyIsPseudoCoeff` celem zrozumienia pojęcia)
+ * i zmienia go w standardowy wykładnik.
+ * @param[in] p : wielomian będący pseudo wykładnikiem */
 static void Decoeffise(Poly* p)
 {
   assert(p->list);
@@ -270,19 +284,23 @@ static void MonoAddComp(Mono* m, const Mono* t)
   PolyAddComp(&m->p, &t->p);
 }
 
-/* TODO -- próba rozwiązania dualizmu koeficji */
-Poly PolyAddCoeff(poly_coeff_t c, const Poly* p)
+/**
+ * Suma wielomianu i liczby całkowitej.
+ * @param[in] coeff : współczynnik @f$ c @f$
+ * @param[in] p : wielomian @$f p(x) @f$
+ * @return @f$ p(x) + c @f$ */
+static Poly PolyAddCoeff(poly_coeff_t coeff, const Poly* p)
 {
   Poly new = PolyZero();
   MonoList* coeff_wrapper;
 
-  if (c == 0)
+  if (coeff == 0)
     new = PolyClone(p);
   else if (PolyIsCoeff(p)) {
-    new.coeff = c + p->coeff;
+    new.coeff = coeff + p->coeff;
     new.list = NULL;
   } else {
-    coeff_wrapper = PolyPseduoCoeff(c);
+    coeff_wrapper = PolyPseduoCoeff(coeff);
     new.list = MonoListClone(p->list);
     MonoListInsert(&new.list, coeff_wrapper);
   }
@@ -315,7 +333,7 @@ Poly PolyAdd(const Poly* p, const Poly* q)
  * Iloczyn jednomianów.
  * @param[in] m : jednomian
  * @param[in] t : jednomian
- * @return iloczyn @f$ m \cdot p @f$
+ * @return iloczyn @f$ m * p @f$
  */
 static Mono MonoMul(const Mono* m, const Mono* t)
 {
@@ -326,10 +344,14 @@ static Mono MonoMul(const Mono* m, const Mono* t)
   return mt;
 }
 
-/* TODO */
 static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff);
 
-/* TODO */
+/**
+ * Pomnożenie wielomianu @p p przez współczynnik @p coeff ,,w miejscu''.
+ * Odpowiednik operacji `p *= c`.
+ * @param[in] p : wielomian @f$ p(x) @f$
+ * @param[in] coeff : współczynnik @f$ c @f$
+ */
 static void PolyMulCoeffComp(Poly* p, poly_coeff_t coeff)
 {
   if (PolyIsCoeff(p))
@@ -338,6 +360,13 @@ static void PolyMulCoeffComp(Poly* p, poly_coeff_t coeff)
     p->list = MonoListMulCoeff(p->list, coeff);
 }
 
+/**
+ * Pomnożenie listy przez skalar. Każdy element listy zaczynającej się
+ * w @p head zostaje pomnożony przez współczynnik @p coeff.
+ * @param[in] head : głowa listy
+ * @param[in] coeff : skalar
+ * @return głowa przemnożonej listy
+ */
 static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff)
 {
   MonoList* tail;
@@ -358,7 +387,12 @@ static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff)
   return head;
 }
 
-/* TODO */
+/**
+ * Iloczyn wielomianu ze skalarem.
+ * @param[in] coeff : współczynnik @f$ c @f$
+ * @param[in] p : wielomain @f$ p(x) @f$
+ * @return @f$ c p(x) @f$ 
+ */
 Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p)
 {
   Poly pc = PolyClone(p);
@@ -437,18 +471,35 @@ Poly PolySub(const Poly* p, const Poly* q)
   return nq;
 }
 
-/* TODO -- sprawdzian degu pierwszego eltu  */
+/**
+ * Obliczenie stopnia wielomianu zawartego w niepustej liście. Ze wzglęfu na
+ * zachowane posortowanie listy, ten stopień jest to potęga przy pierwszym
+ * jednomianie będącym w tejże liście.
+ * @param[in] head : niepusta lista
+ * @return stopień wielomianu reprezentowanego przez listę
+ */
 static poly_exp_t MonoListDeg(const MonoList* head)
 {
   assert(head != NULL);
   return head->m.exp;
 }
 
+/**
+ * Prosta funkcyjka licząca maksimum dwu współczynników.
+ * @param[in] a : @f$ a @f$
+ * @param[in] b : @f$ b @f$
+ * @return @f$ \max(a, b) @f$
+ */
 static inline poly_exp_t max(poly_exp_t a, poly_exp_t b)
 {
   return (a < b) ? b : a;
 }
 
+/**
+ * Obliczenie współczynnika wielomianu stałego.
+ * @param[in] p : wielomian stały
+ * @return stopień wielomianu
+ */
 static poly_exp_t PolyCoeffDeg(const Poly* p)
 {
   assert(PolyIsCoeff(p));
@@ -525,7 +576,15 @@ bool PolyIsEq(const Poly* p, const Poly* q)
   return eq && !pl && !ql;
 }
 
-/* TODO */
+/**
+ * Potęgowanie liczb całkowitych. Oparty na algorytmie potęgowania przez
+ * podnoszenie do kwadratu, który ma złożoność @f$\log n@f$ w przeciwieństwie do
+ * naiwnego rozwiązania liniowego. Nie będę kłamać, rozwiązanie iteracyjne
+ * wziąłem stąd: https://en.wikipedia.org/wiki/Exponentiation_by_squaring
+ * @param[in] a : @f$ a @f$
+ * @param[in] n : @f$ n @f$
+ * @return @f$ a^n @f$
+ */
 static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
 {
   poly_coeff_t b;
@@ -551,9 +610,6 @@ static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
   return a * b;
 }
 
-
-
-/* TODO */
 Poly PolyAt(const Poly* p, poly_coeff_t x)
 {
   /* wszystkie x_0^n zmieniam na x^n, mnożę je przez te koeficje i robię
