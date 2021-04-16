@@ -3,6 +3,36 @@ Wielomiany: co robić i jak
 
 * TODO debug
 
+** TODO *VALGRIND*
+   
+*** TODO zeracja
+    wygląda na to, że nie usuwam elementów listy, które następnie się zerują
+    
+** DONE dualizm koeficyjny, a mnożenie zerujące
+   oczywiście jedno to mnożenie przez zero. drugie to gdy mnożymy przez =1 << 32= czyli
+   $2^32$. Wtedy też pójdzie zero
+   #+begin_example
+     # w mnożeniu
+     (gdb) p *p.list
+     $41 = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+     # w TestOp
+     (gdb) p *c.list
+     $47 = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+   #+end_example
+   ~MonoMul~ upewnia się co do zerowości, natomiast PolyCoeffMul jakoś nie
+
+   ok. to nie dualizmu kwestia aż tak. jednak rozchodzi się m.in. o coś bardziej tricky
+
+   otóż mając =PolyMullCoeffComp= czyli ~p *= c~ problem jest taki... Jeśli p to PolyCoeff
+   to es -- mnożę jego wnętrzności i powstaje mi elegancki wielomian. wpp wywołuję to
+   mnożenie na każdym poniższym jednomianie w liście mej. I tu szkopuł pewien
+   zachodzi. Ponieważ wtedy poniektóre z wielomianów mogą się pozerować tam niżej. Więc
+   chciałbym ich się pozbyć.
+
+   Lista z dwoma wskazami... co jeśli już pierwszy jest felerny?
+   muszę to sobie chyba rozrysować
+
+   hmm. czy dla zwykłego mnożenia przez zwykłe zero będzie ok? w sumie to Jean Doute
 ** DONE inicjalizacja koeficji
    wyobraźmy sobie taką sytuację. Sumacja np $x$ i $-x$. Wyjdzie ofc zero. W programie
    mamy tam wielomian z listą jednoelementową z jednomianem o współczynniku 1. Drugi ma
@@ -90,10 +120,10 @@ Wielomiany: co robić i jak
 
     Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
-  - [ ] nie alokować  na stosie!!!
+  - [X] nie alokować  na stosie!!!
   - [ ] poukładać kod logicznie, modularyzacja perhaps?
-  - [ ] dualizm koeficji
-    - [ ] sprawdzian pseudo koeficji naprawić
+  - [-] dualizm koeficji
+    - [X] sprawdzian pseudo koeficji naprawić
     - [ ] co zrobić, jeśli gdzieś głęboko jest *zero*
       najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
       pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i

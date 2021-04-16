@@ -357,6 +357,9 @@ Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p)
 {
   Poly pc = PolyClone(p);
   PolyMulCoeffComp(&pc, coeff);
+  
+  if (PolyIsPseudoCoeff(pc.list))
+    Decoeffise(&pc);
 
   return pc;
 }
@@ -447,7 +450,7 @@ poly_exp_t PolyDegBy(const Poly* p, size_t var_idx)
   poly_exp_t max_deg = -1;
 
   if (PolyIsCoeff(p))
-    PolyCoeffDeg(p);
+    return PolyCoeffDeg(p);
 
   if (var_idx == 0)
     return MonoListDeg(p->list);
@@ -531,9 +534,9 @@ Function exp_by_squaring_iterative(x, n)
     return x * y
  */
 
-static int QuickPow(int a, int n)
+static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
 {
-  int b;
+  poly_coeff_t b;
 
   assert(n >= 0);
 
@@ -567,8 +570,8 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
    * wait mam tam listę jednomów... hm. no to tak, z każego biorę ->p i multypl,
    * a następnie je wszystkie robię +=.
    * minus -- konieczność destrukcji mul */
-  Poly res;
-  Poly mul;
+  Poly res = {.coeff = 0, .list = NULL};
+  Poly mul = {.coeff = 0, .list = NULL};
   poly_coeff_t coeff;
 
   if (PolyIsCoeff(p))
