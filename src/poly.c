@@ -176,14 +176,6 @@ void MonoListInsert(MonoList** head, MonoList* new)
     *tracer = new;
   } else {
     /* nowy element jest merge'owany z już istniejącym o równym stopniu */
-    /* MonoAddComp(&new->m, &(*tracer)->m);
-     * /\* jeśli sumacja wyzerowała ten element, to... *\/
-     * if (PolyIsZero(&new->m.p)) {
-     *   MonoDestroy(&(*tracer)->m);
-     *   MonoDestroy(&new->m);
-     *
-     *   *tracer = (*tracer)->tail;
-     * } */
     MonoAddComp(&(*tracer)->m, &new->m);
 
     if (PolyIsZero(&(*tracer)->m.p)) {
@@ -215,13 +207,9 @@ static MonoList* PolyPseduoCoeff(poly_coeff_t c)
 /* TODO -- sprawdzian czy to nie pseudo koeficja czyli coś jak c * x^0 */
 static bool PolyIsPseudoCoeff(const MonoList* ml)
 {
-  if (ml) {
-    return ml->m.exp == 0 && PolyIsCoeff(&ml->m.p)
-           /* && head->tail == NULL */;
-  }
-
-  return false;
+  return ml && ml->m.exp == 0 && PolyIsCoeff(&ml->m.p) && ml->tail == NULL;
 }
+
 /* TODO -- zamiana pseudo koefu c * x^0 na zwykły --> c */
 static void Decoeffise(Poly* p)
 {
@@ -278,19 +266,6 @@ static void MonoAddComp(Mono* m, const Mono* t)
   assert(m->exp == t->exp);
   PolyAddComp(&m->p, &t->p);
 }
-
-/* /\** Dodanie do siebie dwóch jednomianów pod założeniem, że stopnie @p m i @p t
- *  * są sobie równe.
- *  * @param[in] m : jednomian @f$ p x_i^n @f$
- *  * @param[in] t : jednomian @f$ q x_i^n @f$
- *  * @return jednomian @f$ (p + q) x_i^n @f$ *\/
- * static Mono MonoAdd(const Mono* m, const Mono* t)
- * {
- *   assert(m->exp == t->exp);
- *   return (Mono) {
- *     .exp = m->exp, .p = PolyAdd(&m->p, &t->p)
- *   };
- * } */
 
 /* TODO -- próba rozwiązania dualizmu koeficji */
 Poly PolyAddCoeff(poly_coeff_t c, const Poly* p)
@@ -385,7 +360,7 @@ Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p)
 {
   Poly pc = PolyClone(p);
   PolyMulCoeffComp(&pc, coeff);
-  
+
   if (PolyIsPseudoCoeff(pc.list))
     Decoeffise(&pc);
 
@@ -455,6 +430,7 @@ Poly PolySub(const Poly* p, const Poly* q)
   return nq;
 }
 
+/* TODO -- sprawdzian degu pierwszego eltu  */
 static poly_exp_t MonoListDeg(const MonoList* head)
 {
   assert(head != NULL);
@@ -542,26 +518,7 @@ bool PolyIsEq(const Poly* p, const Poly* q)
   return eq && !pl && !ql;
 }
 
-/* https://stackoverflow.com/a/18581693 */
-
-/*
-Function exp_by_squaring_iterative(x, n)
-    if n < 0 then
-      x := 1 / x;
-      n := -n;
-    if n = 0 then return 1
-    y := 1;
-    while n > 1 do
-      if n is even then
-        x := x * x;
-        n := n / 2;
-      else
-        y := x * y;
-        x := x * x;
-        n := (n – 1) / 2;
-    return x * y
- */
-
+/* TODO */
 static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
 {
   poly_coeff_t b;
@@ -589,11 +546,11 @@ static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
 
 
 
-/* jak to zrb */
+/* TODO */
 Poly PolyAt(const Poly* p, poly_coeff_t x)
 {
   /* wszystkie x_0^n zmieniam na x^n, mnożę je przez te koeficje i robię
-   * sumę wielomianów wielu. czyli każdemu wielomianowi robię *koef gdzie koef
+   * sumę wielomianów wielu. czyli każdemu wielomianowi robię *= koef gdzie koef
    * to x^n i później kumsum (suma akumulatywna) jest robiona tak jakby.
    * wait mam tam listę jednomów... hm. no to tak, z każego biorę ->p i multypl,
    * a następnie je wszystkie robię +=.
@@ -631,8 +588,10 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
   }
 
   sum.list = head;
+
   if (PolyIsPseudoCoeff(sum.list))
     Decoeffise(&sum);
+
   /* skąd wiedzieć czy to nie koeficja? trzeba uważać jakoś ech */
   return sum;
 }
