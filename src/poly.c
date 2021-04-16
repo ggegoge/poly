@@ -288,7 +288,7 @@ static void MonoAddComp(Mono* m, const Mono* t)
 /* TODO -- próba rozwiązania dualizmu koeficji */
 Poly PolyAddCoeff(poly_coeff_t c, const Poly* p)
 {
-  Poly new = {.coeff = 0, .list = NULL};
+  Poly new = PolyZero();
   MonoList* coeff_wrapper;
 
   if (c == 0)
@@ -307,7 +307,7 @@ Poly PolyAddCoeff(poly_coeff_t c, const Poly* p)
 
 Poly PolyAdd(const Poly* p, const Poly* q)
 {
-  Poly new = {.coeff = 0, .list = NULL};
+  Poly new = PolyZero();
 
   if (PolyIsCoeff(p) && PolyIsCoeff(q))
     return (Poly) {
@@ -366,7 +366,7 @@ Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p)
 
 Poly PolyMul(const Poly* p, const Poly* q)
 {
-  Poly pq = {.coeff = 0, .list = NULL};
+  Poly pq = PolyZero();
   Mono pm, qm;
   MonoList* new;
 
@@ -570,8 +570,8 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
    * wait mam tam listę jednomów... hm. no to tak, z każego biorę ->p i multypl,
    * a następnie je wszystkie robię +=.
    * minus -- konieczność destrukcji mul */
-  Poly res = {.coeff = 0, .list = NULL};
-  Poly mul = {.coeff = 0, .list = NULL};
+  Poly res = PolyZero();
+  Poly mul = PolyZero();
   poly_coeff_t coeff;
 
   if (PolyIsCoeff(p))
@@ -591,7 +591,7 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
 {
   MonoList* head = NULL;
   MonoList* elem;
-  Poly sum = {.coeff = 0, .list = NULL};
+  Poly sum = PolyZero();
 
   for (size_t i = 0; i < count; ++i) {
     elem = malloc(sizeof(MonoList));
