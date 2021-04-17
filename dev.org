@@ -1,19 +1,282 @@
 #+TITLE: ważne dokumentowanie procesu twórczego
 Wielomiany: co robić i jak
 
+* TODO  debug (/testy gitlabowskie../)
+  [[https://gitlab.com/mimuw-ipp-2021/testy-duze-zadanie-1][link do testów o tu]]
+
+  problem z tymi testami jest taki -- nie działają! na moim komputerze z burżuazyjnym
+  systemem MacOs generator liczb losowych się zupełnie nie zgadza! przez to muszę
+  debugować w koślawym gdb terminalowym na studentsie
+  
+** TODO stress correct   
+
+*** TODO ans[9][11]
+    straszne obrzydlistwo
+    #+begin_example
+      ans[9][11] = P(P(P(C(3107301932000000), 0, C(5548753450), 9), 0, P(C(1938779255430), 0, C(80), 9), 1, C(27952), 2, C(-2840961766400), 3, C(-40960), 4, P(C(-3107307532000), 0, C(-10), 9), 5, C(-48294), 6, C(-3495714668380), 8, C(-50400), 9, P(C(-57711514077160), 0, C(-70), 9), 10, C(-36067753947), 11, P(C(-196000520), 0, C(-350), 9), 12, C(57706955730), 13, C(832), 14, P(C(57662558288), 0, C(-80), 9), 15, C(-27055), 16, C(196000), 17, C(64920500321), 18, C(936), 19, C(993252), 20, C(455), 21, C(3640280), 22, C(51830), 23, C(827696), 25, C(520), 26, C(-3640), 27, C(-1651), 28, C(-4927), 30, C(-936), 33), 0, P(C(290914484879360), 0, C(4194304), 1, C(-524288), 5, C(-3670016), 10, C(-18350080), 12, C(-4194304), 15), 4, P(C(-44390027600000), 0, C(-27744407250), 1, C(-400), 2, C(37731523460), 3, C(544), 4, C(44390107600), 5, C(690), 6, C(49938780982), 8, C(720), 9, C(559920), 10, C(350), 11, C(2800000), 12, C(1184), 13, C(637060), 15, C(400), 16, C(-2800), 17, C(-1174), 18, C(-3790), 20, C(-720), 23), 6, P(C(-1566080208698605568), 0, C(7087246163312640), 1, C(-885905770414080), 5, C(-6201340392898560), 10, C(-31006701964492800), 12, C(-7087246163312640), 15), 7, P(C(-4750521706123402240), 0, C(1187437322772480), 1, C(-148429665346560), 5, C(-1039007657425920), 10, C(-5195038287129600), 12, C(-1187437322772480), 15), 13, P(C(1963672772935680), 0, C(28311552), 1, C(-3538944), 5, C(-24772608), 10, C(-123863040), 12, C(-28311552), 15), 14, P(C(-199755124200000), 0, C(-124849832625), 1, C(-1800), 2, C(199755124200), 3, C(2880), 4, C(199755484200), 5, C(3105), 6, C(224724514365), 8, C(3240), 9, C(2519640), 10, C(1575), 11, C(12600000), 12, C(4950), 13, C(2864880), 15, C(1800), 16, C(-12600), 17, C(-5715), 18, C(-17055), 20, C(-3240), 23), 16);
+    #+end_example
+    ech. nie wiem jak ja to zdebuguję.
+
+    może breakpointa z ifem jakoś?
+
+    tak żem zrobił i...
+    #+begin_example
+      (gdb) b stress.c:48 if dep == 9 && i == 11
+      Breakpoint 1 at 0x3c424: file /home/students/inf/g/gc429174/test/poly/src/testy-duze-zadanie-1/stress.c, line 48.
+      Breakpoint 1, StressCorrect () at /home/students/inf/g/gc429174/test/poly/src/testy-duze-zadanie-1/stress.c:48
+      48	            if ((!PolyIsEq(&p, &ans[dep][i])))
+      (gdb) p i
+      $1 = 11
+      (gdb) p dep
+      $2 = 9
+      (gdb) p p
+      $3 = {coeff = 0, list = 0x5555555c78d0}
+      (gdb) p ans[dep][i]
+      $4 = {coeff = 0, list = 0x5555555c9ff0}
+      (gdb) s
+      PolyIsEq (p=0x7fffffffdea0, q=0x555555595230 <ans+4496>) at /home/students/inf/g/gc429174/test/poly/src/poly.c:556
+      556	  bool eq = true;
+      (gdb) s
+      558	  if (PolyIsCoeff(p)) {
+      (gdb) n
+      562	  } else if (PolyIsCoeff(q))
+      (gdb) n
+      565	  pl = p->list;
+      (gdb) n
+      566	  ql = q->list;
+      (gdb) n
+      568	  while (pl && ql && eq) {
+      (gdb) n
+      569	    eq = MonoIsEq(&pl->m, &ql->m);
+      (gdb) display pl->m
+      1: pl->m = {p = {coeff = 553329315, list = 0x5555555c7300}, exp = 18}
+      (gdb) display ql->m
+      2: ql->m = {p = {coeff = 0, list = 0x5555555c8980}, exp = 16}
+    #+end_example
+    jak widzimy te dwa wielomiany różnią się *już na pierwszym miejscu* i to nawet expem,
+    ale jak patrzyłem głębiej, to też.
+    Skąd to mogło się wziąć?
+    
+*** DONE ans[2][5]
+**** *fixd!*
+     kłopotem było istotnie niesprawdzanie czy przypadkiem nie dodaję zerowych wielomianów
+     w insercie
+**** prblm
+     najwidoczniej są jakieś błędy z potęgą zerową w niektórych sytuacjach? no jest to
+     kłopotliwe w każdym razie
+
+     a nie. może składniki typu 0x^0 gdzieś pojawiające się? nie wiem. dziwne w każdym
+     razie to jest.. Pojawia mi się takie coś:
+     #+begin_example
+       (gdb) p *res.list.tail.tail 
+       $24 = {m = {p = {coeff = 0, list = 0x0}, exp = 0}, tail = 0x0}
+     #+end_example
+     to akurat dla ~dep = 3~ i ~i = 2~
+
+     podejrzane. skąd się może brać? bonne question.
+    
+* DONE debug (/na poly_example.c.../)
+
+** DONE *VALGRIND*
+   
+*** DONE invalid read
+    
+**** *fixed!*
+     kluczem było zajęcie się funkcją =PolyMulCoeffComp=, która się kiełbasiła jak nie
+     wiem. na stashu schowałem tę sprytną, acz ułomną wersję. miast tego napisałem
+     rekurencyjną -- ta śmiga natomiast
+    
+**** prblm
+     mam invalid ready przez =free= w =PolyMulCoeffComp=
+     #+begin_example
+       (gdb) n
+       PolyMulCoeffComp (p=0x7ffeefbff6d0, coeff=4294967296) at /Users/grzegorz/Dropbox/C/poly/src/poly.c:365
+       365	      if (PolyIsZero(&pl->m.p)) {
+       1: *prev = (MonoList *) 0x1004040d0
+       2: **prev = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       368	        *prev = pl->tail;
+       1: *prev = (MonoList *) 0x1004040d0
+       2: **prev = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       369	        MonoDestroy(&pl->m);
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       370	        prev = &pl->tail;
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       371	        free(pl);
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       372	        pl = *prev;
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x1004040d0
+       4: *pl = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+       (gdb) n
+       373	      } else {
+       1: *prev = (MonoList *) 0x0
+       2: **prev = <error: Cannot access memory at address 0x0>
+       3: pl = (MonoList *) 0x0
+       4: *pl = <error: Cannot access memory at address 0x0>
+     #+end_example
+
+*** DONE zeracja
+    wygląda na to, że nie usuwam elementów listy, które następnie się zerują
+    
+
+** DONE dualizm koeficyjny, a mnożenie zerujące
+   oczywiście jedno to mnożenie przez zero. drugie to gdy mnożymy przez =1 << 32= czyli
+   $2^32$. Wtedy też pójdzie zero
+   #+begin_example
+     # w mnożeniu
+     (gdb) p *p.list
+     $41 = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+     # w TestOp
+     (gdb) p *c.list
+     $47 = {m = {p = {coeff = 0, list = 0x0}, exp = 1}, tail = 0x0}
+   #+end_example
+   ~MonoMul~ upewnia się co do zerowości, natomiast PolyCoeffMul jakoś nie
+
+   ok. to nie dualizmu kwestia aż tak. jednak rozchodzi się m.in. o coś bardziej tricky
+
+   otóż mając =PolyMullCoeffComp= czyli ~p *= c~ problem jest taki... Jeśli p to PolyCoeff
+   to es -- mnożę jego wnętrzności i powstaje mi elegancki wielomian. wpp wywołuję to
+   mnożenie na każdym poniższym jednomianie w liście mej. I tu szkopuł pewien
+   zachodzi. Ponieważ wtedy poniektóre z wielomianów mogą się pozerować tam niżej. Więc
+   chciałbym ich się pozbyć.
+
+   Lista z dwoma wskazami... co jeśli już pierwszy jest felerny?
+   muszę to sobie chyba rozrysować
+
+   hmm. czy dla zwykłego mnożenia przez zwykłe zero będzie ok? w sumie to Jean Doute
+** DONE inicjalizacja koeficji
+   wyobraźmy sobie taką sytuację. Sumacja np $x$ i $-x$. Wyjdzie ofc zero. W programie
+   mamy tam wielomian z listą jednoelementową z jednomianem o współczynniku 1. Drugi ma
+   tam -1. Zatem merge'ując listy dostaniemy rzecz jasna w pewnym momencie ~+=~ na
+   jednomianach, które zwróci nam jednomian z zerem w sobie. Więc się go oczywiście
+   pozbędziemy. Czyli rezultatem merge'u będzie... NULL! w tym przypadku. Zatem w
+   =PolyAddComp= trzeba chyba sprawdzić to. Wielomianowi jeśli z nienull listy zrobi się
+   null, to wtw gdy zeracja
+   
+** DONE SimpleAddMonos:
+   teraz wcześniej
+   #+begin_src C
+     {
+       Mono m[] = {M(C(-1), 1), M(C(1), 1)};
+       res &= TestAddMonos(2, m, C(0));
+     }
+   #+end_src
+   
+   
+   linijka 190 w [[file:src/poly_example.c][poly_example.c]]
+   #+begin_src C
+     {
+       Mono m[] = {M(C(1), 0), M(C(1), 0)};
+       res &= TestAddMonos(2, m, C(2));
+     }
+   #+end_src
+   jedyny test w =SimpleAddMonosTest= na którym się wywala, ważne dość *todo*
+   #+begin_example
+     67	  bool is_eq = PolyIsEq(&b, &res);
+     (gdb) p b
+     $33 = {coeff = 0, list = 0x1003040c0}
+     (gdb) p *b.list
+     $34 = {m = {p = {coeff = 2, list = 0x0}, exp = 0}, tail = 0x0}
+     (gdb) p res
+     $35 = {coeff = 2, list = 0x0}
+   #+end_example
+   Taki błąd -- tworząc z mono ~n == 0~ dostaję nie koef, a ten pseudo koef. Mimo, że
+   wynik poprawny, to się popsuje wynik. Brak dekoefizacji?
+** DONE =PolyAddMonos= czyli $\sum$
+   ok. robiąc =PolyAddMonos= robię zawsze ten sam =elem=. Z tym samym adresem. Przez co
+   dodaje się ta sama rzecz kilka raz!
+
+*** =MonoListInsert= -- triple ref
+    Przez powyższego buga robię destroy na tej samej rzeczy!
+    
+** =PolyAddComp= czyli $+=$
+   czyli *+=*. Niestety *nie działa* -- nie sprawdzam przypadku gdy $p$ i $q$ to
+   wielomiany stałe (lub jeden z nich, tam też /dualizm koeficji/ wejdzie w grę)
+
+** =MakePolyHelper=... czyli ten syf
+   Po teście =SimpleAddTest= (ln 117) gdzie wywołuję w helperze PolyAddMonos jakoś po
+   powrocie dostaję w wyniku syf
+   #+begin_example
+     (gdb) p head
+     $54 = (MonoList *) 0x7ffeefbfe958
+     (gdb) p *head
+     $55 = {m = {p = {coeff = 2, list = 0x0}, exp = 0}, tail = 0x0}
+     (gdb) s
+     492	    .list = head
+     (gdb) s
+     491	  return (Poly) {
+     (gdb) s
+     MakePolyHelper (dummy=0) at /Users/grzegorz/Dropbox/C/poly/src/poly_example.c:44
+     44	  free(arr);
+     (gdb) s
+     45	  return res;
+     (gdb) p res
+     $56 = {coeff = 0, list = 0x7ffeefbfe958}
+     (gdb) p *res.list
+     $58 = {m = {p = {coeff = 4298113024, list = 0xefbfe9a0}, exp = 7680}, tail = 0x100110000}
+   #+end_example
+   clearly miałem ładny head (choć błędny vide powyższe bugi), podstawiłem pointer nań do
+   tam list, a po zreturnowaniu otrzymałem jakiś syf pod listą... Czemu? Bo to nie był
+   wynik mallokacji? wydaje mi się, że wcześniej działało. Chyba head to jest tam zmienna
+   stosowa jak i elem i takie coś się dzieje dlatego.
+
+***    *TAK*
+    Zwracam head źle. Drugi test to pokazuje. Powinienem malokować tę pamięć, a ja ją
+    zwracam cymbalsko. Później gdy przed merge'ując =PolyClone= klona listy to sięgam tam
+    pod same nieznane lokacje losowe.
+
+    ergo /wina segmentacyjna/.
+
+    _zwracam wskaźniki na zmienne na stosie!!!_
+
+    Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
+  - [ ] naprawić ten dziwaczny test z gitlaba *WAŻNE*
+  - [ ] poukładać kod logicznie, modularyzacja perhaps?
+  - [-] dualizm koeficji
+    - [X] sprawdzian pseudo koeficji naprawić
+    - [X] co zrobić, jeśli gdzieś głęboko jest *zero*
+      najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
+      pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
+      porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
+    - [ ] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
+  - [ ] *przechodzi gitlabne*
+    - [ ] bez wycieków
+    - [ ] poprawnie
+  - [X] nie alokować  na stosie!!!
+  - [X] *przechodzi example*
+    - [X] poprawnie
+    - [X] bez wycieków
+  - [X] obrócić kolejność jednomów
+  - [X] poprawić na ~use-list+=~ wszystko -- kolejność + reformat
+  - [X] =PolyAt= *!!!!!*
+  - [X] dodawanie
+  - [X] mnożenie
   - [X] zacząć
-  - [ ] obrócić kolejność jednomów
-  - [ ] co zrobić, jeśli gdzieś głęboko jest *zero*
-    najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
-    pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
-    porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
-  - [ ] =PolyAt= *!!!!!*
-  - [ ] dodawanie
-  - [ ] mnożenie
-  - [ ] _niech to działa_
+  - [-] _niech to działa_
+    - [X] jakoś
+    - [ ] w pełni
 
 
 ** różne
@@ -26,7 +289,6 @@ Wielomiany: co robić i jak
      - =fold_left=, =fold_right=
      - =filter=
    - [ ] symulacja pattern matchingu w C
-
 
 * Lista jednomianów
   Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
@@ -149,35 +411,98 @@ Wielomiany: co robić i jak
       #+end_example
       załatwiłoby sprawę...?
 * Implementacja
+** TODO dualizm koeficji
+   Zachodzi ewidentnie pewien /dualizm/ swoisty w strefie koeficji (ang. /coefficient/)
+   wielomianowych. Otóż jest dwuznacznośc pewna. Można albo zapisać je zarazem jako
+   wielomian z pustą listą oraz jako jednomian $c x^0$. Wręcz tak trzeba je chyba trzymać
+   mając listę dla $x^3 + x^2 + 5$ np. Ale jak wtedy to rozkminiać...
+
+   1. komparator mondry
+   2. nie tworzyć któregoś rodzaju
+   3. ???
+
+   Trzymanie jednomianu pojedynczego jako koeficji? być może to byłoby najlepsze. hm
+   
+*** rozw nr 1 -- *x^0 * c*
+    Zgodnie z tym co żem napisał powyżej jako 1. W przyrodzie istnieć będą obydwa rodzaje
+    koeficji (/yikes/).
+    
+    1. wielomian -- =(Poly) { .coeff = c, .list = NULL }=
+    2. jednomowy wrapper -- =(Mono) { .p = PolyCoeff, .exp = 0 }= czyli w sensie
+       matematycznym jest to $c * x^0$... Trochę głupie, wiem. Aczkolwiek chyba jest to
+       *jedyny* sposób aby zachować integrację z dotychczasowym interfejsem. Wtedy trzeba
+       dokonać przemyślunku jeszcze w tych kilku kwestiach:
+       
+**** dodawanie koeficji
+     Mając koeficję typu pierwszego i dodając ją do wielomianu muszę ją zwrapować
+     zawczasu. Czyli tworzę =MonoList= z tym wielomianem i ją wciskam w miejsce
+     odpowiednie. jeśli w procesie dodawanie trafi mi się zerowy koeff, co wtedy? tj jeśli
+     mam $x+1$ i dodam doń $-1$. Oczekiwałbym $x$. Musiałbym wtedy do funkcji insertującej
+     się doglądać. to jest zdecydowane *TODO*. Hm.
+     +Dotychczas dodawałem element i robiłem+
+     +~+=~ na tracerze, ale teraz widzę, że być może słuszniej byłoby zrobić ~+=~ na nowym+
+     +i jeśli niewyjdzie zero to podmiankę, a jeśli wyjdzie, to czyszczę co pod tracerem i+
+     +robię jakoś relink. tj ~*tracer = &(*tracer)->tail~ -- podmieniam cały wskaźnik.+
+
+     chociaż........... hm. być może jednak /lepiej/ zostawić tak jak jest. =MonoAddComp=
+     zadziała i tak jedynie na tracerze i jego tail pozostanie bez szwanku. zatem w
+     przypadku zerowania po prostu nisczę mono tracera i podstawiam pod niego jego ogon.
+
+**** czy może mi się trafić wywołanie =is_coeff= na takim pseudo koefie?
+     innymi słowy... czy powinienem dodać warunek do is coeff? *bardzo* by to
+     popsuło. Muszę zatem po operacjach sprawdzać, czy nie został koef jedynie
+
+*** nierozw nr 2 -- /lista jednoelementowa/
+    
 ** TODO problem niemały -- =PolyAt=
-   Czyli zamieniam zmienną na samym dole w jakąś wartość.
-   \[ \sum_n p_n x^n \]
-   co tu poczynić???
+   
+*** rozw?
+    Potencjalnie rozwiązałem tę zagwozdkę. Mając to swoje ~+=~ mogę wykonywać taką pętlę:
+    #+begin_example
+      PolyAt(p, x)
+      {
+        Poly res, mul;
+        for Mono m in p->list do {
+          mul = m.p * x^m->exp
+          res += mul
+          delete mul
+        }
 
-   mogę obliczyć oczywiśie potęgę. Wtedy awansują zmienne wszystkie. Czyli muszę jakby tę
-   /listę list/ zde-awansować do /listy/. Mam
-   #+begin_example
-     +-----+
-     | m   |  +--->  
-     |     |  |
-     |tail-----
-     +-----+
-   #+end_example
-   takich komórek nie mało i każde =m= trzyma swoją listę też. Teraz chcę przelać tę listę
-   do środka... Ech. Mógłbym wziąć pierwszą listę po prostu i robić =PolyAdd= każdej
-   kolejnej.
-   #+begin_example
-     +-----------------------+    +-->  +-----------------------+   +--> ...
-     | m { ax_1 + bx_1 + ... |    |     | m { cx_1 + dx_1 + ... |   |
-     |                       |    |     |                       |   |
-     |  x_0 = x^n        tl ------+     |  x_0 = x^n        tl -----+
-     +-----------------------+          +-----------------------+
+        return res.
+      }
+    #+end_example
+    Czyli tworzę pomnożony przez koeficję zawsze i *kumsum*.
 
-     ======>>>
+    minus: konieczność destrukcji wyniku mnożenia za każdym razem
+*** prblm
+    Czyli zamieniam zmienną na samym dole w jakąś wartość.
+    \[ \sum_n p_n x^n \]
+    co tu poczynić???
 
-     (ax^n + bx^n + cx^n + dx_n) x_0         ????
-   #+end_example
-   meaning -- flattuję listę. *ech*
+    mogę obliczyć oczywiśie potęgę. Wtedy awansują zmienne wszystkie. Czyli muszę jakby tę
+    /listę list/ zde-awansować do /listy/. Mam
+    #+begin_example
+      +-----+
+      | m   |  +--->  
+      |     |  |
+      |tail-----
+      +-----+
+    #+end_example
+    takich komórek nie mało i każde =m= trzyma swoją listę też. Teraz chcę przelać tę listę
+    do środka... Ech. Mógłbym wziąć pierwszą listę po prostu i robić =PolyAdd= każdej
+    kolejnej.
+    #+begin_example
+      +-----------------------+    +-->  +-----------------------+   +--> ...
+      | m { ax_1 + bx_1 + ... |    |     | m { cx_1 + dx_1 + ... |   |
+      |                       |    |     |                       |   |
+      |  x_0 = x^n        tl ------+     |  x_0 = x^n        tl -----+
+      +-----------------------+          +-----------------------+
+
+      ======>>>
+
+      (ax^n + bx^n + cx^n + dx_n) x_0         ????
+    #+end_example
+    meaning -- flattuję listę. *ech*
 ** DONE arr v list
    Czy powinienem użyć na wielomian jednomianu (tj ten współczynnik) tablicy czy może raczej linked
    listy?

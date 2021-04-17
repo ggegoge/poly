@@ -30,15 +30,10 @@ struct MonoList;
  */
 typedef struct Poly {
   /**
-  * To jest unia przechowująca współczynnik wielomianu lub
-  * liczbę jednomianów w wielomianie.
   * Jeżeli `list == NULL`, wtedy jest to współczynnik będący liczbą całkowitą.
   * W przeciwnym przypadku jest to niepusta lista jednomianów.
   */
-  union {
-    poly_coeff_t coeff;    /**< współczynnik */
-    size_t       size;     /**< rozmiar wielomianu, liczba jednomianów */
-  };
+  poly_coeff_t coeff;    /**< współczynnik */
   /** To jest tablica przechowująca listę jednomianów. */
   struct MonoList* list;
 } Poly;
