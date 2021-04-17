@@ -44,7 +44,8 @@ void PolyDestroy(Poly* p)
 /**
  * Utworzenie pełnej kopii listy jednomianów.
  * @param[in] head : głowa listy jednomianów
- * @return pełna kopia listy */
+ * @return pełna kopia listy
+ */
 static MonoList* MonoListClone(const MonoList* head)
 {
   MonoList* elem;
@@ -75,7 +76,8 @@ Poly PolyClone(const Poly* p)
  * @param[in] m : wskaźnik na pierwszy z jednomianów
  * @param[in] t : wskaźnik na drugi z jednomianów
  * @return -1 jeżeli wykładnik @p m jest mniejszy od wykładnika @p t, 0 gdy są
- * równe i 1 w odwrotnej sytuacji. */
+ * równe i 1 w odwrotnej sytuacji.
+ */
 static int MonoCmp(const void* m, const void* t)
 {
   Mono* mm = (Mono*) m;
@@ -93,7 +95,8 @@ static void MonoAddComp(Mono* m, const Mono* t);
  * @param[in] lh : głowa lewej listy
  * @param[in] rh : głowa prawej listy
  * @return lista jednomianów zawierająca zsumowane wszystkie jednomiany
- * z oryginalnych @p lh i @p rh. */
+ * z oryginalnych @p lh i @p rh.
+ */
 static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
 {
   int cmp;
@@ -149,9 +152,6 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
 
   }
 }
-
-static bool PolyIsPseudoCoeff(const MonoList* ml);
-static void Decoeffise(Poly* p);
 
 /**
  * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
@@ -227,7 +227,8 @@ static bool PolyIsPseudoCoeff(const MonoList* ml)
  * Zmiana pseudowykładnika w normalny. Funkcja bierze wielomian @p p będący
  * pseudowykładnikiem (patrz: `PolyIsPseudoCoeff` celem zrozumienia pojęcia)
  * i zmienia go w standardowy wykładnik.
- * @param[in] p : wielomian będący pseudo wykładnikiem */
+ * @param[in] p : wielomian będący pseudo wykładnikiem
+ */
 static void Decoeffise(Poly* p)
 {
   assert(p->list);
@@ -244,7 +245,8 @@ static void Decoeffise(Poly* p)
  * operatora `+=`.
  * @param[in] p : wielomian @f$ p @f$
  * @param[in] q : wielomian @f$ q @f$
- * Wykonuje `p += q`. */
+ * Wykonuje `p += q`.
+ */
 static void PolyAddComp(Poly* p, const Poly* q)
 {
   MonoList* l;
@@ -287,8 +289,9 @@ static void MonoAddComp(Mono* m, const Mono* t)
 /**
  * Suma wielomianu i liczby całkowitej.
  * @param[in] coeff : współczynnik @f$ c @f$
- * @param[in] p : wielomian @$f p(x) @f$
- * @return @f$ p(x) + c @f$ */
+ * @param[in] p : wielomian @f$ p(x) @f$
+ * @return @f$ p(x) + c @f$
+ */
 static Poly PolyAddCoeff(poly_coeff_t coeff, const Poly* p)
 {
   Poly new = PolyZero();
@@ -391,7 +394,7 @@ static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff)
  * Iloczyn wielomianu ze skalarem.
  * @param[in] coeff : współczynnik @f$ c @f$
  * @param[in] p : wielomain @f$ p(x) @f$
- * @return @f$ c p(x) @f$ 
+ * @return @f$ c p(x) @f$
  */
 Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p)
 {
@@ -455,6 +458,7 @@ void PolyNegComp(Poly* p)
 
 Poly PolyNeg(const Poly* p)
 {
+  return PolyMulCoeff(-1, p);
   Poly np = PolyClone(p);
   PolyNegComp(&np);
 
@@ -514,9 +518,12 @@ poly_exp_t PolyDegBy(const Poly* p, size_t var_idx)
   if (PolyIsCoeff(p))
     return PolyCoeffDeg(p);
 
+  /* jesteśmy w wielomianie danej zmiennej */
   if (var_idx == 0)
     return MonoListDeg(p->list);
 
+  /* stopniem względem tej zmiennej będzie największy z tych stopni znalezionych
+   * rekurencyjnie */
   for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
     max_deg = max(max_deg, PolyDegBy(&pl->m.p, var_idx - 1));
 
@@ -530,10 +537,10 @@ poly_exp_t PolyDeg(const Poly* p)
   if (PolyIsCoeff(p))
     return PolyCoeffDeg(p);
 
+  /* szukam stopnia rekurencyjnie -- stopień to jest jak gdyby zmiana wszystkich
+   * zmiennych na jedną i szukanie największej potęgi, zatem to właśnie robię
+   * dodając wykładniki i rekurencyjnie się zagłębiając w czeluści dalekich x */
   for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
-    /* uwaga z tym dodawaniem -- jeśli wielomian poniżej jest = 0 to...
-     * aha nie powinien w sumie być równy zero, co nie? bo to by znaczyło, że
-     * gdzieś jest głęboko zero ajj */
     max_deg = max(max_deg, pl->m.exp + PolyDeg(&pl->m.p));
 
   return max_deg;
@@ -543,7 +550,8 @@ poly_exp_t PolyDeg(const Poly* p)
  * Sprawdzian równości dwu jednomianów.
  * @param[in] m : jednomian
  * @param[in] t : jednomian
- * @return czy @p m i @p t są równe */
+ * @return czy @p m i @p t są równe
+ */
 static bool MonoIsEq(const Mono* m, const Mono* t)
 {
   return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
@@ -661,5 +669,3 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
   /* skąd wiedzieć czy to nie koeficja? trzeba uważać jakoś ech */
   return sum;
 }
-
-

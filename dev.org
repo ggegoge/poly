@@ -78,6 +78,18 @@ Wielomiany: co robić i jak
 * TODO reorganizacja kodu, moduły
   Jescze nie wiem jak. Może listowe rzeczy do jednego modułu? Trudno powiedzieć
   
+** PolyNeg zmienić na PolyMulCoeff -1
+   
+** modularyzacja
+
+*** listewka
+    Podział na moduł z listą ma ten minus, że funkcje listowe wciąż korzystają z funkcji,
+    które wolałbym mieć jako statyczne w poly.c
+
+*** wszystkie compound operacje do jednego pliku?
+
+*** moduł "poly-lib" gdzie trzymam wszystkie rzeczy spoza interfejsu?
+    
 * DONE debug (/na poly_example.c.../)
 
 ** DONE *VALGRIND*
