@@ -75,6 +75,9 @@ Wielomiany: co robić i jak
 
      podejrzane. skąd się może brać? bonne question.
     
+* TODO reorganizacja kodu, moduły
+  Jescze nie wiem jak. Może listowe rzeczy do jednego modułu? Trudno powiedzieć
+  
 * DONE debug (/na poly_example.c.../)
 
 ** DONE *VALGRIND*
