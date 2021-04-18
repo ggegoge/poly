@@ -121,6 +121,64 @@ Wielomiany: co robić i jak
 *** moduł =poly-lib= gdzie trzymam wszystkie rzeczy spoza interfejsu?
     chyba to najlepsza opcja. Muszę pospisywać zależności funkcji z =poly.h= by wiedzieć
     co muszę uwzględnić w headerze =poly_lib=
+    
+**** lista zależności
+     1. [X] =MonoGetExp=
+     2. [X] =PolyFromCoeff=
+     3. [X] =PolyZero=
+     4. [X] =PolyIsZero=
+     5. [X] =MonoFromPoly=
+     6. [X] =PolyIsCoeff=
+     7. [X] =PolyIsZero=
+     8. [ ] =PolyDestroy=
+        1. PolyIsCoeff
+        2. *MonoListDestroy*
+     9. [X] =MonoDestroy=
+     10. [ ] =PolyClone=
+         1. *MonoListClone*
+     11. [X] =MonoClone=
+     12. [ ] =PolyAdd=
+         1. PolyIsCoeff
+         2. *PolyAddCoeff*
+         3. *PolyAddComp*
+     13. [ ] =PolyAddMonos=
+         1. PolyIsZero
+         2. *MonoListInsert*
+         3. *PolyIsPseudoCoeff*
+         4. *Decoeffise*
+     14. [ ] =PolyMul=
+         1. PolyIsCoeff
+         2. *PolyMulCoeff*
+         3. *MonoMul*
+         4. PolyIsZero
+         5. *MonoListDestroy*
+         6. *MonoListInsert*
+     15. [ ] =PolyNeg=
+         1. ? -- czy implementować osobno, czy jako mnożenie?
+         2. *PolyMullCoeff* / *PolyNegComp*
+     16. [ ] =PolySub=
+         1. PolyClone
+         2. *PolyNegComp*
+         3. *PolyAddComp*
+     17. [ ] =PolyDegBy=
+         1. PolyIsCoeff
+         2. *PolyCoeffDeg*
+         3. *MonoListDeg*
+         4. /max/ (to może zostawię w poly.c)
+     18. [ ] =PolyDeg=
+         1. PolyIsCoeff
+         2. *PolyCoeffdeg*
+         3. /max/
+     19. [ ] =PolyIsEq=
+         1. PolyIsCoeff
+         2. *MonoIsEq*
+     20. [ ] =PolyAt=
+         1. PolyZero
+         2. PolyIsCoeff
+         3. PolyClone
+         4. *PolyMulCoeff*
+         5. *PolyAddComp*
+         6. PolyDestroy
 * DONE debug (/na poly_example.c.../)
 
 ** DONE *VALGRIND*
