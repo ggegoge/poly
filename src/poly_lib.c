@@ -62,7 +62,7 @@ void Decoeffise(Poly* p)
   assert(p->list);              /* pseudowykładnik z definicji ma niepustą listę */
   MonoList* head = p->list;
   poly_coeff_t c = head->m.p.coeff;
-  Poly np = {.coeff = c, .list = NULL};
+  Poly np = PolyFromCoeff(c);
   MonoListDestroy(head);
   *p = np;
 }
