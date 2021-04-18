@@ -138,7 +138,7 @@ div.contents ul{
     font-family: Arial;
     text-transform: uppercase;
     text-shadow: none;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
 }
 
@@ -245,7 +245,7 @@ div.summary {
 /***********************************/
 
 a, a:visited, a:active, .contents a:visited, body.SRPage a, body.SRPage a:visited, body.SRPage a:active {
-    color: var(--bgfont);
+    color: #DB7093;
     text-decoration: none;
 }
 
