@@ -27,6 +27,15 @@ void MonoListDestroy(MonoList* head);
 MonoList* MonoListClone(const MonoList* head);
 
 /**
+ * Porównanie dwu jednomianów po ich wykładnikach.
+ * @param[in] m : wskaźnik na pierwszy z jednomianów
+ * @param[in] t : wskaźnik na dru1gi z jednomianów
+ * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
+ * przypadku 1, 0 oznacza równość.
+ */
+int MonoCmp(const Mono* m, const Mono* t);
+
+/**
  * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
  * @param[in] head : głowa listy
  * @param[in] new : komórka listy z nowym elementem

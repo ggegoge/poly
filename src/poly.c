@@ -166,16 +166,16 @@ bool PolyIsEq(const Poly* p, const Poly* q)
   /* jeśli wielomiany są współczynnikami, to decyduje równość arytmetyczna.
    * jeśli jeden z nich jest, a drugi już nie, to nierówność jest oczywista */
   if (PolyIsCoeff(p) && PolyIsCoeff(q))
-    return p->coeff == q->coeff;  
+    return p->coeff == q->coeff;
   else if (PolyIsCoeff(p) || PolyIsCoeff(q))
     return false;
-  
+
   pl = p->list;
   ql = q->list;
 
   for (pl = p->list, ql = q->list; pl && ql && eq; pl = pl->tail, ql = ql->tail)
     eq = MonoIsEq(&pl->m, &ql->m);
-  
+
   /* nie są równe wtw któreś z jednomianów były różne lub są różnej długości
    * tj. jeden skończył się zanim skończył się drugi */
   return eq && !pl && !ql;
@@ -239,24 +239,43 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
   return res;
 }
 
+/**
+ * Funkcja porządkująca wielomiany dla qsorta w odwrotnej kolejności.
+ * @param[in] m : jednomian
+ * @param[in] t : jednomian
+ * @return przeciwny wynik od MonoCmp z modułu poly_lib.h. */
+static int MonoCmpRev(const void* m, const void* t)
+{
+  int cmp = MonoCmp((Mono*) m, (Mono*) t);
+  return cmp * (-1);
+}
+
 Poly PolyAddMonos(size_t count, const Mono monos[])
 {
   MonoList* head = NULL;
   MonoList* elem;
   Poly sum = PolyZero();
+  Mono* arr = malloc(count * sizeof(Mono));
+  CHECK_PTR(arr);
+
+  for (size_t i = 0; i < count; ++i)
+    arr[i] = monos[i];
+
+  qsort(arr, count, sizeof(Mono), MonoCmpRev);
 
   for (size_t i = 0; i < count; ++i) {
-    if (PolyIsZero(&monos[i].p))
+    if (PolyIsZero(&arr[i].p))
       continue;
 
     elem = malloc(sizeof(MonoList));
     CHECK_PTR(elem);
 
-    elem->m = monos[i];
+    elem->m = arr[i];
     elem->tail = NULL;
     MonoListInsert(&head, elem);
   }
 
+  free(arr);
   sum.list = head;
 
   if (PolyIsPseudoCoeff(sum.list))

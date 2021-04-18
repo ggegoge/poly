@@ -80,14 +80,7 @@ static void MonoAddComp(Mono* m, const Mono* t)
   PolyAddComp(&m->p, &t->p);
 }
 
-/**
- * Porównanie dwu jednomianów po ich wykładnikach.
- * @param[in] m : wskaźnik na pierwszy z jednomianów
- * @param[in] t : wskaźnik na dru1gi z jednomianów
- * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
- * przypadku 1, 0 oznacza równość.
- */
-static int MonoCmp(const Mono* m, const Mono* t)
+int MonoCmp(const Mono* m, const Mono* t)
 {
   return (m->exp > t->exp) - (m->exp < t->exp);
 }
