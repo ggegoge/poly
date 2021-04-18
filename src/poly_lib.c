@@ -59,7 +59,7 @@ bool PolyIsPseudoCoeff(const MonoList* ml)
 
 void Decoeffise(Poly* p)
 {
-  assert(p->list);
+  assert(p->list);              /* pseudowykładnik z definicji ma niepustą listę */
   MonoList* head = p->list;
   poly_coeff_t c = head->m.p.coeff;
   Poly np = {.coeff = c, .list = NULL};
@@ -87,11 +87,9 @@ static void MonoAddComp(Mono* m, const Mono* t)
  * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
  * przypadku 1, 0 oznacza równość.
  */
-static int MonoCmp(const void* m, const void* t)
+static int MonoCmp(const Mono* m, const Mono* t)
 {
-  Mono* mm = (Mono*) m;
-  Mono* tt = (Mono*) t;
-  return (mm->exp > tt->exp) - (mm->exp < tt->exp);
+  return (m->exp > t->exp) - (m->exp < t->exp);
 }
 
 /**
@@ -321,7 +319,6 @@ Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff)
 
   return pc;
 }
-
 
 poly_exp_t MonoListDeg(const MonoList* head)
 {
