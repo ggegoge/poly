@@ -31,7 +31,7 @@ MonoList* MonoListClone(const MonoList* head);
  * @param[in] p : wielomian @f$ p(x) @f$
  * @return @f$ p(x) + c @f$
  */
-Poly PolyAddCoeff(poly_coeff_t coeff, const Poly* p);
+Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff);
 
 /**
  * Suma dwu wielomianów, ale w wersji `compound assignment' tj nie tworzy
@@ -74,7 +74,7 @@ void Decoeffise(Poly* p);
  * @param[in] p : wielomain @f$ p(x) @f$
  * @return @f$ c p(x) @f$
  */
-Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p);
+Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff);
 
 /**
  * Iloczyn jednomianów.

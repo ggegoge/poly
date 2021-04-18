@@ -16,11 +16,11 @@
 /**
  * Sprawdzian powodzenia (m)allokacyjnego.
  */
-#define CHECK_PTR(p) \
-  do {              \
-    if (!p) {       \
-      exit(1);      \
-    }               \
+#define CHECK_PTR(p)                            \
+  do {                                          \
+    if (!p) {                                   \
+      exit(1);                                  \
+    }                                           \
   } while (0)
 
 void PolyDestroy(Poly* p)
@@ -49,10 +49,10 @@ Poly PolyAdd(const Poly* p, const Poly* q)
   };
 
   if (PolyIsCoeff(p))
-    return PolyAddCoeff(p->coeff, q);
+    return PolyAddCoeff(q, p->coeff);
 
   if (PolyIsCoeff(q))
-    return PolyAddCoeff(q->coeff, p);
+    return PolyAddCoeff(p, q->coeff);
 
   new = PolyClone(p);
   PolyAddComp(&new, q);
@@ -67,10 +67,10 @@ Poly PolyMul(const Poly* p, const Poly* q)
   MonoList* new;
 
   if (PolyIsCoeff(p))
-    return PolyMulCoeff(p->coeff, q);
+    return PolyMulCoeff(q, p->coeff);
 
   if (PolyIsCoeff(q))
-    return PolyMulCoeff(q->coeff, p);
+    return PolyMulCoeff(p, q->coeff);
 
   for (MonoList* pl = p->list; pl != NULL; pl = pl->tail) {
     for (MonoList* ql = q->list; ql != NULL; ql = ql->tail) {
@@ -93,11 +93,7 @@ Poly PolyMul(const Poly* p, const Poly* q)
 
 Poly PolyNeg(const Poly* p)
 {
-  return PolyMulCoeff(-1, p);
-  /* Poly np = PolyClone(p);
-   * PolyNegComp(&np);
-   * 
-   * return np; */
+  return PolyMulCoeff(p, -1);
 }
 
 Poly PolySub(const Poly* p, const Poly* q)
@@ -235,7 +231,7 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 
   for (MonoList* pl = p->list; pl != NULL; pl = pl->tail) {
     coeff = QuickPow(x, pl->m.exp);
-    mul = PolyMulCoeff(coeff, &pl->m.p);
+    mul = PolyMulCoeff(&pl->m.p, coeff);
     PolyAddComp(&res, &mul);
     PolyDestroy(&mul);
   }
@@ -266,6 +262,5 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
   if (PolyIsPseudoCoeff(sum.list))
     Decoeffise(&sum);
 
-  /* skąd wiedzieć czy to nie koeficja? trzeba uważać jakoś ech */
   return sum;
 }

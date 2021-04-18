@@ -15,11 +15,11 @@
 /**
  * Sprawdzian powodzenia (m)allokacyjnego.
  */
-#define CHECK_PTR(p) \
-  do {              \
-    if (!p) {       \
-      exit(1);      \
-    }               \
+#define CHECK_PTR(p)                            \
+  do {                                          \
+    if (!p) {                                   \
+      exit(1);                                  \
+    }                                           \
   } while (0)
 
 void MonoListDestroy(MonoList* head)
@@ -87,7 +87,6 @@ static void MonoAddComp(Mono* m, const Mono* t)
  */
 static int MonoCmp(const void* m, const void* t)
 {
-  /* ona powinna być static w poly_lib.c */
   Mono* mm = (Mono*) m;
   Mono* tt = (Mono*) t;
   return (mm->exp > tt->exp) - (mm->exp < tt->exp);
@@ -123,7 +122,7 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
 
   /* celem jest zmodyfikowanie listy lh i pozostawienie bez szwanku listy rh,
    * zatem elementy z lh pozostawiam takie jakimi są, elementy z rh wkopiowuję,
-   * a trafiając na równe potęgi dokonuję lh ->m += rh->m */
+   * a trafiając na równe potęgi dokonuję lh->m += rh->m */
   switch (cmp) {
 
   case 0 :                      /* lh == rh */
@@ -159,7 +158,7 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
 }
 
 /**
- * Tworzy pseudowykładnik dla danej liczby. Więcej szczegółów w Decoeffise.
+ * Tworzy pseudowykładnik dla danej liczby. Więcej szczegółów w `Decoeffise`.
  * @param[in] c : wykładnik
  * @return komórka listy będąca pseudowykładnikiem
  */
@@ -185,8 +184,7 @@ void PolyAddComp(Poly* p, const Poly* q)
   }
 
   if (PolyIsCoeff(p) && !PolyIsZero(p)) {
-    l = PolyPseduoCoeff(p->coeff);
-    p->list = l;
+    p->list = PolyPseduoCoeff(p->coeff);
     p->list = MonoListsMerge(p->list, q->list);
   } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
     l = PolyPseduoCoeff(q->coeff);
@@ -202,7 +200,7 @@ void PolyAddComp(Poly* p, const Poly* q)
     Decoeffise(p);
 }
 
-Poly PolyAddCoeff(poly_coeff_t coeff, const Poly* p)
+Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
 {
   Poly new = PolyZero();
   MonoList* coeff_wrapper;
@@ -221,7 +219,10 @@ Poly PolyAddCoeff(poly_coeff_t coeff, const Poly* p)
   return new;
 }
 
-
+/* algorytm insercji o nazwie `triple ref pointer technique' poznałem o tutaj:
+ * https://www.youtube.com/watch?v=1s0w_p5HEuY&t=0s
+ * i jest to sprytny sposób na iteracyjne wstawienie elementu do listy bez
+ * jakiejś nadmiernej ifologii */
 void MonoListInsert(MonoList** head, MonoList* new)
 {
   MonoList** tracer = head;
@@ -231,7 +232,6 @@ void MonoListInsert(MonoList** head, MonoList* new)
   assert(new);
   assert(!PolyIsZero(&new->m.p));
 
-  /* czy to działa???? */
   while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) > 0))
     tracer = &(*tracer)->tail;
 
@@ -309,7 +309,7 @@ static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff)
   return head;
 }
 
-Poly PolyMulCoeff(poly_coeff_t coeff, const Poly* p)
+Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff)
 {
   Poly pc = PolyClone(p);
   PolyMulCoeffComp(&pc, coeff);
@@ -340,12 +340,5 @@ bool MonoIsEq(const Mono* m, const Mono* t)
 
 void PolyNegComp(Poly* p)
 {
-  if (PolyIsCoeff(p)) {
-    p->coeff *= -1;
-    return;
-  }
-
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
-    PolyNegComp(&pl->m.p);
-
+  PolyMulCoeffComp(p, -1);
 }
