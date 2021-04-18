@@ -68,4 +68,14 @@ list, po każdej przechodzę raz, ergo liniowość.
 
 Mnożenie jest zwykłym naiwnym algorytmem kwadratowym.
 
+### Wygląd dokumentacji
+
+W pliku `Doxyfile.in` mam linijkę
+```
+HTML_EXTRA_STYLESHEET  = ../css/doxygen_theme_flat.css
+```
+która odpowiada za wygląd tej dokumentacji -- korzystam z cssa z tego
+[repozytorium gitowego](https://github.com/kcwongjoe/doxygen_theme_flat_design),
+które jest olicensjonowane licencją MIT (jest zatem open
+source). Licencę załączam w katalogu `css` zgodnie z jej warunkami.
 */
