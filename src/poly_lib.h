@@ -35,7 +35,7 @@ Poly PolyAddCoeff(poly_coeff_t coeff, const Poly* p);
 
 /**
  * Suma dwu wielomianów, ale w wersji `compound assignment' tj nie tworzy
- * nowego wielomianu, a jedynie modyfikuje ten ,,po lewej''. Odpowiednik
+ * nowego wielomianu, a jedynie modyfikuje ten ''po lewej''. Odpowiednik
  * operatora `+=`.
  * @param[in] p : wielomian @f$ p @f$
  * @param[in] q : wielomian @f$ q @f$
@@ -51,7 +51,7 @@ void PolyAddComp(Poly* p, const Poly* q);
 void MonoListInsert(MonoList** head, MonoList* new);
 
 /**
- * Sprawdzian czy komórka listy @p ml nie jest przypadkiem ,,pseudo
+ * Sprawdzian czy komórka listy @p ml nie jest przypadkiem ''pseudo
  * wykładnikiem''. Funkcja mówi czy nie jest to przypadkiem lista, w którą
  * zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
  * typu @f$ c * x^0 @f$.

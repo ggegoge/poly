@@ -80,7 +80,7 @@ Wielomiany: co robić i jak
   
 ** PolyNeg zmienić na PolyMulCoeff -1
    
-** modularyzacja
+** DONE modularyzacja
 
 *** +listewka+
     +Podział na moduł z listą ma ten minus, że funkcje listowe wciąż korzystają z funkcji,+
@@ -118,7 +118,7 @@ Wielomiany: co robić i jak
     
 *** +wszystkie compound operacje do jednego pliku?+
 
-*** moduł =poly-lib= gdzie trzymam wszystkie rzeczy spoza interfejsu?
+*** DONE moduł =poly-lib= gdzie trzymam wszystkie rzeczy spoza interfejsu?
     chyba to najlepsza opcja. Muszę pospisywać zależności funkcji z =poly.h= by wiedzieć
     co muszę uwzględnić w headerze =poly_lib=
     
