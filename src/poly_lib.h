@@ -1,6 +1,7 @@
 /** @file
   Zbiór dodatkowych operacji na wielomianach z poly.h. Poszerzają tamtejszy
-  interfejs oraz służą do implementacji różnorakich działań na m. in. listach.
+  interfejs oraz służą do implementacji różnorakich działań na m. in. listach,
+  ale także są tutaj odpowiedniki działania `+=` (tak jak w poly.h mamy `+`).
 
   @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski

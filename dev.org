@@ -355,7 +355,10 @@ Wielomiany: co robić i jak
     Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
   - [ ] naprawić ten dziwaczny test z gitlaba *WAŻNE*
-  - [ ] poukładać kod logicznie, modularyzacja perhaps?
+  - [ ] strona główna doc
+  - [-] poukładać kod logicznie, modularyzacja perhaps?
+    - [X] moduł
+    - [ ] kolejność =[?]=
   - [-] dualizm koeficji
     - [X] sprawdzian pseudo koeficji naprawić
     - [X] co zrobić, jeśli gdzieś głęboko jest *zero*
@@ -365,8 +368,8 @@ Wielomiany: co robić i jak
     - [ ] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
-  - [ ] *przechodzi gitlabne*
-    - [ ] bez wycieków
+  - [-] *przechodzi gitlabne*
+    - [X] bez wycieków
     - [ ] poprawnie
   - [X] nie alokować  na stosie!!!
   - [X] *przechodzi example*
