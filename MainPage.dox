@@ -53,9 +53,10 @@ zwraca nowy obiekt.
 Wszelakie nazwy funkcji zachowuję w konwencji `PascalCase` zgodnie z
 danym uprzednio `poly.h`.
 
-Konwencja nazewnicza z sufiksem `Comp` jest w większości wypadków
-zachowana, wyjątkiem być może są funkcje na listach, które mają nazwy
-oparte na bezpośredniej operacji na liście, którą mają wykonać. 
+Konwencja nazewnicza z sufiksem `Comp` (od `compound assignment') jest
+w większości wypadków zachowana, wyjątkiem być może są funkcje na
+listach, które mają nazwy oparte na bezpośredniej operacji na liście,
+którą mają wykonać.
 
 Do tego dodanie `Coeff` do nazwy często oznacza operacje na
 wielomianie stałym.
