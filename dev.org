@@ -75,6 +75,110 @@ Wielomiany: co robić i jak
 
      podejrzane. skąd się może brać? bonne question.
     
+* DONE reorganizacja kodu, moduły
+  Jescze nie wiem jak. Może listowe rzeczy do jednego modułu? Trudno powiedzieć
+  
+** DONE PolyNeg zmienić na PolyMulCoeff -1
+   
+** DONE modularyzacja
+
+*** +listewka+
+    +Podział na moduł z listą ma ten minus, że funkcje listowe wciąż korzystają z funkcji,+
+    +które wolałbym mieć jako statyczne w poly.c+
+    
+    ^ słabe ponieważ schemat wywołań różnorakich funkcji zwykle jest taki :mając rzecz do
+    zrobienia =F=:
+    #+begin_example
+      PolyF(Poly* p)
+      {
+        ...
+        MonoListF(p->list);
+        ...
+      }
+
+      MonoListF(MonoList* h)
+      {
+        ...
+        MonoF(h->m);
+        ...
+      }
+
+      MonoF(Mono* m)
+      {
+        ...
+        PolyF(m->p);
+        ...
+      }
+    #+end_example
+    czyli
+    #+begin_example
+      PolyF --> MonoListF --> MonoF --> PolyF
+    #+end_example
+    przez co podział jest dość ciężki gdyż wszystko jest zaplątane
+    
+*** +wszystkie compound operacje do jednego pliku?+
+
+*** DONE moduł =poly-lib= gdzie trzymam wszystkie rzeczy spoza interfejsu?
+    chyba to najlepsza opcja. Muszę pospisywać zależności funkcji z =poly.h= by wiedzieć
+    co muszę uwzględnić w headerze =poly_lib=
+    
+**** lista zależności
+     1. [X] =MonoGetExp=
+     2. [X] =PolyFromCoeff=
+     3. [X] =PolyZero=
+     4. [X] =PolyIsZero=
+     5. [X] =MonoFromPoly=
+     6. [X] =PolyIsCoeff=
+     7. [X] =PolyIsZero=
+     8. [X] =PolyDestroy=
+        1. PolyIsCoeff
+        2. *MonoListDestroy*
+     9. [X] =MonoDestroy=
+     10. [X] =PolyClone=
+         1. *MonoListClone*
+     11. [X] =MonoClone=
+     12. [X] =PolyAdd=
+         1. PolyIsCoeff
+         2. *PolyAddCoeff*
+         3. *PolyAddComp*
+     13. [X] =PolyAddMonos=
+         1. PolyIsZero
+         2. *MonoListInsert*
+         3. *PolyIsPseudoCoeff*
+         4. *Decoeffise*
+     14. [X] =PolyMul=
+         1. PolyIsCoeff
+         2. *PolyMulCoeff*
+         3. *MonoMul*
+         4. PolyIsZero
+         5. *MonoListDestroy*
+         6. *MonoListInsert*
+     15. [X] =PolyNeg=
+         1. ? -- czy implementować osobno, czy jako mnożenie?
+         2. *PolyMullCoeff* / *PolyNegComp*
+     16. [X] =PolySub=
+         1. PolyClone
+         2. *PolyNegComp*
+         3. *PolyAddComp*
+     17. [X] =PolyDegBy=
+         1. PolyIsCoeff
+         2. *PolyCoeffDeg*
+         3. *MonoListDeg*
+         4. /max/ (to może zostawię w poly.c)
+     18. [X] =PolyDeg=
+         1. PolyIsCoeff
+         2. *PolyCoeffdeg*
+         3. /max/
+     19. [X] =PolyIsEq=
+         1. PolyIsCoeff
+         2. *MonoIsEq*
+     20. [X] =PolyAt=
+         1. PolyZero
+         2. PolyIsCoeff
+         3. PolyClone
+         4. *PolyMulCoeff*
+         5. *PolyAddComp*
+         6. PolyDestroy
 * DONE debug (/na poly_example.c.../)
 
 ** DONE *VALGRIND*
@@ -251,18 +355,21 @@ Wielomiany: co robić i jak
     Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
   - [ ] naprawić ten dziwaczny test z gitlaba *WAŻNE*
-  - [ ] poukładać kod logicznie, modularyzacja perhaps?
-  - [-] dualizm koeficji
+  - [X] strona główna doc
+  - [X] poukładać kod logicznie, modularyzacja perhaps?
+    - [X] moduły
+    - +[ ] kolejność =[?]=+
+  - [X] dualizm koeficji
     - [X] sprawdzian pseudo koeficji naprawić
     - [X] co zrobić, jeśli gdzieś głęboko jest *zero*
       najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
       pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
       porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
-    - [ ] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
+    - [X] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
-  - [ ] *przechodzi gitlabne*
-    - [ ] bez wycieków
+  - [-] *przechodzi gitlabne*
+    - [X] bez wycieków
     - [ ] poprawnie
   - [X] nie alokować  na stosie!!!
   - [X] *przechodzi example*
@@ -290,11 +397,20 @@ Wielomiany: co robić i jak
      - =filter=
    - [ ] symulacja pattern matchingu w C
 
+* dalsze imprówmencje?
+  1. zrobić ~typedef MonoList struct MonoList*~? czyli ogólnie -- traktować jako właściwy
+     typ wskaźnik? Oczywiście później przy mallokacjach musiałbym uważać na poprawny
+     size. nie wiem czy warto prawdę mówiąc -- wolę pamiętać, że to pointer jest prawdę mówiąc
+  2. =MonoListClone= zapisać iteracyjnie?
+  3. makro =CHECK_PTR= do =poly_lib=?
+  4. w ~PolyAddMonos~ płytka kopia tablicy i następnie posortowanie jej aby inserty krócej
+     trwały? Minus: malloc. Plus: zamiast insertu /O(n)/ robię prostego prependa /O(1)/
+  5. ujednolicić -- ~p == NULL~ czy ~!p~ ?
 * Lista jednomianów
   Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
   tym pole =size= wtedy traci rację bytu mając listę. 
 
-** TODO dodanie elemtnu do listy, a kopiowanie danych
+** DONE dodanie elemtnu do listy, a kopiowanie danych
 *** wariant kodu
     mówię o tym
     #+begin_src C
@@ -411,7 +527,7 @@ Wielomiany: co robić i jak
       #+end_example
       załatwiłoby sprawę...?
 * Implementacja
-** TODO dualizm koeficji
+** DONE dualizm koeficji
    Zachodzi ewidentnie pewien /dualizm/ swoisty w strefie koeficji (ang. /coefficient/)
    wielomianowych. Otóż jest dwuznacznośc pewna. Można albo zapisać je zarazem jako
    wielomian z pustą listą oraz jako jednomian $c x^0$. Wręcz tak trzeba je chyba trzymać
@@ -454,7 +570,7 @@ Wielomiany: co robić i jak
 
 *** nierozw nr 2 -- /lista jednoelementowa/
     
-** TODO problem niemały -- =PolyAt=
+** DONE problem niemały -- =PolyAt=
    
 *** rozw?
     Potencjalnie rozwiązałem tę zagwozdkę. Mając to swoje ~+=~ mogę wykonywać taką pętlę:

@@ -1,9 +1,11 @@
 /** @file
   Interfejs klasy wielomianów rzadkich wielu zmiennych
 
-  @authors Jakub Pawlewicz <pan@mimuw.edu.pl>, Marcin Peczarski <marpe@mimuw.edu.pl>
+  @authors Jakub Pawlewicz <pan@mimuw.edu.pl>,
+           Marcin Peczarski <marpe@mimuw.edu.pl>,
+           Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
-  @date 2021
+  @date kwiecień 2021
 */
 
 #ifndef __POLY_H__
@@ -26,15 +28,16 @@ struct MonoList;
 /**
  * To jest struktura przechowująca wielomian.
  * Wielomian jest albo liczbą całkowitą, czyli wielomianem stałym
- * (wtedy `arr == NULL`), albo niepustą listą jednomianów (wtedy `arr != NULL`).
+ * (wtedy `list == NULL` i wartość `coeff` ma znaczenie), albo niepustą listą
+ * jednomianów (wtedy `list != NULL`).
  */
 typedef struct Poly {
   /**
   * Jeżeli `list == NULL`, wtedy jest to współczynnik będący liczbą całkowitą.
   * W przeciwnym przypadku jest to niepusta lista jednomianów.
   */
-  poly_coeff_t coeff;    /**< współczynnik */
-  /** To jest tablica przechowująca listę jednomianów. */
+  poly_coeff_t coeff;
+  /** To jest lista jednomianów. */
   struct MonoList* list;
 } Poly;
 
@@ -50,7 +53,7 @@ typedef struct Mono {
 } Mono;
 
 /**
- * Struktura tworząca listę wskaźnikową jednomianów.
+ * Struktura stanowiąca listę wskaźnikową jednomianów.
  */
 typedef struct MonoList {
   struct Mono m;                /**< jednomian  */
