@@ -130,49 +130,49 @@ Wielomiany: co robić i jak
      5. [X] =MonoFromPoly=
      6. [X] =PolyIsCoeff=
      7. [X] =PolyIsZero=
-     8. [ ] =PolyDestroy=
+     8. [X] =PolyDestroy=
         1. PolyIsCoeff
         2. *MonoListDestroy*
      9. [X] =MonoDestroy=
-     10. [ ] =PolyClone=
+     10. [X] =PolyClone=
          1. *MonoListClone*
      11. [X] =MonoClone=
-     12. [ ] =PolyAdd=
+     12. [X] =PolyAdd=
          1. PolyIsCoeff
          2. *PolyAddCoeff*
          3. *PolyAddComp*
-     13. [ ] =PolyAddMonos=
+     13. [X] =PolyAddMonos=
          1. PolyIsZero
          2. *MonoListInsert*
          3. *PolyIsPseudoCoeff*
          4. *Decoeffise*
-     14. [ ] =PolyMul=
+     14. [X] =PolyMul=
          1. PolyIsCoeff
          2. *PolyMulCoeff*
          3. *MonoMul*
          4. PolyIsZero
          5. *MonoListDestroy*
          6. *MonoListInsert*
-     15. [ ] =PolyNeg=
+     15. [X] =PolyNeg=
          1. ? -- czy implementować osobno, czy jako mnożenie?
          2. *PolyMullCoeff* / *PolyNegComp*
-     16. [ ] =PolySub=
+     16. [X] =PolySub=
          1. PolyClone
          2. *PolyNegComp*
          3. *PolyAddComp*
-     17. [ ] =PolyDegBy=
+     17. [X] =PolyDegBy=
          1. PolyIsCoeff
          2. *PolyCoeffDeg*
          3. *MonoListDeg*
          4. /max/ (to może zostawię w poly.c)
-     18. [ ] =PolyDeg=
+     18. [X] =PolyDeg=
          1. PolyIsCoeff
          2. *PolyCoeffdeg*
          3. /max/
-     19. [ ] =PolyIsEq=
+     19. [X] =PolyIsEq=
          1. PolyIsCoeff
          2. *MonoIsEq*
-     20. [ ] =PolyAt=
+     20. [X] =PolyAt=
          1. PolyZero
          2. PolyIsCoeff
          3. PolyClone
