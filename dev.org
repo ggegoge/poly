@@ -397,6 +397,11 @@ Wielomiany: co robić i jak
      - =filter=
    - [ ] symulacja pattern matchingu w C
 
+* dalsze imprówmencje?
+  1. zrobić ~typedef MonoList struct MonoList*~? czyli ogólnie -- traktować jako właściwy
+     typ wskaźnik? Oczywiście później przy mallokacjach musiałbym uważać na poprawny
+     size. nie wiem czy warto prawdę mówiąc -- wolę pamiętać, że to pointer jest prawdę mówiąc
+  2. =MonoListClone= zapisać iteracyjnie?
 * Lista jednomianów
   Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
   tym pole =size= wtedy traci rację bytu mając listę. 

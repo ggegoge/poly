@@ -22,7 +22,7 @@ void MonoListDestroy(MonoList* head);
 /**
  * Utworzenie pełnej kopii listy jednomianów.
  * @param[in] head : głowa listy jednomianów
- * @return pełna kopia listy
+ * @return pełna kopia listy.
  */
 MonoList* MonoListClone(const MonoList* head);
 
@@ -55,7 +55,7 @@ void PolyAddComp(Poly* p, const Poly* q);
  * wykładnikiem''. Funkcja mówi czy nie jest to przypadkiem lista, w którą
  * zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
  * typu @f$ c * x^0 @f$.
- * @param[in] ml : wskaźnik na komórkę listy
+ * @param[in] ml : komórka listy jednomianów
  * @return czy to nie pseudowykładnik?
  */
 bool PolyIsPseudoCoeff(const MonoList* ml);

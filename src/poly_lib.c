@@ -94,61 +94,61 @@ static int MonoCmp(const Mono* m, const Mono* t)
 
 /**
  * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
- * tychże. Jest to robione w formie `+=` -- zmienia się @p lh w oparciu o @p rh,
+ * tychże. Jest to robione w formie `+=` -- zmienia się @p lhead w oparciu o @p rhead,
  * która pozostaje niezmieniona.
- * @param[in] lh : głowa lewej listy
- * @param[in] rh : głowa prawej listy
+ * @param[in] lhead : głowa lewej listy
+ * @param[in] rhead : głowa prawej listy
  * @return głowa listy jednomianów zawierająca zsumowane wszystkie jednomiany
- * z oryginalnych @p lh i @p rh.
+ * z oryginalnych @p lhead i @p rhead.
  */
-static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
+static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
 {
   int cmp;
   MonoList* cpy;
   MonoList* tmp;
 
   /* złączenie list à la merge sort dopóki obydwie nie są puste. */
-  if (lh == NULL && rh == NULL)
+  if (lhead == NULL && rhead == NULL)
     return NULL;
 
-  /* chcę podłączyć lh jeśli rh jest puste i na odwrót. jeśli obydwa niepuste,
-   * to podłączam w kolejności malejącej expów */
-  if (lh == NULL)
+  /* chcę podłączyć lhead jeśli rhead jest puste i na odwrót. jeśli obydwa
+   * niepuste, to podłączam w kolejności malejącej expów */
+  if (lhead == NULL)
     cmp = -1;
-  else if (rh == NULL)
+  else if (rhead == NULL)
     cmp = 1;
   else
-    cmp = MonoCmp(&lh->m, &rh->m);
+    cmp = MonoCmp(&lhead->m, &rhead->m);
 
-  /* celem jest zmodyfikowanie listy lh i pozostawienie bez szwanku listy rh,
-   * zatem elementy z lh pozostawiam takie jakimi są, elementy z rh wkopiowuję,
-   * a trafiając na równe potęgi dokonuję lh->m += rh->m */
+  /* celem jest zmodyfikowanie listy lhead i pozostawienie bez szwanku listy rhead,
+   * zatem elementy z lhead pozostawiam takie jakimi są, elementy z rhead wkopiowuję,
+   * a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
   switch (cmp) {
 
   case 0 :                      /* lh == rh */
     /* lh->m += rh->m */
-    MonoAddComp(&lh->m, &rh->m);
+    MonoAddComp(&lhead->m, &rhead->m);
 
-    if (!PolyIsZero(&lh->m.p)) {
-      lh->tail = MonoListsMerge(lh->tail, rh->tail);
-      return lh;
+    if (!PolyIsZero(&lhead->m.p)) {
+      lhead->tail = MonoListsMerge(lhead->tail, rhead->tail);
+      return lhead;
     } else {
       /* jeśli dostałem zero, to go nie chcę utrzymywać bez sensu w liście */
-      MonoDestroy(&lh->m);
-      tmp = lh->tail;
-      free(lh);
-      return MonoListsMerge(tmp, rh->tail);
+      MonoDestroy(&lhead->m);
+      tmp = lhead->tail;
+      free(lhead);
+      return MonoListsMerge(tmp, rhead->tail);
     }
 
   case 1 :                      /* lh > rh */
-    lh->tail = MonoListsMerge(lh->tail, rh);
-    return lh;
+    lhead->tail = MonoListsMerge(lhead->tail, rhead);
+    return lhead;
 
   case -1 :                     /* lh < rh */
     cpy = malloc(sizeof(MonoList));
     CHECK_PTR(cpy);
-    cpy->m = MonoClone(&rh->m);
-    cpy->tail = MonoListsMerge(lh, rh->tail);
+    cpy->m = MonoClone(&rhead->m);
+    cpy->tail = MonoListsMerge(lhead, rhead->tail);
     return cpy;
 
   default :
