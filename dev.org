@@ -309,7 +309,7 @@ Wielomiany: co robić i jak
   Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
   tym pole =size= wtedy traci rację bytu mając listę. 
 
-** TODO dodanie elemtnu do listy, a kopiowanie danych
+** DONE dodanie elemtnu do listy, a kopiowanie danych
 *** wariant kodu
     mówię o tym
     #+begin_src C
@@ -426,7 +426,7 @@ Wielomiany: co robić i jak
       #+end_example
       załatwiłoby sprawę...?
 * Implementacja
-** TODO dualizm koeficji
+** DONE dualizm koeficji
    Zachodzi ewidentnie pewien /dualizm/ swoisty w strefie koeficji (ang. /coefficient/)
    wielomianowych. Otóż jest dwuznacznośc pewna. Można albo zapisać je zarazem jako
    wielomian z pustą listą oraz jako jednomian $c x^0$. Wręcz tak trzeba je chyba trzymać
@@ -469,7 +469,7 @@ Wielomiany: co robić i jak
 
 *** nierozw nr 2 -- /lista jednoelementowa/
     
-** TODO problem niemały -- =PolyAt=
+** DONE problem niemały -- =PolyAt=
    
 *** rozw?
     Potencjalnie rozwiązałem tę zagwozdkę. Mając to swoje ~+=~ mogę wykonywać taką pętlę:
