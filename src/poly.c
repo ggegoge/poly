@@ -1,5 +1,5 @@
 /** @file
-  Implmenetacja interfejsu z pliku poly.h dot `klasy' reprezentującej wielomiany
+  Implmenetacja interfejsu z pliku poly.h `klasy' reprezentującej wielomiany
   rzadkie wielu zmiennych.
 
   @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
@@ -166,16 +166,13 @@ bool PolyIsEq(const Poly* p, const Poly* q)
   /* jeśli wielomiany są współczynnikami, to decyduje równość arytmetyczna.
    * jeśli jeden z nich jest, a drugi już nie, to nierówność jest oczywista */
   if (PolyIsCoeff(p) && PolyIsCoeff(q))
-    return p->coeff == q->coeff;  
+    return p->coeff == q->coeff;
   else if (PolyIsCoeff(p) || PolyIsCoeff(q))
     return false;
-  
-  pl = p->list;
-  ql = q->list;
 
   for (pl = p->list, ql = q->list; pl && ql && eq; pl = pl->tail, ql = ql->tail)
     eq = MonoIsEq(&pl->m, &ql->m);
-  
+
   /* nie są równe wtw któreś z jednomianów były różne lub są różnej długości
    * tj. jeden skończył się zanim skończył się drugi */
   return eq && !pl && !ql;
