@@ -241,9 +241,10 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 
 /**
  * Funkcja porządkująca wielomiany dla qsorta.
- * @param[in] m : jednomian
- * @param[in] t : jednomian
- * @return przeciwny wynik od MonoCmp z modułu poly_lib.h. */
+ * @param[in] m : jednomian jako `void*`
+ * @param[in] t : jednomian jako `void*`
+ * @return wynik z MonoCmp z poly_lib.c 
+ */
 static int MonoCmpQsort(const void* m, const void* t)
 {
   int cmp = MonoCmp((Mono*) m, (Mono*) t);
@@ -255,32 +256,30 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
   MonoList* head = NULL;
   MonoList* elem;
   Poly sum = PolyZero();
-  Mono* arr = malloc(count * sizeof(Mono));
-  CHECK_PTR(arr);
+  Mono* sorted = malloc(count * sizeof(Mono));
+  CHECK_PTR(sorted);
 
   for (size_t i = 0; i < count; ++i)
-    arr[i] = monos[i];
+    sorted[i] = monos[i];
 
   /* ustawiam jednomiany od najmniejszego exp do największego.
    * tym samym idąc w głąb mamy coraz większe, a większe chcemy mieć na
    * początku listy. zatem każdy kolejny będzie de facto wstawiany na jej sam
    * początek jako większy od poprzedniego. */
-  qsort(arr, count, sizeof(Mono), MonoCmpQsort);
-  if (count > 2)
-    assert(arr[0].exp <= arr[1].exp);
+  qsort(sorted, count, sizeof(Mono), MonoCmpQsort);
   for (size_t i = 0; i < count; ++i) {    
-    if (PolyIsZero(&arr[i].p))
+    if (PolyIsZero(&sorted[i].p))
       continue;
 
     elem = malloc(sizeof(MonoList));
     CHECK_PTR(elem);
 
-    elem->m = arr[i];
+    elem->m = sorted[i];
     elem->tail = head;
     MonoListInsert(&head, elem);
   }
 
-  free(arr);
+  free(sorted);
   sum.list = head;
 
   if (PolyIsPseudoCoeff(sum.list))
