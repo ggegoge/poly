@@ -1,6 +1,10 @@
 /** @file
   Implmenetacja interfejsu z pliku poly.h dot `klasy' reprezentującej wielomiany
   rzadkie wielu zmiennych.
+
+  @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
+  @copyright Uniwersytet Warszawski
+  @date kwiecień 2021
 */
 
 #include <stdlib.h>
