@@ -82,14 +82,45 @@ Wielomiany: co robić i jak
    
 ** modularyzacja
 
-*** listewka
-    Podział na moduł z listą ma ten minus, że funkcje listowe wciąż korzystają z funkcji,
-    które wolałbym mieć jako statyczne w poly.c
-
-*** wszystkie compound operacje do jednego pliku?
-
-*** moduł "poly-lib" gdzie trzymam wszystkie rzeczy spoza interfejsu?
+*** +listewka+
+    +Podział na moduł z listą ma ten minus, że funkcje listowe wciąż korzystają z funkcji,+
+    +które wolałbym mieć jako statyczne w poly.c+
     
+    ^ słabe ponieważ schemat wywołań różnorakich funkcji zwykle jest taki :mając rzecz do
+    zrobienia =F=:
+    #+begin_example
+      PolyF(Poly* p)
+      {
+        ...
+        MonoListF(p->list);
+        ...
+      }
+
+      MonoListF(MonoList* h)
+      {
+        ...
+        MonoF(h->m);
+        ...
+      }
+
+      MonoF(Mono* m)
+      {
+        ...
+        PolyF(m->p);
+        ...
+      }
+    #+end_example
+    czyli
+    #+begin_example
+      PolyF --> MonoListF --> MonoF --> PolyF
+    #+end_example
+    przez co podział jest dość ciężki gdyż wszystko jest zaplątane
+    
+*** +wszystkie compound operacje do jednego pliku?+
+
+*** moduł =poly-lib= gdzie trzymam wszystkie rzeczy spoza interfejsu?
+    chyba to najlepsza opcja. Muszę pospisywać zależności funkcji z =poly.h= by wiedzieć
+    co muszę uwzględnić w headerze =poly_lib=
 * DONE debug (/na poly_example.c.../)
 
 ** DONE *VALGRIND*
