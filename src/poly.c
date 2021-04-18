@@ -54,6 +54,7 @@ Poly PolyAdd(const Poly* p, const Poly* q)
   if (PolyIsCoeff(q))
     return PolyAddCoeff(p, q->coeff);
 
+  /* operację p + q można rozumieć jako p' += q, gdzie p' to kopia p */
   new = PolyClone(p);
   PolyAddComp(&new, q);
 
@@ -63,7 +64,8 @@ Poly PolyAdd(const Poly* p, const Poly* q)
 Poly PolyMul(const Poly* p, const Poly* q)
 {
   Poly pq = PolyZero();
-  Mono pm, qm;
+  /* jednomiany p, q i p * q */
+  Mono pm, qm, pqm;
   MonoList* new;
 
   if (PolyIsCoeff(p))
@@ -76,15 +78,17 @@ Poly PolyMul(const Poly* p, const Poly* q)
     for (MonoList* ql = q->list; ql != NULL; ql = ql->tail) {
       pm = pl->m;
       qm = ql->m;
-      new = malloc(sizeof(MonoList));
-      CHECK_PTR(new);
-      new->m = MonoMul(&pm, &qm);
-      new->tail = NULL;
+      pqm = MonoMul(&pm, &qm);
 
-      if (PolyIsZero(&new->m.p))
-        MonoListDestroy(new);
-      else
+      if (PolyIsZero(&pqm.p))
+        MonoDestroy(&pqm);
+      else {
+        new = malloc(sizeof(MonoList));
+        CHECK_PTR(new);
+        new->m = pqm;
+        new->tail = NULL;
         MonoListInsert(&pq.list, new);
+      }
     }
   }
 
@@ -98,7 +102,7 @@ Poly PolyNeg(const Poly* p)
 
 Poly PolySub(const Poly* p, const Poly* q)
 {
-  /* nq = q; nq *= -1; nq += p <--> nq = (-q) + p */
+  /* nq := q; nq *= -1; nq += p <---> nq := (-q) + p */
   Poly nq = PolyClone(q);
   PolyNegComp(&nq);
   PolyAddComp(&nq, p);
@@ -107,7 +111,7 @@ Poly PolySub(const Poly* p, const Poly* q)
 }
 
 /**
- * Prosta funkcyjka licząca maksimum dwu współczynników.
+ * Prosta funkcyjka licząca maksimum dwu wykładników.
  * @param[in] a : @f$ a @f$
  * @param[in] b : @f$ b @f$
  * @return @f$ \max(a, b) @f$
@@ -159,22 +163,19 @@ bool PolyIsEq(const Poly* p, const Poly* q)
   MonoList* ql;
   bool eq = true;
 
-  if (PolyIsCoeff(p)) {
-    if (PolyIsCoeff(q))
-      return p->coeff == q->coeff;
-    else return false;
-  } else if (PolyIsCoeff(q))
+  /* jeśli wielomiany są współczynnikami, to decyduje równość arytmetyczna.
+   * jeśli jeden z nich jest, a drugi już nie, to nierówność jest oczywista */
+  if (PolyIsCoeff(p) && PolyIsCoeff(q))
+    return p->coeff == q->coeff;  
+  else if (PolyIsCoeff(p) || PolyIsCoeff(q))
     return false;
-
+  
   pl = p->list;
   ql = q->list;
 
-  while (pl && ql && eq) {
+  for (pl = p->list, ql = q->list; pl && ql && eq; pl = pl->tail, ql = ql->tail)
     eq = MonoIsEq(&pl->m, &ql->m);
-    pl = pl->tail;
-    ql = ql->tail;
-  }
-
+  
   /* nie są równe wtw któreś z jednomianów były różne lub są różnej długości
    * tj. jeden skończył się zanim skończył się drugi */
   return eq && !pl && !ql;

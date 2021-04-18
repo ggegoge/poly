@@ -1,4 +1,12 @@
 * Poly
   Zadanie duże z IPP 2021 dotyczące wielomianów rzadkich. Szczegóły poleceniowe do ujrzenia w
-  [[file:task.org][task.org]]
+  [[file:task.org][task.org]], szczegółowe losowe rozważania zawarłem w [[file:dev.org][dev.org]], a coś porządniejszego to
+  główna strona dokumentacji (o jej uzyskaniu napisano w task.org)
+
+  
+* toc
+  
+**** moduł =poly=
+
+**** moduł =poly_lib=
   

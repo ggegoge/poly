@@ -50,6 +50,8 @@ MonoList* MonoListClone(const MonoList* head)
   return elem;
 }
 
+
+/* pseudowykładnik ma formę c x^0 */
 bool PolyIsPseudoCoeff(const MonoList* ml)
 {
   return ml && ml->m.exp == 0 && PolyIsCoeff(&ml->m.p) && ml->tail == NULL;
@@ -67,8 +69,8 @@ void Decoeffise(Poly* p)
 
 
 /**
- * Suma dwóch jednomów równych stopni, również modyfikująca jeden z nich
- * (analogiczny mechanizm jak opisany w `PolyAddComp`).
+ * Suma dwóch jednomów równych stopni, również modyfikująca pierwszy z nich
+ * (analogiczny mechanizm jak opisany w `PolyAddComp` czyli operator `+=`).
  * @param[in] m : jednomian
  * @param[in] t : jednomian
  */
@@ -79,11 +81,11 @@ static void MonoAddComp(Mono* m, const Mono* t)
 }
 
 /**
- * Porównanie jednomianów dwu jednomianów.
+ * Porównanie dwu jednomianów po ich wykładnikach.
  * @param[in] m : wskaźnik na pierwszy z jednomianów
- * @param[in] t : wskaźnik na drugi z jednomianów
- * @return -1 jeżeli wykładnik @p m jest mniejszy od wykładnika @p t, 0 gdy są
- * równe i 1 w odwrotnej sytuacji.
+ * @param[in] t : wskaźnik na dru1gi z jednomianów
+ * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
+ * przypadku 1, 0 oznacza równość.
  */
 static int MonoCmp(const void* m, const void* t)
 {
@@ -95,10 +97,10 @@ static int MonoCmp(const void* m, const void* t)
 /**
  * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
  * tychże. Jest to robione w formie `+=` -- zmienia się @p lh w oparciu o @p rh,
- * które pozostaje niezmienne.
+ * która pozostaje niezmieniona.
  * @param[in] lh : głowa lewej listy
  * @param[in] rh : głowa prawej listy
- * @return lista jednomianów zawierająca zsumowane wszystkie jednomiany
+ * @return głowa listy jednomianów zawierająca zsumowane wszystkie jednomiany
  * z oryginalnych @p lh i @p rh.
  */
 static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
@@ -133,7 +135,7 @@ static MonoList* MonoListsMerge(MonoList* lh, const MonoList* rh)
       lh->tail = MonoListsMerge(lh->tail, rh->tail);
       return lh;
     } else {
-      /* jeśli dostałem zero, to go nie chcę utrzymywać */
+      /* jeśli dostałem zero, to go nie chcę utrzymywać bez sensu w liście */
       MonoDestroy(&lh->m);
       tmp = lh->tail;
       free(lh);
@@ -329,6 +331,8 @@ poly_exp_t MonoListDeg(const MonoList* head)
 
 poly_exp_t PolyCoeffDeg(const Poly* p)
 {
+  /* wielomian stały ma stopień 0 o ile nie jest tożsamościowo równy 0, wtedy
+   * jego stopień wynosi -1 */
   assert(PolyIsCoeff(p));
   return PolyIsZero(p) ? -1 : 0;
 }

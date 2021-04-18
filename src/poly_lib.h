@@ -27,6 +27,13 @@ void MonoListDestroy(MonoList* head);
 MonoList* MonoListClone(const MonoList* head);
 
 /**
+ * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
+ * @param[in] head : głowa listy
+ * @param[in] new : komórka listy z nowym elementem
+ */
+void MonoListInsert(MonoList** head, MonoList* new);
+
+/**
  * Suma wielomianu i liczby całkowitej.
  * @param[in] coeff : współczynnik @f$ c @f$
  * @param[in] p : wielomian @f$ p(x) @f$
@@ -37,19 +44,11 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff);
 /**
  * Suma dwu wielomianów, ale w wersji `compound assignment' tj nie tworzy
  * nowego wielomianu, a jedynie modyfikuje ten ''po lewej''. Odpowiednik
- * operatora `+=`.
+ * operatora `+=`. Dla @p p i @p q wykonuje `p += q`.
  * @param[in] p : wielomian @f$ p @f$
  * @param[in] q : wielomian @f$ q @f$
- * Wykonuje `p += q`.
  */
 void PolyAddComp(Poly* p, const Poly* q);
-
-/**
- * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
- * @param[in] head : głowa listy
- * @param[in] new : komórka listy z nowym elementem
- */
-void MonoListInsert(MonoList** head, MonoList* new);
 
 /**
  * Sprawdzian czy komórka listy @p ml nie jest przypadkiem ''pseudo

@@ -75,10 +75,10 @@ Wielomiany: co robić i jak
 
      podejrzane. skąd się może brać? bonne question.
     
-* TODO reorganizacja kodu, moduły
+* DONE reorganizacja kodu, moduły
   Jescze nie wiem jak. Może listowe rzeczy do jednego modułu? Trudno powiedzieć
   
-** PolyNeg zmienić na PolyMulCoeff -1
+** DONE PolyNeg zmienić na PolyMulCoeff -1
    
 ** DONE modularyzacja
 
@@ -355,17 +355,17 @@ Wielomiany: co robić i jak
     Muszę insertując dawać zaalokowane na stercie rzeczy!
 * TODO 
   - [ ] naprawić ten dziwaczny test z gitlaba *WAŻNE*
-  - [ ] strona główna doc
-  - [-] poukładać kod logicznie, modularyzacja perhaps?
-    - [X] moduł
-    - [ ] kolejność =[?]=
-  - [-] dualizm koeficji
+  - [X] strona główna doc
+  - [X] poukładać kod logicznie, modularyzacja perhaps?
+    - [X] moduły
+    - +[ ] kolejność =[?]=+
+  - [X] dualizm koeficji
     - [X] sprawdzian pseudo koeficji naprawić
     - [X] co zrobić, jeśli gdzieś głęboko jest *zero*
       najlepiej tego w ogole uniknąć, ale nie jest to zawsze możliwe. zatem może jakoś
       pokombinować i np pomyśleć tak -- mnożąc jeśli dostaniemy zero, to je *omijamy* i
       porzucamy. Rekurencją próba wykaraskania się z objęć zera. _TODO ważne_
-    - [ ] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
+    - [X] naprawić test na reduckcję -- *gdzie ma być* =IsPseudo= a *gdzie nie*?
   - [X] lista vs tablica?
     na gałęzi ~use-list~ lista
   - [-] *przechodzi gitlabne*
