@@ -402,6 +402,9 @@ Wielomiany: co robić i jak
      typ wskaźnik? Oczywiście później przy mallokacjach musiałbym uważać na poprawny
      size. nie wiem czy warto prawdę mówiąc -- wolę pamiętać, że to pointer jest prawdę mówiąc
   2. =MonoListClone= zapisać iteracyjnie?
+  3. makro =CHECK_PTR= do =poly_lib=?
+  4. w ~PolyAddMonos~ płytka kopia tablicy i następnie posortowanie jej aby inserty krócej
+     trwały? Minus: malloc. Plus: zamiast insertu /O(n)/ robię prostego prependa /O(1)/ 
 * Lista jednomianów
   Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
   tym pole =size= wtedy traci rację bytu mając listę. 

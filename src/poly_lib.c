@@ -94,8 +94,8 @@ static int MonoCmp(const Mono* m, const Mono* t)
 
 /**
  * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
- * tychże. Jest to robione w formie `+=` -- zmienia się @p lhead w oparciu o @p rhead,
- * która pozostaje niezmieniona.
+ * tychże. Jest to robione w formie `+=` -- zmienia się @p lhead w oparciu
+ * o @p rhead, która pozostaje niezmieniona.
  * @param[in] lhead : głowa lewej listy
  * @param[in] rhead : głowa prawej listy
  * @return głowa listy jednomianów zawierająca zsumowane wszystkie jednomiany
@@ -121,8 +121,8 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
     cmp = MonoCmp(&lhead->m, &rhead->m);
 
   /* celem jest zmodyfikowanie listy lhead i pozostawienie bez szwanku listy rhead,
-   * zatem elementy z lhead pozostawiam takie jakimi są, elementy z rhead wkopiowuję,
-   * a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
+   * zatem elementy z lhead pozostawiam takie jakimi są, elementy z rhead
+   * wkopiowuję, a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
   switch (cmp) {
 
   case 0 :                      /* lh == rh */
@@ -193,7 +193,7 @@ void PolyAddComp(Poly* p, const Poly* q)
     p->list = MonoListsMerge(p->list, q->list);
 
   /* nawet jeśli lista się znullyfikowała, to dzięki ścisłemu reżimowi
-   * inicjalizacji koeficji możemy spać spokojnie -- są one z defaultu zerowe
+   * inicjalizacji wykładników możemy spać spokojnie -- są one z defaultu zerowe
    * zatem zostanie nam po prostu lista z 0 i NULLem */
 
   if (PolyIsPseudoCoeff(p->list))

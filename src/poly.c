@@ -64,7 +64,7 @@ Poly PolyAdd(const Poly* p, const Poly* q)
 Poly PolyMul(const Poly* p, const Poly* q)
 {
   Poly pq = PolyZero();
-  /* jednomiany p, q i p * q */
+  /* jednomiany należące do wielomianów p, q i p * q */
   Mono pm, qm, pqm;
   MonoList* new;
 
@@ -217,12 +217,11 @@ static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
 
 Poly PolyAt(const Poly* p, poly_coeff_t x)
 {
-  /* wszystkie x_0^n zmieniam na x^n, mnożę je przez te koeficje i robię
-   * sumę wielomianów wielu. czyli każdemu wielomianowi robię *= koef gdzie koef
-   * to x^n i później kumsum (suma akumulatywna) jest robiona tak jakby.
-   * wait mam tam listę jednomów... hm. no to tak, z każego biorę ->p i multypl,
-   * a następnie je wszystkie robię +=.
-   * minus -- konieczność destrukcji mul */
+  /* zamieniam wszystkie x_0 na x i potęguję je przez odpowiednie wykładniki.
+   * Wynik traktować mogę jako mnożenie wielomianu wokół x_1 przez skalar. Robię
+   * więc tak: tworzę wielomian wynikowy res, z każdego jednomianu wybieram jego
+   * wielomian p, i dokonuję res += p * x^n -- powstaje mi suma kumulatywna
+   * wielomianów wielu, która jest wynikiem */
   Poly res = PolyZero();
   Poly mul = PolyZero();
   poly_coeff_t coeff;
