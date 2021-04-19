@@ -87,7 +87,7 @@ Mono MonoMul(const Mono* m, const Mono* t);
 /**
  * Uprzeciwnienie wielomianu samego w sobie. Nie zwraca nowego wielomianu tylko
  * neguje ten otrzymany. Dokładniej rzecz biorąc neguje jego współczynniki
- * liczbowe. Coś a la `p *= -1`.
+ * liczbowe. Coś à la `p *= -1`.
  * @param[in] p : wielomian @f$ p @f$
 */
 void PolyNegComp(Poly* p);

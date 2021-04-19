@@ -59,7 +59,7 @@ bool PolyIsPseudoCoeff(const MonoList* ml)
 
 void Decoeffise(Poly* p)
 {
-  assert(p->list);              /* pseudowykładnik z definicji ma niepustą listę */
+  assert(p->list);              /* pseudowykładnik ma niepustą listę */
   MonoList* head = p->list;
   poly_coeff_t c = head->m.p.coeff;
   Poly np = PolyFromCoeff(c);
@@ -120,8 +120,8 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
   else
     cmp = MonoCmp(&lhead->m, &rhead->m);
 
-  /* celem jest zmodyfikowanie listy lhead i pozostawienie bez szwanku listy rhead,
-   * zatem elementy z lhead pozostawiam takie jakimi są, elementy z rhead
+  /* celem jest zmodyfikowanie listy lhead i pozostawienie bez szwanku listy
+   * rhead, zatem elementy z lhead pozostawiam takie jakimi są, elementy z rhead
    * wkopiowuję, a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
   switch (cmp) {
 
@@ -166,9 +166,7 @@ static MonoList* PolyPseduoCoeff(poly_coeff_t c)
 {
   MonoList* head = malloc(sizeof(MonoList));
   CHECK_PTR(head);
-  head->m.p = (Poly) {
-    .coeff = c, .list = NULL
-  };
+  head->m.p = PolyFromCoeff(c);
   head->m.exp = 0;
   head->tail = NULL;
   return head;

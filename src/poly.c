@@ -1,5 +1,5 @@
 /** @file
-  Implmenetacja interfejsu z pliku poly.h `klasy' reprezentującej wielomiany
+  Implementacja interfejsu z pliku poly.h `klasy' reprezentującej wielomiany
   rzadkie wielu zmiennych.
 
   @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
@@ -44,9 +44,7 @@ Poly PolyAdd(const Poly* p, const Poly* q)
   Poly new = PolyZero();
 
   if (PolyIsCoeff(p) && PolyIsCoeff(q))
-    return (Poly) {
-    .coeff = p->coeff + q->coeff, .list = NULL
-  };
+    return PolyFromCoeff(p->coeff + q->coeff);
 
   if (PolyIsCoeff(p))
     return PolyAddCoeff(q, p->coeff);
