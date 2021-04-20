@@ -182,7 +182,15 @@ void PolyAddComp(Poly* p, const Poly* q)
   }
 
   if (PolyIsCoeff(p) && !PolyIsZero(p)) {
+    /* zamieniam wielomian wykładnikowy na pseudowykładnik by był kompatybilny
+     * ze standardowym wielomianem q tj. by dało się użyć MonoListsMerge */
     p->list = PolyPseduoCoeff(p->coeff);
+    /* uwaga: kluczowe jest ustawienie coeff na zero gdy jego lista jest != NULL
+     * ponieważ to daje nam łatwą obsługę redukcji -- zamiast po dodawaniu jakoś
+     * patrzeć czy lista opustoszała i wtedy konstatować -- aha, to zero! -- da
+     * się po prostu mieć tam to zero za wczasu! bardzo kluczowy mechanizm, tak
+     * zapewniam sobie spokój, że po redukcji już jest właściwy coeff */
+    p->coeff = 0;
     p->list = MonoListsMerge(p->list, q->list);
   } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
     l = PolyPseduoCoeff(q->coeff);
