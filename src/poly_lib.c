@@ -161,7 +161,7 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
  * @param[in] c : współczynnik @f$ c @f$
  * @return @f$ c x_0^0 @f$
  */
-static Mono MonoPseudoCoeff(poly_coeff_t c)
+static inline Mono MonoPseudoCoeff(poly_coeff_t c)
 {
   return (Mono) {
     .exp = 0, .p = PolyFromCoeff(c)

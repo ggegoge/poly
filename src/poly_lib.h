@@ -51,18 +51,20 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff);
 void PolyAddComp(Poly* p, const Poly* q);
 
 /**
- * Sprawdzian czy komórka listy @p ml nie jest przypadkiem ''pseudo
- * wykładnikiem''. Funkcja mówi czy nie jest to przypadkiem lista, w którą
- * zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
- * typu @f$ c * x^0 @f$.
+ * Sprawdzian czy komórka listy @p ml nie jest przypadkiem
+ * ''pseudowspółczynnikiem''. Funkcja mówi czy nie jest to przypadkiem lista,
+ * w którą zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
+ * typu @f$ c * x^0 @f$. Istnienie pseudowspółczynnika ma wbrew pozorom głęboki
+ * sens -- trzymamy listy __jednomianów__ ergo chcąc tam schować współczynnik
+ * (tj wielomian) musimy go przebrać. Stąd wspomniana reprezentacja.
  * @param[in] ml : komórka listy jednomianów
- * @return czy to nie pseudowykładnik?
+ * @return czy to nie pseudowspółczynnik?
  */
 bool PolyIsPseudoCoeff(const MonoList* ml);
 
 /**
- * Zmiana pseudowykładnika w normalny. Funkcja bierze wielomian @p p będący
- * pseudowykładnikiem (patrz: `PolyIsPseudoCoeff` celem zrozumienia pojęcia)
+ * Zmiana pseudowspółczynnika w normalny. Funkcja bierze wielomian @p p będący
+ * pseudowspółczynnikiem (patrz: `PolyIsPseudoCoeff` celem zrozumienia pojęcia)
  * i zmienia go w standardowy wykładnik.
  * @param[in] p : wielomian będący pseudo wykładnikiem
  */
