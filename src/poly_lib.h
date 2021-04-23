@@ -29,9 +29,9 @@ MonoList* MonoListClone(const MonoList* head);
 /**
  * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
  * @param[in] head : głowa listy
- * @param[in] new : komórka listy z nowym elementem
+ * @param[in] m : nowy jednomian
  */
-void MonoListInsert(MonoList** head, MonoList* new);
+void MonoListInsert(MonoList** head, Mono* m);
 
 /**
  * Suma wielomianu i liczby całkowitej.
