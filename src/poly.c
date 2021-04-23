@@ -80,13 +80,8 @@ Poly PolyMul(const Poly* p, const Poly* q)
 
       if (PolyIsZero(&pqm.p))
         MonoDestroy(&pqm);
-      else {
-        /* new = malloc(sizeof(MonoList));
-         * CHECK_PTR(new);
-         * new->m = pqm;
-         * new->tail = NULL; */
+      else
         MonoListInsert(&pq.list, &pqm);
-      }
     }
   }
 
@@ -237,7 +232,6 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 Poly PolyAddMonos(size_t count, const Mono monos[])
 {
   MonoList* head = NULL;
-  /* MonoList* elem; */
   Poly sum = PolyZero();
   Mono m;
 
@@ -245,11 +239,6 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
     if (PolyIsZero(&monos[i].p))
       continue;
 
-    /* elem = malloc(sizeof(MonoList));
-     * CHECK_PTR(elem); */
-
-    /* elem->m = monos[i];
-     * elem->tail = NULL; */
     m = monos[i];
     MonoListInsert(&head, &m);
   }

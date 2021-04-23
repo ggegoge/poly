@@ -174,7 +174,6 @@ static MonoList* PolyPseduoCoeff(poly_coeff_t c)
 
 void PolyAddComp(Poly* p, const Poly* q)
 {
-  /* MonoList* l; */
   Mono m;
 
   if (PolyIsCoeff(p) && PolyIsCoeff(q)) {
@@ -194,8 +193,9 @@ void PolyAddComp(Poly* p, const Poly* q)
     p->coeff = 0;
     p->list = MonoListsMerge(p->list, q->list);
   } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
-    m = (Mono) {.exp = 0, .p = PolyFromCoeff(q->coeff)};
-    /* l = PolyPseduoCoeff(q->coeff); */
+    m = (Mono) {
+      .exp = 0, .p = PolyFromCoeff(q->coeff)
+    };
     MonoListInsert(&p->list, &m);
   } else
     p->list = MonoListsMerge(p->list, q->list);
@@ -211,7 +211,6 @@ void PolyAddComp(Poly* p, const Poly* q)
 Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
 {
   Poly new = PolyZero();
-  /* MonoList* coeff_wrapper; */
   Mono m;
 
   if (coeff == 0)
@@ -220,8 +219,9 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
     new.coeff = coeff + p->coeff;
     new.list = NULL;
   } else {
-    /* coeff_wrapper = PolyPseduoCoeff(coeff); */
-    m = (Mono) { .exp = 0, .p = PolyFromCoeff(coeff) };
+    m = (Mono) {
+      .exp = 0, .p = PolyFromCoeff(coeff)
+    };
     new.list = MonoListClone(p->list);
     MonoListInsert(&new.list, &m);
   }
@@ -266,8 +266,6 @@ void MonoListInsert(MonoList** head, Mono* m)
     }
 
     MonoDestroy(m);
-    /* new powstaje przez moj malloc */
-    /* free(new); */
   }
 }
 

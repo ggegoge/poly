@@ -27,7 +27,7 @@ void MonoListDestroy(MonoList* head);
 MonoList* MonoListClone(const MonoList* head);
 
 /**
- * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
+ * Wstawienie jednomianu w odpowiednie miejsce listy.
  * @param[in] head : głowa listy
  * @param[in] m : nowy jednomian
  */
