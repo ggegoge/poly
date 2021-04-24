@@ -1,4 +1,7 @@
+#+OPTIONS: toc:nil
+# #+LANGUAGE: pl
 * Duże zadanie, część 1
+  #+TOC: headlines 2
 ** Wielomiany
    Tegoroczne duże zadanie polega na zaimplementowaniu operacji na wielomianach rzadkich wielu
    zmiennych o współczynnikach całkowitych. Zmienne wielomianu oznaczamy $x_0, x_1, x_2$ itd.

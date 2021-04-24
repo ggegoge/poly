@@ -1,10 +1,8 @@
-/**
-mainpage Dokumentacja zadania wielomiany
-
 ### Treść zadania
 
 Uwaga: aktualna treść zadania znajduje się
-w [Moodle](https://moodle.mimuw.edu.pl), ale zarazem w pliku task.org.
+w [Moodle](https://moodle.mimuw.edu.pl), ale zarazem w pliku task.md,
+który można ujrzeć w sekcji _dodatkowe strony_.
 
 ### Opis programu
 
@@ -83,5 +81,3 @@ source). Licencę zresztą załączam w katalogu `css` zgodnie z jej warunkami.
 
 Dokonałem jedynie nieznacznych poprawek nadając linkom elegancki
 różowy kolor.
-
-*/
