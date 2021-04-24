@@ -114,10 +114,9 @@ static inline poly_exp_t max(poly_exp_t a, poly_exp_t b)
   return (a < b) ? b : a;
 }
 
-/* co zrobić, gdy nie starczy stopni?? */
 poly_exp_t PolyDegBy(const Poly* p, size_t var_idx)
 {
-  poly_exp_t max_deg = 0;
+  poly_exp_t max_deg = -1;
 
   if (PolyIsCoeff(p))
     return PolyCoeffDeg(p);
