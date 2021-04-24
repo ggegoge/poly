@@ -198,10 +198,9 @@ void PolyAddComp(Poly* p, const Poly* q)
      * kompatybilny ze standardowym wielomianem q tj. by dało się użyć
      * MonoListsMerge */
     p->list = MonoListPseduoCoeff(p->coeff);
-    /* uwaga: kluczowe jest ustawienie coeff na zero gdy jego lista jest != NULL
-     * ponieważ to daje nam łatwą obsługę redukcji -- zamiast po dodawaniu jakoś
-     * patrzeć czy lista opustoszała i wtedy konstatować -- aha, to zero! -- da
-     * się po prostu mieć tam to zero zawczasu! */
+    /* kluczowe jest ustawienie coeff na 0 gdy jego lista jest != NULL ponieważ
+     * to daje łatwą obsługę redukcji. Zamiast po dodawaniu patrzeć czy lista
+     * opustoszała i konstatować -- aha, to 0 -- umieszczamy tam 0 zawczasu */
     p->coeff = 0;
     p->list = MonoListsMerge(p->list, q->list);
   } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
