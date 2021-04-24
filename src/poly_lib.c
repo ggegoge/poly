@@ -53,7 +53,7 @@ MonoList* MonoListClone(const MonoList* head)
 /* pseudowspółczynnik ma formę c x^0 */
 bool PolyIsPseudoCoeff(const MonoList* ml)
 {
-  return ml && ml->m.exp == 0 && PolyIsCoeff(&ml->m.p) && ml->tail == NULL;
+  return ml && ml->m.exp == 0 && PolyIsCoeff(&ml->m.p) && !ml->tail;
 }
 
 void Decoeffise(Poly* p)
@@ -84,7 +84,7 @@ static void MonoAddComp(Mono* m, const Mono* t)
  * @param[in] m : wskaźnik na pierwszy z jednomianów
  * @param[in] t : wskaźnik na dru1gi z jednomianów
  * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
- * przypadku 1, 0 oznacza równość.
+ * przypadku 1, 0 oznacza równość -- konwencja zgodna z C.
  */
 static int MonoCmp(const Mono* m, const Mono* t)
 {
@@ -107,24 +107,23 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
   MonoList* tmp;
 
   /* złączenie list à la merge sort dopóki obydwie nie są puste. */
-  if (lhead == NULL && rhead == NULL)
+  if (!lhead && !rhead)
     return NULL;
 
   /* chcę podłączyć lhead jeśli rhead jest puste i na odwrót. jeśli obydwa
    * niepuste, to podłączam w kolejności malejącej expów */
-  if (lhead == NULL)
+  if (!lhead)
     cmp = -1;
-  else if (rhead == NULL)
+  else if (!rhead)
     cmp = 1;
   else
     cmp = MonoCmp(&lhead->m, &rhead->m);
 
   /* celem jest zmodyfikowanie listy lhead i pozostawienie bez szwanku listy
-   * rhead, zatem elementy z lhead pozostawiam takie jakimi są, elementy z rhead
+   * rhead. Elementy z lhead pozostawiam takie jakimi są, elementy z rhead
    * wkopiowuję, a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
-  switch (cmp) {
 
-  case 0:                       /* lh == rh */
+  if (cmp == 0) {                /* lh == rh */
     /* lh->m += rh->m */
     MonoAddComp(&lhead->m, &rhead->m);
 
@@ -138,21 +137,15 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
       free(lhead);
       return MonoListsMerge(tmp, rhead->tail);
     }
-
-  case 1:                       /* lh > rh */
+  } else if (cmp > 0) {        /* lh > rh */
     lhead->tail = MonoListsMerge(lhead->tail, rhead);
     return lhead;
-
-  case -1:                      /* lh < rh */
+  } else {                      /* lh < rh */
     cpy = malloc(sizeof(MonoList));
     CHECK_PTR(cpy);
     cpy->m = MonoClone(&rhead->m);
     cpy->tail = MonoListsMerge(lhead, rhead->tail);
     return cpy;
-
-  default:
-    return NULL;
-
   }
 }
 
