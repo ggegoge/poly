@@ -201,8 +201,7 @@ void PolyAddComp(Poly* p, const Poly* q)
     /* uwaga: kluczowe jest ustawienie coeff na zero gdy jego lista jest != NULL
      * ponieważ to daje nam łatwą obsługę redukcji -- zamiast po dodawaniu jakoś
      * patrzeć czy lista opustoszała i wtedy konstatować -- aha, to zero! -- da
-     * się po prostu mieć tam to zero za wczasu! bardzo kluczowy mechanizm, tak
-     * zapewniam sobie spokój, że po redukcji już jest właściwy coeff */
+     * się po prostu mieć tam to zero zawczasu! */
     p->coeff = 0;
     p->list = MonoListsMerge(p->list, q->list);
   } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
@@ -226,7 +225,7 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
   Mono m;
 
   if (coeff == 0) {
-    new = PolyClone(p);    
+    new = PolyClone(p);
   } else if (PolyIsCoeff(p)) {
     new.coeff = coeff + p->coeff;
     new.list = NULL;
@@ -250,7 +249,6 @@ void MonoListInsert(MonoList** head, Mono* m)
   MonoList* new;
   int cmp = 1;
 
-  /* assert(new); */
   assert(!PolyIsZero(&m->p));
 
   while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, m)) > 0))

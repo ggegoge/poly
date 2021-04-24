@@ -452,14 +452,27 @@ Wielomiany: co robić i jak
    - [ ] symulacja pattern matchingu w C
 
 * dalsze imprówmencje?
-  1. zrobić ~typedef MonoList struct MonoList*~? czyli ogólnie -- traktować jako właściwy
-     typ wskaźnik? Oczywiście później przy mallokacjach musiałbym uważać na poprawny
-     size. nie wiem czy warto prawdę mówiąc -- wolę pamiętać, że to pointer jest prawdę mówiąc
+  1. +zrobić ~typedef MonoList struct MonoList*~?+
+     odrdzane choćby tu [[https://www.kernel.org/doc/html/v4.10/process/coding-style.html#typedefs][w kernel style guide]] + niewygodne i zaciemnia
   2. =MonoListClone= zapisać iteracyjnie?
   3. makro =CHECK_PTR= do =poly_lib=?
+     może je nazwać ~CheckPtr~?
   4. w ~PolyAddMonos~ płytka kopia tablicy i następnie posortowanie jej aby inserty krócej
      trwały? Minus: malloc. Plus: zamiast insertu /O(n)/ robię prostego prependa /O(1)/
   5. ujednolicić -- ~p == NULL~ czy ~!p~ ?
+  6. ujednolicić inline'y w ~poly_lib.c~ i ~poly.c~
+  7. skrócić funkcje do circa 24 linijek?
+     Choć może no need
+     /The maximum length of a function is inversely proportional to the complexity and/
+     /indentation level of that function. So, if you have a conceptually simple function/
+     /that is just one long (but simple) case-statement, where you have to do lots of small/
+     /things for a lot of different cases, it’s OK to have a longer function./
+
+     może jednak warto każdą akcję splitnąć? chyba przesada...
+  8. ukrócić komentarze
+  9. jednolinijkowe ify na prostotę?
+  10. consistentne nowe linie -- po deklaracjach, przed returnami?
+  11. rename tymczasowych na tmp?
 * Lista jednomianów
   Lepiej ją trzymań od największych do najmniejszych wykładników -- prościej policzyć stopień. Poza
   tym pole =size= wtedy traci rację bytu mając listę. 
