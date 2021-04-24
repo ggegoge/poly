@@ -72,8 +72,8 @@ Poly PolyMul(const Poly* p, const Poly* q)
   if (PolyIsCoeff(q))
     return PolyMulCoeff(p, q->coeff);
 
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail) {
-    for (MonoList* ql = q->list; ql != NULL; ql = ql->tail) {
+  for (MonoList* pl = p->list; pl; pl = pl->tail) {
+    for (MonoList* ql = q->list; ql; ql = ql->tail) {
       pm = pl->m;
       qm = ql->m;
       pqm = MonoMul(&pm, &qm);
@@ -127,7 +127,7 @@ poly_exp_t PolyDegBy(const Poly* p, size_t var_idx)
 
   /* stopniem względem tej zmiennej będzie największy z tych stopni znalezionych
    * rekurencyjnie */
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
+  for (MonoList* pl = p->list; pl; pl = pl->tail)
     max_deg = max(max_deg, PolyDegBy(&pl->m.p, var_idx - 1));
 
   return max_deg;
@@ -143,7 +143,7 @@ poly_exp_t PolyDeg(const Poly* p)
   /* szukam stopnia rekurencyjnie -- stopień to jest jak gdyby zmiana wszystkich
    * zmiennych na jedną i szukanie największej potęgi, zatem to właśnie robię
    * dodając wykładniki i rekurencyjnie się zagłębiając w czeluści dalekich x */
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
+  for (MonoList* pl = p->list; pl; pl = pl->tail)
     max_deg = max(max_deg, pl->m.exp + PolyDeg(&pl->m.p));
 
   return max_deg;
@@ -218,7 +218,7 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
   if (PolyIsCoeff(p))
     return PolyClone(p);
 
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail) {
+  for (MonoList* pl = p->list; pl; pl = pl->tail) {
     coeff = QuickPow(x, pl->m.exp);
     mul = PolyMulCoeff(&pl->m.p, coeff);
     PolyAddComp(&res, &mul);
