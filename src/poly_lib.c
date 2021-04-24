@@ -50,8 +50,7 @@ MonoList* MonoListClone(const MonoList* head)
   return elem;
 }
 
-
-/* pseudowykładnik ma formę c x^0 */
+/* pseudowspółczynnik ma formę c x^0 */
 bool PolyIsPseudoCoeff(const MonoList* ml)
 {
   return ml && ml->m.exp == 0 && PolyIsCoeff(&ml->m.p) && ml->tail == NULL;
@@ -59,7 +58,7 @@ bool PolyIsPseudoCoeff(const MonoList* ml)
 
 void Decoeffise(Poly* p)
 {
-  assert(p->list);              /* pseudowykładnik ma niepustą listę */
+  assert(p->list);              /* pseudowspółczynnik ma niepustą listę */
   MonoList* head = p->list;
   poly_coeff_t c = head->m.p.coeff;
   Poly np = PolyFromCoeff(c);
@@ -125,7 +124,7 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
    * wkopiowuję, a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
   switch (cmp) {
 
-  case 0 :                      /* lh == rh */
+  case 0:                       /* lh == rh */
     /* lh->m += rh->m */
     MonoAddComp(&lhead->m, &rhead->m);
 
@@ -140,29 +139,42 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
       return MonoListsMerge(tmp, rhead->tail);
     }
 
-  case 1 :                      /* lh > rh */
+  case 1:                       /* lh > rh */
     lhead->tail = MonoListsMerge(lhead->tail, rhead);
     return lhead;
 
-  case -1 :                     /* lh < rh */
+  case -1:                      /* lh < rh */
     cpy = malloc(sizeof(MonoList));
     CHECK_PTR(cpy);
     cpy->m = MonoClone(&rhead->m);
     cpy->tail = MonoListsMerge(lhead, rhead->tail);
     return cpy;
 
-  default :
+  default:
     return NULL;
 
   }
 }
 
 /**
- * Tworzy pseudowykładnik dla danej liczby. Więcej szczegółów w `Decoeffise`.
- * @param[in] c : wykładnik
- * @return komórka listy będąca pseudowykładnikiem
+ * Tworzy jednomian będący _pseudowspółczynnikiem_ reprezentującym @p c.
+ * @param[in] c : współczynnik @f$ c @f$
+ * @return @f$ c x_0^0 @f$
  */
-static MonoList* PolyPseduoCoeff(poly_coeff_t c)
+static inline Mono MonoPseudoCoeff(poly_coeff_t c)
+{
+  return (Mono) {
+    .exp = 0, .p = PolyFromCoeff(c)
+  };
+}
+
+/**
+ * Tworzy pseudowspółczynnik dla danej liczby opakowany w listę.
+ * Więcej szczegółów w `Decoeffise`.
+ * @param[in] c : współczynnik
+ * @return komórka listy będąca pseudowspółczynnikiem
+ */
+static MonoList* MonoListPseduoCoeff(poly_coeff_t c)
 {
   MonoList* head = malloc(sizeof(MonoList));
   CHECK_PTR(head);
@@ -174,7 +186,7 @@ static MonoList* PolyPseduoCoeff(poly_coeff_t c)
 
 void PolyAddComp(Poly* p, const Poly* q)
 {
-  MonoList* l;
+  Mono m;
 
   if (PolyIsCoeff(p) && PolyIsCoeff(q)) {
     p->coeff += q->coeff;
@@ -182,9 +194,10 @@ void PolyAddComp(Poly* p, const Poly* q)
   }
 
   if (PolyIsCoeff(p) && !PolyIsZero(p)) {
-    /* zamieniam wielomian wykładnikowy na pseudowykładnik by był kompatybilny
-     * ze standardowym wielomianem q tj. by dało się użyć MonoListsMerge */
-    p->list = PolyPseduoCoeff(p->coeff);
+    /* zamieniam wielomian wykładnikowy na pseudowspółczynnik by był
+     * kompatybilny ze standardowym wielomianem q tj. by dało się użyć
+     * MonoListsMerge */
+    p->list = MonoListPseduoCoeff(p->coeff);
     /* uwaga: kluczowe jest ustawienie coeff na zero gdy jego lista jest != NULL
      * ponieważ to daje nam łatwą obsługę redukcji -- zamiast po dodawaniu jakoś
      * patrzeć czy lista opustoszała i wtedy konstatować -- aha, to zero! -- da
@@ -193,10 +206,11 @@ void PolyAddComp(Poly* p, const Poly* q)
     p->coeff = 0;
     p->list = MonoListsMerge(p->list, q->list);
   } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
-    l = PolyPseduoCoeff(q->coeff);
-    MonoListInsert(&p->list, l);
-  } else
+    m = MonoPseudoCoeff(q->coeff);
+    MonoListInsert(&p->list, &m);
+  } else {
     p->list = MonoListsMerge(p->list, q->list);
+  }
 
   /* nawet jeśli lista się znullyfikowała, to dzięki ścisłemu reżimowi
    * inicjalizacji wykładników możemy spać spokojnie -- są one z defaultu zerowe
@@ -209,17 +223,17 @@ void PolyAddComp(Poly* p, const Poly* q)
 Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
 {
   Poly new = PolyZero();
-  MonoList* coeff_wrapper;
+  Mono m;
 
-  if (coeff == 0)
-    new = PolyClone(p);
-  else if (PolyIsCoeff(p)) {
+  if (coeff == 0) {
+    new = PolyClone(p);    
+  } else if (PolyIsCoeff(p)) {
     new.coeff = coeff + p->coeff;
     new.list = NULL;
   } else {
-    coeff_wrapper = PolyPseduoCoeff(coeff);
+    m = MonoPseudoCoeff(coeff);
     new.list = MonoListClone(p->list);
-    MonoListInsert(&new.list, coeff_wrapper);
+    MonoListInsert(&new.list, &m);
   }
 
   return new;
@@ -229,25 +243,29 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
  * https://www.youtube.com/watch?v=1s0w_p5HEuY&t=0s
  * i jest to sprytny sposób na iteracyjne wstawienie elementu do listy bez
  * jakiejś nadmiernej ifologii */
-void MonoListInsert(MonoList** head, MonoList* new)
+void MonoListInsert(MonoList** head, Mono* m)
 {
   MonoList** tracer = head;
   MonoList* tmp;
+  MonoList* new;
   int cmp = 1;
 
-  assert(new);
-  assert(!PolyIsZero(&new->m.p));
+  /* assert(new); */
+  assert(!PolyIsZero(&m->p));
 
-  while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, &new->m)) > 0))
+  while ((*tracer && (cmp = MonoCmp(&(*tracer)->m, m)) > 0))
     tracer = &(*tracer)->tail;
 
   if (cmp != 0) {
     /* nowy element o wykładniku niepojawionym jeszcze */
+    new = malloc(sizeof(MonoList));
+    CHECK_PTR(new);
+    new->m = *m;
     new->tail = *tracer;
     *tracer = new;
   } else {
     /* nowy element jest merge'owany z już istniejącym o równym stopniu */
-    MonoAddComp(&(*tracer)->m, &new->m);
+    MonoAddComp(&(*tracer)->m, m);
 
     if (PolyIsZero(&(*tracer)->m.p)) {
       /* wyzerowanie -- podłączam po prostu ogon pod tracera */
@@ -257,9 +275,7 @@ void MonoListInsert(MonoList** head, MonoList* new)
       free(tmp);
     }
 
-    MonoDestroy(&new->m);
-    /* new powstaje przez moj malloc */
-    free(new);
+    MonoDestroy(m);
   }
 }
 

@@ -64,7 +64,7 @@ Poly PolyMul(const Poly* p, const Poly* q)
   Poly pq = PolyZero();
   /* jednomiany należące do wielomianów p, q i p * q */
   Mono pm, qm, pqm;
-  MonoList* new;
+  /* MonoList* new; */
 
   if (PolyIsCoeff(p))
     return PolyMulCoeff(q, p->coeff);
@@ -80,13 +80,8 @@ Poly PolyMul(const Poly* p, const Poly* q)
 
       if (PolyIsZero(&pqm.p))
         MonoDestroy(&pqm);
-      else {
-        new = malloc(sizeof(MonoList));
-        CHECK_PTR(new);
-        new->m = pqm;
-        new->tail = NULL;
-        MonoListInsert(&pq.list, new);
-      }
+      else
+        MonoListInsert(&pq.list, &pqm);
     }
   }
 
@@ -237,19 +232,15 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 Poly PolyAddMonos(size_t count, const Mono monos[])
 {
   MonoList* head = NULL;
-  MonoList* elem;
   Poly sum = PolyZero();
+  Mono m;
 
   for (size_t i = 0; i < count; ++i) {
     if (PolyIsZero(&monos[i].p))
       continue;
 
-    elem = malloc(sizeof(MonoList));
-    CHECK_PTR(elem);
-
-    elem->m = monos[i];
-    elem->tail = NULL;
-    MonoListInsert(&head, elem);
+    m = monos[i];
+    MonoListInsert(&head, &m);
   }
 
   sum.list = head;
