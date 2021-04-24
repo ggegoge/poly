@@ -106,7 +106,9 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
   MonoList* cpy;
   MonoList* tmp;
 
-  /* złączenie list à la merge sort dopóki obydwie nie są puste. */
+  /* złączenie list à la merge sort dopóki obydwie nie są puste.
+   * Elementy z lhead pozostawiam takie jakimi są, elementy z rhead
+   * wkopiowuję, a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
   if (!lhead && !rhead)
     return NULL;
 
@@ -119,11 +121,7 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
   else
     cmp = MonoCmp(&lhead->m, &rhead->m);
 
-  /* celem jest zmodyfikowanie listy lhead i pozostawienie bez szwanku listy
-   * rhead. Elementy z lhead pozostawiam takie jakimi są, elementy z rhead
-   * wkopiowuję, a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
-
-  if (cmp == 0) {                /* lh == rh */
+  if (cmp == 0) {               /* lh == rh */
     /* lh->m += rh->m */
     MonoAddComp(&lhead->m, &rhead->m);
 
@@ -137,7 +135,7 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
       free(lhead);
       return MonoListsMerge(tmp, rhead->tail);
     }
-  } else if (cmp > 0) {        /* lh > rh */
+  } else if (cmp > 0) {         /* lh > rh */
     lhead->tail = MonoListsMerge(lhead->tail, rhead);
     return lhead;
   } else {                      /* lh < rh */
@@ -314,6 +312,7 @@ static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff)
     MonoDestroy(&head->m);
     tail = head->tail;
     free(head);
+    /* jeśli po pomnożeniu przez 0 głowa się wyzeruje, to ją przeskakujemy */
     return MonoListMulCoeff(tail, coeff);
   }
 
