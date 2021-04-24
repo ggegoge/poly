@@ -124,7 +124,7 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
    * wkopiowuję, a trafiając na równe potęgi dokonuję lhead->m += rhead->m */
   switch (cmp) {
 
-  case 0 :                      /* lh == rh */
+  case 0:                       /* lh == rh */
     /* lh->m += rh->m */
     MonoAddComp(&lhead->m, &rhead->m);
 
@@ -139,18 +139,18 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
       return MonoListsMerge(tmp, rhead->tail);
     }
 
-  case 1 :                      /* lh > rh */
+  case 1:                       /* lh > rh */
     lhead->tail = MonoListsMerge(lhead->tail, rhead);
     return lhead;
 
-  case -1 :                     /* lh < rh */
+  case -1:                      /* lh < rh */
     cpy = malloc(sizeof(MonoList));
     CHECK_PTR(cpy);
     cpy->m = MonoClone(&rhead->m);
     cpy->tail = MonoListsMerge(lhead, rhead->tail);
     return cpy;
 
-  default :
+  default:
     return NULL;
 
   }
@@ -208,8 +208,9 @@ void PolyAddComp(Poly* p, const Poly* q)
   } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
     m = MonoPseudoCoeff(q->coeff);
     MonoListInsert(&p->list, &m);
-  } else
+  } else {
     p->list = MonoListsMerge(p->list, q->list);
+  }
 
   /* nawet jeśli lista się znullyfikowała, to dzięki ścisłemu reżimowi
    * inicjalizacji wykładników możemy spać spokojnie -- są one z defaultu zerowe
@@ -224,9 +225,9 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
   Poly new = PolyZero();
   Mono m;
 
-  if (coeff == 0)
-    new = PolyClone(p);
-  else if (PolyIsCoeff(p)) {
+  if (coeff == 0) {
+    new = PolyClone(p);    
+  } else if (PolyIsCoeff(p)) {
     new.coeff = coeff + p->coeff;
     new.list = NULL;
   } else {
