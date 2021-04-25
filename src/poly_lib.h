@@ -54,7 +54,7 @@ void PolyAddComp(Poly* p, const Poly* q);
  * Sprawdzian czy komórka listy @p ml nie jest przypadkiem
  * ''pseudowspółczynnikiem''. Funkcja mówi czy nie jest to przypadkiem lista,
  * w którą zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
- * typu @f$ c * x^0 @f$. Istnienie pseudowspółczynnika ma wbrew pozorom głęboki
+ * typu @f$ c \cdot x^0 @f$. Istnienie pseudowspółczynnika ma wbrew pozorom głęboki
  * sens -- trzymamy listy __jednomianów__ ergo chcąc tam schować współczynnik
  * (tj wielomian) musimy go przebrać. Stąd wspomniana reprezentacja.
  * @param[in] ml : komórka listy jednomianów
@@ -82,7 +82,7 @@ Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff);
  * Iloczyn jednomianów.
  * @param[in] m : jednomian
  * @param[in] t : jednomian
- * @return iloczyn @f$ m * p @f$
+ * @return iloczyn @f$ m \cdot p @f$
  */
 Mono MonoMul(const Mono* m, const Mono* t);
 

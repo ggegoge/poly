@@ -183,7 +183,7 @@ Poly PolyAddMonos(size_t count, const Mono monos[]);
  * Mnoży dwa wielomiany.
  * @param[in] p : wielomian @f$p@f$
  * @param[in] q : wielomian @f$q@f$
- * @return @f$p * q@f$
+ * @return @f$p \cdot q@f$
  */
 Poly PolyMul(const Poly* p, const Poly* q);
 
