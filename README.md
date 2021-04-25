@@ -2,7 +2,7 @@
 
 Uwaga: aktualna treść zadania znajduje się
 w [Moodle](https://moodle.mimuw.edu.pl), ale zarazem w pliku task.md,
-który można ujrzeć w sekcji _dodatkowe strony_.
+który można ujrzeć w sekcji [_dodatkowe strony_](pages.html).
 
 ### Opis programu
 

@@ -3,7 +3,7 @@
 # Duże zadanie, część 1
 
 
-# Table of Contents
+# Spis treści
 
 1.  [Duże zadanie, część 1](#org71a9932)
     1.  [Wielomiany](#org4d32805)
