@@ -191,7 +191,7 @@ void PolyAddComp(Poly* p, const Poly* q)
     p->list = MonoListPseduoCoeff(p->coeff);
     /* kluczowe jest ustawienie coeff na 0 gdy jego lista jest != NULL ponieważ
      * to daje łatwą obsługę redukcji. Zamiast po dodawaniu patrzeć czy lista
-     * opustoszała i konstatować -- aha, to 0 -- umieszczamy tam 0 zawczasu */
+     * opustoszała i konstatować -- aha, to 0! -- umieszczamy tam 0 zawczasu */
     p->coeff = 0;
     p->list = MonoListsMerge(p->list, q->list);
   } else if (PolyIsCoeff(q) && !PolyIsZero(q)) {
@@ -219,8 +219,8 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
   } else if (PolyIsCoeff(p)) {
     new = PolyFromCoeff(coeff + p->coeff);
   } else {
-    new = PolyZero();
     m = MonoPseudoCoeff(coeff);
+    new.coeff = 0;
     new.list = MonoListClone(p->list);
     MonoListInsert(&new.list, &m);
   }
@@ -254,6 +254,7 @@ void MonoListInsert(MonoList** head, Mono* m)
   } else {
     /* nowy element jest merge'owany z już istniejącym o równym stopniu */
     MonoAddComp(&(*tracer)->m, m);
+    MonoDestroy(m);
 
     if (PolyIsZero(&(*tracer)->m.p)) {
       /* wyzerowanie -- podłączam po prostu ogon pod tracera */
@@ -262,8 +263,6 @@ void MonoListInsert(MonoList** head, Mono* m)
       *tracer = (*tracer)->tail;
       free(tmp);
     }
-
-    MonoDestroy(m);
   }
 }
 
@@ -293,7 +292,8 @@ static void PolyMulCoeffComp(Poly* p, poly_coeff_t coeff)
 
 /**
  * Pomnożenie listy przez skalar. Każdy element listy zaczynającej się
- * w @p head zostaje pomnożony przez współczynnik @p coeff.
+ * w @p head zostaje pomnożony przez współczynnik @p coeff wraz z pozbyciem się
+ * wyzerowanych jednomianów w razie, gdy takowe się nadażą.
  * @param[in] head : głowa listy
  * @param[in] coeff : skalar
  * @return głowa przemnożonej listy
@@ -311,7 +311,6 @@ static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff)
     MonoDestroy(&head->m);
     tail = head->tail;
     free(head);
-    /* jeśli po pomnożeniu przez 0 głowa się wyzeruje, to ją przeskakujemy */
     return MonoListMulCoeff(tail, coeff);
   }
 

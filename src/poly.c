@@ -28,7 +28,7 @@ Poly PolyClone(const Poly* p)
 
 Poly PolyAdd(const Poly* p, const Poly* q)
 {
-  Poly new = PolyZero();
+  Poly new;
 
   if (PolyIsCoeff(p) && PolyIsCoeff(q))
     return PolyFromCoeff(p->coeff + q->coeff);
@@ -81,7 +81,7 @@ Poly PolyNeg(const Poly* p)
 
 Poly PolySub(const Poly* p, const Poly* q)
 {
-  /* nq *= -q; nq += p <---> nq := (-q) + p */
+  /* nq := -q; nq += p <---> nq := (-q) + p */
   Poly nq = PolyNeg(q);
   PolyAddComp(&nq, p);
 
@@ -197,7 +197,7 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
    * wielomian p, i dokonuję res += p * x^n -- powstaje mi suma kumulatywna
    * wielomianów wielu, która jest wynikiem */
   Poly res = PolyZero();
-  Poly mul = PolyZero();
+  Poly mul;
   poly_coeff_t coeff;
 
   if (PolyIsCoeff(p))
@@ -215,7 +215,6 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 
 Poly PolyAddMonos(size_t count, const Mono monos[])
 {
-  MonoList* head = NULL;
   Poly sum = PolyZero();
   Mono m;
 
@@ -224,10 +223,8 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
       continue;
 
     m = monos[i];
-    MonoListInsert(&head, &m);
+    MonoListInsert(&sum.list, &m);
   }
-
-  sum.list = head;
 
   if (PolyIsPseudoCoeff(sum.list))
     Decoeffise(&sum);
