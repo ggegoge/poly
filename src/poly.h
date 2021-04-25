@@ -33,9 +33,9 @@ struct MonoList;
  */
 typedef struct Poly {
   /**
-  * Jeżeli `list == NULL`, wtedy jest to współczynnik będący liczbą całkowitą.
-  * W przeciwnym przypadku jest to niepusta lista jednomianów.
-  */
+   * Jeżeli `list == NULL`, wtedy jest to współczynnik będący liczbą całkowitą.
+   * W przeciwnym przypadku jest to niepusta lista jednomianów.
+   */
   poly_coeff_t coeff;
   /** To jest lista jednomianów. */
   struct MonoList* list;

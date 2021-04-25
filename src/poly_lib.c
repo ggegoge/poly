@@ -86,7 +86,7 @@ static void MonoAddComp(Mono* m, const Mono* t)
  * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
  * przypadku 1, 0 oznacza równość -- konwencja zgodna z C.
  */
-static int MonoCmp(const Mono* m, const Mono* t)
+static inline int MonoCmp(const Mono* m, const Mono* t)
 {
   return (m->exp > t->exp) - (m->exp < t->exp);
 }
@@ -211,15 +211,15 @@ void PolyAddComp(Poly* p, const Poly* q)
 
 Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
 {
-  Poly new = PolyZero();
+  Poly new;
   Mono m;
 
   if (coeff == 0) {
     new = PolyClone(p);
   } else if (PolyIsCoeff(p)) {
-    new.coeff = coeff + p->coeff;
-    new.list = NULL;
+    new = PolyFromCoeff(coeff + p->coeff);
   } else {
+    new = PolyZero();
     m = MonoPseudoCoeff(coeff);
     new.list = MonoListClone(p->list);
     MonoListInsert(&new.list, &m);
