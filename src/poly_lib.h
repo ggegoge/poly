@@ -3,7 +3,7 @@
   interfejs oraz służą do implementacji różnorakich działań na m. in. listach,
   ale także są tutaj odpowiedniki działania `+=` (tak jak w poly.h mamy `+`).
 
-  @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
+  @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
   @date kwiecień 2021
 */

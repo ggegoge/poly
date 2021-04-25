@@ -2,7 +2,7 @@
   Implementacja funkcji z pliku poly_lib.h czyli biblioteki dodatkowych operacji
   na wielomianach rzadkich z poly.h i ichnich listach jednomianów.
 
-  @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
+  @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
   @date kwiecień 2021
 */

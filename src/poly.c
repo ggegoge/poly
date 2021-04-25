@@ -2,7 +2,7 @@
   Implementacja interfejsu z pliku poly.h `klasy' reprezentującej wielomiany
   rzadkie wielu zmiennych.
 
-  @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
+  @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
   @date kwiecień 2021
 */
