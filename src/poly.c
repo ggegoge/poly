@@ -13,16 +13,6 @@
 #include "poly.h"
 #include "poly_lib.h"
 
-/**
- * Sprawdzian powodzenia (m)allokacyjnego.
- */
-#define CHECK_PTR(p)                            \
-  do {                                          \
-    if (!p) {                                   \
-      exit(1);                                  \
-    }                                           \
-  } while (0)
-
 void PolyDestroy(Poly* p)
 {
   if (!PolyIsCoeff(p))

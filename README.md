@@ -1,8 +1,11 @@
+
+## Wielomiany
+
 ### Treść zadania
 
 Aktualna treść zadania znajduje się
 w [Moodle](https://moodle.mimuw.edu.pl), ale zarazem w pliku task.md,
-który można ujrzeć w sekcji [_dodatkowe strony_](pages.html).
+który można ujrzeć w sekcji _dodatkowe strony_ dokumentacji.
 
 ### Opis programu
 
@@ -81,3 +84,8 @@ source). Licencę zresztą załączam w katalogu `css` zgodnie z jej warunkami.
 
 Dokonałem jedynie nieznacznych poprawek nadając linkom elegancki
 różowy kolor.
+
+------------
+
+@author Grzegorz Cichosz
+@date kwiecień 2021
