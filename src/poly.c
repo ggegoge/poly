@@ -21,12 +21,9 @@ void PolyDestroy(Poly* p)
 
 Poly PolyClone(const Poly* p)
 {
-  Poly np;
-
-  np.coeff = p->coeff;
-  np.list = MonoListClone(p->list);
-
-  return np;
+  return (Poly) {
+    .coeff = p->coeff, .list = MonoListClone(p->list)
+  };
 }
 
 Poly PolyAdd(const Poly* p, const Poly* q)
@@ -54,7 +51,6 @@ Poly PolyMul(const Poly* p, const Poly* q)
   Poly pq = PolyZero();
   /* jednomiany należące do wielomianów p, q i p * q */
   Mono pm, qm, pqm;
-  /* MonoList* new; */
 
   if (PolyIsCoeff(p))
     return PolyMulCoeff(q, p->coeff);
@@ -85,9 +81,8 @@ Poly PolyNeg(const Poly* p)
 
 Poly PolySub(const Poly* p, const Poly* q)
 {
-  /* nq := q; nq *= -1; nq += p <---> nq := (-q) + p */
-  Poly nq = PolyClone(q);
-  PolyNegComp(&nq);
+  /* nq *= -q; nq += p <---> nq := (-q) + p */
+  Poly nq = PolyNeg(q);
   PolyAddComp(&nq, p);
 
   return nq;

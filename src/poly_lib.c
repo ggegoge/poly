@@ -272,7 +272,6 @@ Mono MonoMul(const Mono* m, const Mono* t)
   Mono mt;
   mt.exp = m->exp + t->exp;
   mt.p = PolyMul(&m->p, &t->p);
-
   return mt;
 }
 
@@ -348,9 +347,4 @@ poly_exp_t PolyCoeffDeg(const Poly* p)
 bool MonoIsEq(const Mono* m, const Mono* t)
 {
   return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
-}
-
-void PolyNegComp(Poly* p)
-{
-  PolyMulCoeffComp(p, -1);
 }

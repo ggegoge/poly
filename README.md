@@ -87,5 +87,5 @@ różowy kolor.
 
 ------------
 
-@author Grzegorz Cichosz
-@date kwiecień 2021
+\author Grzegorz Cichosz
+\date kwiecień 2021

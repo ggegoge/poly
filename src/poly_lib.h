@@ -87,14 +87,6 @@ Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff);
 Mono MonoMul(const Mono* m, const Mono* t);
 
 /**
- * Uprzeciwnienie wielomianu samego w sobie. Nie zwraca nowego wielomianu tylko
- * neguje ten otrzymany. Dokładniej rzecz biorąc neguje jego współczynniki
- * liczbowe. Coś à la `p *= -1`.
- * @param[in] p : wielomian @f$ p @f$
-*/
-void PolyNegComp(Poly* p);
-
-/**
  * Obliczenie współczynnika wielomianu stałego.
  * @param[in] p : wielomian stały
  * @return stopień wielomianu
