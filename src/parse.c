@@ -34,7 +34,8 @@ bool ParsePoly(char* src, char** err, Poly* p)
   bool mono_read;
   Mono m;
 
-  if (isdigit(*src)) {
+  /* przypadek pierwszy -- wielomian współczynnny */
+  if (isdigit(*src) || *src == '-') {
     c = strtol(src, &strto_err, 10);
 
     if (errno == ERANGE) {
@@ -42,7 +43,7 @@ bool ParsePoly(char* src, char** err, Poly* p)
       return false;
     }
 
-    if (*strto_err != '\0' && *strto_err != ',')
+    if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
       return false;
 
     *p = PolyFromCoeff(c);
