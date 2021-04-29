@@ -20,43 +20,45 @@
  * <exp> ::= 0..2147483647
  */
 
-/* static long ReadNumber(const char* s) {
- *   char* err;
- *   long res = strtol(src, &strto_err, 10);
- * } */
-
 void RangeError(void)
 {
   fprintf(stderr, "range!\n");
   errno = 0;
 }
 
-/* to na razie czyta jedynie listę, jak odróżnić koef? */
-bool ParsePoly(char* src, char** err, Poly* p)
+/* TODO -- self ewidentne */
+static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 {
+  assert(isdigit(*src) || *src == '-');
 
   char* strto_err;
   poly_coeff_t c;
+
+  c = strtol(src, &strto_err, 10);
+
+  if (errno == ERANGE) {
+    RangeError();
+    return false;
+  }
+
+  if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
+    return false;
+
+  *err = strto_err;
+  *p = PolyFromCoeff(c);
+  return true;
+}
+
+/* to na razie czyta jedynie listę, jak odróżnić koef? */
+bool ParsePoly(char* src, char** err, Poly* p)
+{
   bool mono_read;
   Mono m;
   *err = src;
-  
+
   /* przypadek pierwszy -- wielomian współczynnny */
-  if (isdigit(*src) || *src == '-') {
-    c = strtol(src, &strto_err, 10);
-
-    if (errno == ERANGE) {
-      RangeError();
-      return false;
-    }
-
-    if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
-      return false;
-
-    *err = strto_err;
-    *p = PolyFromCoeff(c);
-    return true;
-  }
+  if (isdigit(*src) || *src == '-')
+    return ParsePolyCoeff(src, err, p);
 
   *p = PolyZero();
 
@@ -74,9 +76,13 @@ bool ParsePoly(char* src, char** err, Poly* p)
     }
 
     MonoListInsert(&p->list, &m);
+
     assert(**err == ')');
     src = ++*err;
   }
+
+  if (PolyIsPseudoCoeff(p->list))
+    Decoeffise(p);
 
   return true;
 }
@@ -87,7 +93,7 @@ bool ParseMono(char* src, char** err, Mono* m)
   Poly p;
   long e;
   char* strto_err;
-  
+
   *err = src;                   /* to wywołane z ParsePoly so no need */
   assert(*src == '(');
 
@@ -101,6 +107,7 @@ bool ParseMono(char* src, char** err, Mono* m)
 
   src = *err + 1;
   e = strtol(src, &strto_err, 10);
+
   if (errno == ERANGE || e > 2147483647 || e < 0) {
     RangeError();
     PolyDestroy(&p);
