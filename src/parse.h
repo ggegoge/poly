@@ -4,22 +4,24 @@
 
 #include "poly.h"
 
-struct Command {
-  enum {ADD, AT, DEG_BY} command;
-  union {
-    poly_coeff_t at_arg;
-    unsigned long deg_arg; 
-  };
-};
+/* struct Command {
+ *   enum {ADD, AT, DEG_BY} command;
+ *   union {
+ *     poly_coeff_t at_arg;
+ *     unsigned long deg_arg; 
+ *   };
+ * };
+ * 
+ * struct input {
+ *   enum {COMMAND, ERROR} kind;
+ *   union {
+ *     Poly poly;
+ *     struct Command cmnd;    
+ *   };
+ *   size_t linum;  
+ * }; */
 
-struct input {
-  enum {COMMAND, POLY, ERROR} kind;
-  union {
-    Poly poly;
-    struct Command cmnd;    
-  };
-  size_t linum;  
-};
+  
 
 /*
  * <poly> ::= <mono> { + <poly> } | <coeff>

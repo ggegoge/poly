@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "poly.h"
 #include "poly_lib.h"
@@ -117,4 +118,54 @@ bool ParseMono(char* src, char** err, Mono* m)
   *err = strto_err;
   *m = MonoFromPoly(&p, e);
   return true;
+}
+
+
+#define WHITE " \t\n\v\f\r"
+
+/* diagnoza cóż za komenda */
+struct Command {
+  enum {SINGLE_ARG, TWO_ARG, POLY} kind;
+  enum {
+    ZERO, IS_COEFF, IS_ZERO, CLONE, ADD, MUL,
+    NEG, SUB, IS_EQ, DEG, DEG_BY, AT, PRINT, POP
+  } command;
+  size_t linum;
+  union {
+    poly_coeff_t at_arg;
+    unsigned long long deg_by_arg;
+  };
+};
+
+struct Command CommandKind(char* src, size_t linum)
+{
+  struct Command command = {0};
+  char* word = NULL;
+  size_t word_count = 0;
+
+  if (isdigit(*src) || *src == '-' || *src == '(') {
+    command.kind = POLY;
+    command.linum = linum;
+    return command;
+  }
+
+  word = strtok(src, WHITE);
+
+  if (!word)
+    ;                           /* empty line? */
+  
+  while (word) {
+    word_count++;
+
+    if (word_count == 1) {
+      if (strcmp(word, "add") == 0) {
+        command.kind = SINGLE_ARG;
+        command.command = ADD;
+      }
+    }
+
+    word = strtok(NULL, WHITE);
+  }
+
+  return command;
 }
