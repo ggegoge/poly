@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "poly.h"
 #include "poly_lib.h"
