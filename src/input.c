@@ -3,8 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "errno.h"
+#include <errno.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #include "input.h"
 #include "poly.h"
@@ -19,6 +20,15 @@ PrintPoly(Poly* p, size_t index);
 static ssize_t
 read_line(char** line_ptr, size_t* line_size, bool* is_eof, bool* is_comment);
 
+
+static bool empty(char* line, size_t line_len)
+{
+  bool is_empty = true;
+  for (size_t i = 0; i < line_len && is_empty; ++i)
+    is_empty = isspace(line[i]);
+
+  return is_empty;
+}
 
 void read()
 {
@@ -37,7 +47,7 @@ void read()
   while (!feof(stdin) && !is_eof) {
     line_len = read_line(&line, &line_size, &is_eof, &is_comment);
 
-    if (!is_comment && !is_eof) {
+    if (!is_comment && !is_eof && !empty(line, line_len)) {
       good_poly = ParsePoly(line, &err, &p);
       if (good_poly) {
         printf("poly>>  ");
