@@ -94,11 +94,15 @@ static void read_text()
 
     if (!is_comment && !is_eof) {
       good_poly = ParsePoly(line, &err, &p);
-      if (good_poly)
+      if (good_poly) {
+        printf("poly>>  ");
         PrintPoly(&p, 0);
-      else
-        printf("bad poly!");
-      }    
+        printf("\n");
+      } else {
+        printf("bad poly!\n");
+      }
+      PolyDestroy(&p);
+    }    
 
     ++line_num;
   }
