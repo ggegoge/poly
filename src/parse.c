@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 #include <ctype.h>
 #include <assert.h>
@@ -24,7 +25,11 @@
  *   long res = strtol(src, &strto_err, 10);
  * } */
 
-void RangeError(void);
+void RangeError(void)
+{
+  fprintf(stderr, "range!\n");
+  errno = 0;
+}
 
 /* to na razie czyta jedynie listę, jak odróżnić koef? */
 bool ParsePoly(char* src, char** err, Poly* p)
@@ -34,7 +39,8 @@ bool ParsePoly(char* src, char** err, Poly* p)
   poly_coeff_t c;
   bool mono_read;
   Mono m;
-
+  *err = src;
+  
   /* przypadek pierwszy -- wielomian współczynnny */
   if (isdigit(*src) || *src == '-') {
     c = strtol(src, &strto_err, 10);
@@ -47,6 +53,7 @@ bool ParsePoly(char* src, char** err, Poly* p)
     if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
       return false;
 
+    *err = strto_err;
     *p = PolyFromCoeff(c);
     return true;
   }
@@ -55,19 +62,20 @@ bool ParsePoly(char* src, char** err, Poly* p)
 
   while (*src != '\n' && *src != ',' && *src != '\0') {
     if (*src == '+' || isspace(*src) || *src != '(') {
-      ++*src;
+      ++src;
+      continue;
     }
 
     mono_read = ParseMono(src, err, &m);
 
     if (!mono_read) {
       PolyDestroy(p);
-      MonoDestroy(&m);
       return false;
     }
 
     MonoListInsert(&p->list, &m);
-    src = *err;
+    assert(**err == ')');
+    src = ++*err;
   }
 
   return true;
@@ -79,12 +87,15 @@ bool ParseMono(char* src, char** err, Mono* m)
   Poly p;
   long e;
   char* strto_err;
+  
+  *err = src;                   /* to wywołane z ParsePoly so no need */
   assert(*src == '(');
 
   poly_read = ParsePoly(src + 1, err, &p);
 
   if (!(**err == ',' && poly_read)) {
     /* błond */
+    PolyDestroy(&p);
     return false;
   }
 
@@ -96,6 +107,7 @@ bool ParseMono(char* src, char** err, Mono* m)
     return false;
   }
 
+  *err = strto_err;
   *m = MonoFromPoly(&p, e);
   return true;
 }
