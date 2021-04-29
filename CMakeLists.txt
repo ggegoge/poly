@@ -27,6 +27,8 @@ set(SOURCE_FILES
     src/poly_lib.h
     src/parse.h
     src/parse.c
+    src/input.h
+    src/input.c
     src/calc.c)
 
 # Wskazujemy plik wykonywalny.
