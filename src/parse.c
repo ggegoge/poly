@@ -158,7 +158,7 @@ void ParseLine(char* src, size_t linum, struct Stack* stack)
   arg = strtok(NULL, WHITE);
   rest = strtok(NULL, WHITE);
 
-  if (strcmp(cmnd, "deg_by") == 0 || strcmp(cmnd, "deg_by") == 0)
+  if (strcmp(cmnd, "deg_by") == 0 || strcmp(cmnd, "at") == 0)
     single_arg = false;
 
   if (rest || (single_arg && arg)) {
