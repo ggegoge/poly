@@ -141,7 +141,6 @@ void ParseLine(char* src, size_t linum, struct Stack* stack)
   char* cmnd;
   char* arg;
   char* rest;
-  size_t word_cnt;
   bool single_arg = true;
 
   if (isdigit(*src) || *src == '-' || *src == '(') {
@@ -153,7 +152,6 @@ void ParseLine(char* src, size_t linum, struct Stack* stack)
     return;
   }
 
-  word_cnt = 0;
   cmnd = strtok(src, WHITE);
   arg = strtok(NULL, WHITE);
   rest = strtok(NULL, WHITE);
@@ -175,7 +173,7 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
   unsigned long long idx;
   poly_coeff_t x;
   char* err;
-  
+
   if (strcmp(cmnd, "add") == 0) {
     Add(stack, linum);
   } else if (strcmp(cmnd, "mul") == 0) {
@@ -202,14 +200,16 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
     Pop(stack, linum);
   } else if (strcmp(cmnd, "deg_by") == 0) {
     idx = strtoull(arg, &err, 10);
+
     if (errno == ERANGE || *err != '\0') {
       errno = 0;
       ErrorTraceback(linum, "DEG BY WRONG VARIABLE");
     } else {
       DegBy(stack, idx, linum);
-    }    
+    }
   } else if (strcmp(cmnd, "at") == 0) {
     x = strtol(arg, &err, 10);
+
     if (errno == ERANGE || *err != '\0') {
       errno = 0;
       ErrorTraceback(linum, "AT WRONG VALUE");
