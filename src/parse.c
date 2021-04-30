@@ -30,7 +30,9 @@ void RangeError(void)
 /* TODO -- self ewidentne */
 static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 {
-  assert(isdigit(*src) || *src == '-');
+  if (!(isdigit(*src) || *src == '-')) {
+    return false;
+  }
 
   char* strto_err;
   poly_coeff_t c;
@@ -95,7 +97,7 @@ bool ParseMono(char* src, char** err, Mono* m)
   long e;
   char* strto_err;
 
-  *err = src;                   /* to wywołane z ParsePoly so no need */
+  *err = src;
   assert(*src == '(');
 
   poly_read = ParsePoly(src + 1, err, &p);
@@ -116,6 +118,12 @@ bool ParseMono(char* src, char** err, Mono* m)
   }
 
   *err = strto_err;
+
+  if (**err != ')') {
+    MonoDestroy(m);
+    return false;
+  }
+
   *m = MonoFromPoly(&p, e);
   return true;
 }
