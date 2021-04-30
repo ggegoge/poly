@@ -192,29 +192,27 @@ void At(struct Stack* stack, poly_coeff_t x, size_t linum)
   PushPoly(stack, &new);
 }
 
-static void PrintPoly(Poly* p, size_t index);
+static void PrintPoly(Poly* p);
 
 /* molasie drukarki */
-static void PrintMono(Mono* m, size_t index)
+static void PrintMono(Mono* m)
 {
-  PrintPoly(&(m->p), index + 1);
-  printf("(x_%ld)^%d", index, m->exp);
+  printf("(");
+  PrintPoly(&(m->p));
+  printf(",%d)", m->exp);
 }
 
-static void PrintPoly(Poly* p, size_t index)
+static void PrintPoly(Poly* p)
 {
   if (PolyIsCoeff(p)) {
     printf("%ld", p->coeff);
   } else {
-    printf("(");
-    PrintMono(&(p->list->m), index);
-
+    PrintMono(&(p->list->m));
+    
     for (MonoList* ml = p->list->tail; ml; ml = ml->tail) {
       printf(" + ");
-      PrintMono(&(ml->m), index);
+      PrintMono(&(ml->m));
     }
-
-    printf(")");
   }
 }
 
@@ -226,6 +224,6 @@ void Print(struct Stack* stack, size_t linum)
     return;
   }
 
-  PrintPoly(CarStack(stack), 0);
+  PrintPoly(CarStack(stack));
   printf("\n");
 }
