@@ -11,6 +11,21 @@ static void StackUnderflow(size_t linum)
   fprintf(stderr, "ERROR %lu STACK UNDERFLOW\n", linum);
 }
 
+static void PolyListDestroy(struct PolyList* pl)
+{
+  if (!pl)
+    return;
+
+  PolyListDestroy(pl->rest);
+  PolyDestroy(&pl->p);
+  free(pl);
+}
+
+void StackDestroy(struct Stack* stack)
+{
+  PolyListDestroy(stack->list);
+}
+
 void PushPoly(struct Stack* stack, Poly* p)
 {
   struct PolyList* new = malloc(sizeof(struct PolyList));
@@ -26,10 +41,12 @@ void PushPoly(struct Stack* stack, Poly* p)
 void Pop(struct Stack* stack, size_t linum)
 {
   struct PolyList* top;
+
   if (stack->height < 1) {
     StackUnderflow(linum);
     return;
   }
+
   top = stack->list;
   --stack->height;
   stack->list = stack->list->rest;
@@ -82,6 +99,7 @@ void Mul(struct Stack* stack, size_t linum)
 void Clone(struct Stack* stack, size_t linum)
 {
   Poly cpy;
+
   if (stack->height < 1) {
     StackUnderflow(linum);
     return;
@@ -92,12 +110,12 @@ void Clone(struct Stack* stack, size_t linum)
 }
 
 void Neg(struct Stack* stack, size_t linum)
-{  
+{
   if (stack->height < 1) {
     StackUnderflow(linum);
     return;
   }
-  
+
   PolyNegComp(CarStack(stack));
 }
 
@@ -133,7 +151,7 @@ void IsEq(struct Stack* stack, size_t linum)
     StackUnderflow(linum);
     return;
   }
-  
+
   if (PolyIsEq(CarStack(stack), CadrStack(stack)))
     printf("1\n");
   else
@@ -146,7 +164,7 @@ void Deg(struct Stack* stack, size_t linum)
     StackUnderflow(linum);
     return;
   }
-  
+
   printf("%d\n", PolyDeg(CarStack(stack)));
 }
 

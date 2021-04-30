@@ -14,6 +14,15 @@ struct Stack {
   size_t height;
 };
 
+static inline struct Stack EmptyStack(void)
+{
+  return (struct Stack) {
+    .height = 0, .list = NULL
+  };
+}
+
+void StackDestroy(struct Stack* stack);
+
 void PushPoly(struct Stack* stack, Poly* p);
 
 void Add(struct Stack* stack, size_t linum);
