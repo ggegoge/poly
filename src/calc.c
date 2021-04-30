@@ -12,10 +12,15 @@
 
 #define COMMENT_MARKER '#'
 
+static bool check_line(char** s, size_t line_num, size_t line_len);
+
+void read(struct Stack*);
 
 int main(void)
 {
-  read();
+  struct Stack stack = EmptyStack();
+  read(&stack);
+  StackDestroy(&stack);
   return 0;
 }
 
@@ -23,42 +28,46 @@ int main(void)
  * TODO: dodać checki na liniach */
 
 static ssize_t
-read_line(char** line_ptr, size_t* line_size, bool* is_eof, bool* is_comment);
+read_line(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
 
 
-static bool empty(char* line, size_t line_len)
+static bool empty(char* line, size_t len)
 {
   bool is_empty = true;
-  for (size_t i = 0; i < line_len && is_empty; ++i)
+
+  for (size_t i = 0; i < len && is_empty; ++i)
     is_empty = isspace(line[i]);
 
   return is_empty;
 }
 
-void read()
+void read(struct Stack* stack)
 {
-  Poly p;
-  bool good_poly;
-  
-  ssize_t line_len;
-  size_t line_num = 1;
-  size_t line_size = 0;
+  ssize_t len;
+  size_t linum = 1;
+  size_t size = 0;
   char* line = NULL;
   bool is_comment = false;
   bool is_eof = false;
 
-  char* err;
 
   while (!feof(stdin) && !is_eof) {
+    len = read_line(&line, &size, &is_eof, &is_comment);
+
+    if (!is_comment && !is_eof && !empty(line, len) &&
+        check_line(&line, linum, len))
+      ParseLine(line, linum, stack);
+
+    ++linum;
   }
 
   free(line);
 }
 
-static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
+static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
                          bool* is_comment)
 {
-  ssize_t line_len;
+  ssize_t len;
   /* za pomocą c wysonduję czy to nie jest linia komentarna pierwien niźli ją
    * wczytam getline'em */
   int c = getc(stdin);
@@ -77,13 +86,13 @@ static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
   }
 
   ungetc(c, stdin);
-  line_len = getline(line_ptr, line_size, stdin);
-  *is_eof = line_len == EOF;
+  len = getline(ptr, size, stdin);
+  *is_eof = len == EOF;
 
-  if (!line_ptr || errno == ENOMEM || errno == EOVERFLOW)
+  if (!ptr || errno == ENOMEM || errno == EOVERFLOW)
     exit(1);
 
-  return line_len;
+  return len;
 }
 
 
