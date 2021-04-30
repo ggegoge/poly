@@ -79,6 +79,12 @@ void Decoeffise(Poly* p);
 Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff);
 
 /**
+ * Uprzeciwnienie wielomianu @p p.
+ * @param[in] p : wielomian
+ */
+void PolyNegComp(Poly* p);
+
+/**
  * Iloczyn jednomianów.
  * @param[in] m : jednomian
  * @param[in] t : jednomian

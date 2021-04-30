@@ -9,6 +9,7 @@
 
 #include "poly.h"
 #include "poly_lib.h"
+#include "stack_op.h"
 #include "parse.h"
 
 
@@ -21,28 +22,21 @@
  * <exp> ::= 0..2147483647
  */
 
-void RangeError(void)
-{
-  fprintf(stderr, "range!\n");
-  errno = 0;
-}
-
 /* TODO -- self ewidentne */
 static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 {
-  if (!(isdigit(*src) || *src == '-')) {
+  if (!(isdigit(*src) || *src == '-'))
     return false;
-  }
+
 
   char* strto_err;
   poly_coeff_t c;
 
   c = strtol(src, &strto_err, 10);
 
-  if (errno == ERANGE) {
-    RangeError();
+  if (errno == ERANGE)
     return false;
-  }
+
 
   if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
     return false;
@@ -51,6 +45,8 @@ static bool ParsePolyCoeff(char* src, char** err, Poly* p)
   *p = PolyFromCoeff(c);
   return true;
 }
+
+static bool ParseMono(char* src, char** err, Mono* m);
 
 /* to na razie czyta jedynie listę, jak odróżnić koef? */
 bool ParsePoly(char* src, char** err, Poly* p)
@@ -90,7 +86,7 @@ bool ParsePoly(char* src, char** err, Poly* p)
   return true;
 }
 
-bool ParseMono(char* src, char** err, Mono* m)
+static bool ParseMono(char* src, char** err, Mono* m)
 {
   bool poly_read;
   Poly p;
@@ -112,7 +108,6 @@ bool ParseMono(char* src, char** err, Mono* m)
   e = strtol(src, &strto_err, 10);
 
   if (errno == ERANGE || e > 2147483647 || e < 0) {
-    RangeError();
     PolyDestroy(&p);
     return false;
   }
@@ -120,7 +115,7 @@ bool ParseMono(char* src, char** err, Mono* m)
   *err = strto_err;
 
   if (**err != ')') {
-    MonoDestroy(m);
+    PolyDestroy(&p);
     return false;
   }
 
@@ -131,49 +126,97 @@ bool ParseMono(char* src, char** err, Mono* m)
 
 #define WHITE " \t\n\v\f\r"
 
-/* diagnoza cóż za komenda */
-struct Command {
-  enum {SINGLE_ARG, TWO_ARG, POLY} kind;
-  enum {
-    ZERO, IS_COEFF, IS_ZERO, CLONE, ADD, MUL,
-    NEG, SUB, IS_EQ, DEG, DEG_BY, AT, PRINT, POP
-  } command;
-  size_t linum;
-  union {
-    poly_coeff_t at_arg;
-    unsigned long long deg_by_arg;
-  };
-};
-
-struct Command CommandKind(char* src, size_t linum)
+void ErrorTraceback(size_t linum, char* s)
 {
-  struct Command command = {0};
-  char* word = NULL;
-  size_t word_count = 0;
+  fprintf(stderr, "ERROR %lu %s\n", linum, s);
+}
+
+static void ParseCommand(char* cmnd, char* arg, size_t linum,
+                         struct Stack* stack);
+
+void ParseLine(char* src, size_t linum, struct Stack* stack)
+{
+  Poly p;
+  char* err;
+  char* cmnd;
+  char* arg;
+  char* rest;
+  size_t word_cnt;
+  bool single_arg = true;
 
   if (isdigit(*src) || *src == '-' || *src == '(') {
-    command.kind = POLY;
-    command.linum = linum;
-    return command;
+    if (ParsePoly(src, &err, &p))
+      PushPoly(stack, &p);
+    else
+      ErrorTraceback(linum, "WRONG POLY");
+
+    return;
   }
 
-  word = strtok(src, WHITE);
+  word_cnt = 0;
+  cmnd = strtok(src, WHITE);
+  arg = strtok(NULL, WHITE);
+  rest = strtok(NULL, WHITE);
 
-  if (!word)
-    ;                           /* empty line? */
+  if (strcmp(cmnd, "deg_by") == 0 || strcmp(cmnd, "deg_by") == 0)
+    single_arg = false;
+
+  if (rest || (single_arg && arg)) {
+    ErrorTraceback(linum, "WRONG COMMAND");
+    return;
+  }
+
+  ParseCommand(cmnd, arg, linum, stack);
+}
+
+static void ParseCommand(char* cmnd, char* arg, size_t linum,
+                         struct Stack* stack)
+{
+  unsigned long long idx;
+  poly_coeff_t x;
+  char* err;
   
-  while (word) {
-    word_count++;
-
-    if (word_count == 1) {
-      if (strcmp(word, "add") == 0) {
-        command.kind = SINGLE_ARG;
-        command.command = ADD;
-      }
+  if (strcmp(cmnd, "add") == 0) {
+    Add(stack, linum);
+  } else if (strcmp(cmnd, "mul") == 0) {
+    Mul(stack, linum);
+  } else if (strcmp(cmnd, "clone") == 0) {
+    Clone(stack, linum);
+  } else if (strcmp(cmnd, "neg") == 0) {
+    Neg(stack, linum);
+  } else if (strcmp(cmnd, "zero") == 0) {
+    Zero(stack);
+  } else if (strcmp(cmnd, "is_coeff") == 0) {
+    IsCoeff(stack, linum);
+  } else if (strcmp(cmnd, "is_zero") == 0) {
+    IsZero(stack, linum);
+  } else if (strcmp(cmnd, "sub") == 0) {
+    Sub(stack, linum);
+  } else if (strcmp(cmnd, "is_eq") == 0) {
+    IsEq(stack, linum);
+  } else if (strcmp(cmnd, "deg") == 0) {
+    Deg(stack, linum);
+  } else if (strcmp(cmnd, "print") == 0) {
+    Print(stack, linum);
+  } else if (strcmp(cmnd, "pop") == 0) {
+    Pop(stack, linum);
+  } else if (strcmp(cmnd, "deg_by") == 0) {
+    idx = strtoull(arg, &err, 10);
+    if (errno == ERANGE || *err != '\0') {
+      errno = 0;
+      ErrorTraceback(linum, "DEG BY WRONG VARIABLE");
+    } else {
+      DegBy(stack, idx, linum);
+    }    
+  } else if (strcmp(cmnd, "at") == 0) {
+    x = strtol(arg, &err, 10);
+    if (errno == ERANGE || *err != '\0') {
+      errno = 0;
+      ErrorTraceback(linum, "AT WRONG VALUE");
+    } else {
+      At(stack, x, linum);
     }
-
-    word = strtok(NULL, WHITE);
+  } else {
+    ErrorTraceback(linum, "WRONG COMMAND");
   }
-
-  return command;
 }
