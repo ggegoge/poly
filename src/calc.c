@@ -19,6 +19,7 @@ void read(struct Stack*);
 int main(void)
 {
   struct Stack stack = EmptyStack();
+  printf("---< Poly Calc >-----------< v. 0.1 >----\n");
   read(&stack);
   StackDestroy(&stack);
   return 0;
@@ -52,6 +53,7 @@ void read(struct Stack* stack)
 
 
   while (!feof(stdin) && !is_eof) {
+    printf("|%lu|> ", linum);
     len = read_line(&line, &size, &is_eof, &is_comment);
 
     if (!is_comment && !is_eof && !empty(line, len) &&
