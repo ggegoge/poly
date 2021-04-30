@@ -156,23 +156,50 @@ void DegBy(struct Stack* stack, unsigned long long idx, size_t linum)
     StackUnderflow(linum);
     return;
   }
-  
+
   printf("%d\n", PolyDegBy(CarStack(stack), idx));
 }
 
 void At(struct Stack* stack, poly_coeff_t x, size_t linum)
 {
   Poly new;
-  
+
   if (stack->height < 1) {
     StackUnderflow(linum);
     return;
   }
-  
+
   new = PolyAt(CarStack(stack), x);
   Pop(stack, linum);
   PushPoly(stack, &new);
 }
+
+static void PrintPoly(Poly* p, size_t index);
+
+/* molasie drukarki */
+static void PrintMono(Mono* m, size_t index)
+{
+  PrintPoly(&(m->p), index + 1);
+  printf("(x_%ld)^%d", index, m->exp);
+}
+
+static void PrintPoly(Poly* p, size_t index)
+{
+  if (PolyIsCoeff(p)) {
+    printf("%ld", p->coeff);
+  } else {
+    printf("(");
+    PrintMono(&(p->list->m), index);
+
+    for (MonoList* ml = p->list->tail; ml; ml = ml->tail) {
+      printf(" + ");
+      PrintMono(&(ml->m), index);
+    }
+
+    printf(")");
+  }
+}
+
 
 void Print(struct Stack* stack, size_t linum)
 {
@@ -181,4 +208,6 @@ void Print(struct Stack* stack, size_t linum)
     return;
   }
 
+  PrintPoly(CarStack(stack), 0);
+  printf("\n");
 }

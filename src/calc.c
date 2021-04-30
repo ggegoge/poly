@@ -12,7 +12,6 @@
 
 #define COMMENT_MARKER '#'
 
-void PrintPoly(Poly* p, size_t index);
 
 int main(void)
 {
@@ -22,8 +21,6 @@ int main(void)
 
 /* Modulik do wczytywania -- kopia z wierszarza
  * TODO: dodać checki na liniach */
-
-void PrintPoly(Poly* p, size_t index);
 
 static ssize_t
 read_line(char** line_ptr, size_t* line_size, bool* is_eof, bool* is_comment);
@@ -53,21 +50,6 @@ void read()
   char* err;
 
   while (!feof(stdin) && !is_eof) {
-    line_len = read_line(&line, &line_size, &is_eof, &is_comment);
-
-    if (!is_comment && !is_eof && !empty(line, line_len)) {
-      good_poly = ParsePoly(line, &err, &p);
-      if (good_poly) {
-        printf("poly>>  ");
-        PrintPoly(&p, 0);
-        printf("\n");
-      } else {
-        printf("bad poly!\n");
-      }
-      PolyDestroy(&p);
-    }    
-
-    ++line_num;
   }
 
   free(line);
@@ -105,26 +87,33 @@ static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
 }
 
 
-/* molasie drukarki */
-void PrintMono(Mono* m, size_t index)
+#define MIN_WORD_ASCII 33
+#define MAX_WORD_ASCII 126
+
+/**
+ * Szybki sprawdzian poprawności znaku -- znak jest ok, jeśli jest to whitespace
+ * lub należy do odpowiedniego zakresu */
+static inline bool correct_char(char c)
 {
-  PrintPoly(&(m->p), index + 1);
-  printf("(x_%ld)^%d", index, m->exp);
+  return isspace(c) || (c >= MIN_WORD_ASCII && c <= MAX_WORD_ASCII);
 }
 
-void PrintPoly(Poly* p, size_t index)
+
+/**
+ * Sprawdzian zakresu znakow w line_num-tej linii s długości line_len, error
+ * w przypadku nieprawidłowości. Do tego lekka normalizacja -- wszystkie duże
+ * litery (poprawne) zostają zmienione ma małe. Zwraca informację o poprawności
+ * danej linii. */
+static bool check_line(char** s, size_t line_num, size_t line_len)
 {
-  if (PolyIsCoeff(p)) {
-    printf("%ld", p->coeff);
-  } else {
-    printf("(");
-    PrintMono(&(p->list->m), index);
-
-    for (MonoList* ml = p->list->tail; ml; ml = ml->tail) {
-      printf(" + ");
-      PrintMono(&(ml->m), index);
+  for (size_t i = 0; i < line_len; ++i) {
+    if (!correct_char((*s)[i])) {
+      fprintf(stderr, "check line ERROR %lu\n", line_num);
+      return false;
+    } else {
+      (*s)[i] = tolower((*s)[i]);
     }
-
-    printf(")");
   }
+
+  return true;
 }
