@@ -74,7 +74,8 @@ bool ParsePoly(char* src, char** err, Poly* p)
       return false;
     }
 
-    MonoListInsert(&p->list, &m);
+    if (!PolyIsZero(&m.p))      
+      MonoListInsert(&p->list, &m);
 
     assert(**err == ')');
     src = ++*err;
