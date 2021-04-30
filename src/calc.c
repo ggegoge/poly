@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include "input.h"
+#include "stack_op.h"
 #include "poly.h"
 #include "parse.h"
 
