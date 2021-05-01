@@ -86,7 +86,7 @@ bool ParsePoly(char* src, char** err, Poly* p)
     if (*src == '+')
       ++pluses;
 
-    if (*src == '+' || isspace(*src) || *src != '(') {
+    if (*src == '+' || *src == '\n') {
       ++src;
       continue;
     }
@@ -167,9 +167,6 @@ static bool ParseMono(char* src, char** err, Mono* m)
   return true;
 }
 
-
-#define WHITE " \t\n\v\f\r"
-
 /**
  * Wypisanie wyjątku wczytywaniowego na wyjście diagnostyczne.
  * @param[in] linum : numer wiersza, na którym znajduje się błąd
@@ -201,9 +198,9 @@ void ParseLine(char* src, size_t linum, struct Stack* stack)
     return;
   }
 
-  cmnd = strtok(src, WHITE);
-  arg = strtok(NULL, WHITE);
-  rest = strtok(NULL, WHITE);
+  cmnd = strtok(src, " \n");
+  arg = strtok(NULL, " \n");
+  rest = strtok(NULL, " \n");
 
   if (strcmp(cmnd, "deg_by") == 0 || strcmp(cmnd, "at") == 0)
     single_arg = false;
