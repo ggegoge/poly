@@ -19,7 +19,6 @@
 #include "stack_op.h"
 #include "parse.h"
 
-
 /*
  * BNF wielomianów:
  *
@@ -41,10 +40,6 @@
  */
 static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 {
-  if (!(isdigit(*src) || *src == '-'))
-    return false;
-
-
   char* strto_err;
   poly_coeff_t c;
 
@@ -95,7 +90,7 @@ bool ParsePoly(char* src, char** err, Poly* p)
 
     /* po plusie musi nastąpić jednomian */
 
-    if ((pluses != 0  && *src != '(') || pluses > 1 || !ParseMono(src, err, &m)) {
+    if (*src != '(' || pluses > 1 || !ParseMono(src, err, &m)) {
       PolyDestroy(p);
       return false;
     }
@@ -130,15 +125,19 @@ bool ParsePoly(char* src, char** err, Poly* p)
  */
 static bool ParseMono(char* src, char** err, Mono* m)
 {
-  Poly p;
+  Poly p = PolyZero();
+  /* bool parsed; */
   long e;
   char* strto_err;
 
   *err = src;
   assert(*src == '(');
 
-  if (!(ParsePoly(src + 1, err, &p) &&** err == ',')) {
-    /* błond */
+  if (!ParsePoly(src + 1, err, &p))
+    return false;
+  else if (**err != ',') {
+    /* jeśli udało się wczytać, ale brakuje przecinka, tzn, że musimy sami
+     * usunąć ten wielomian ponieważ ParsePoly tego nie zrobiło */
     PolyDestroy(&p);
     return false;
   }
@@ -180,9 +179,8 @@ static void ErrorTraceback(size_t linum, char* s)
   fprintf(stderr, "ERROR %lu %s\n", linum, s);
 }
 
-static void ParseCommand(char* cmnd, char* arg, size_t linum,
-                         struct Stack* stack);
-
+static void
+ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
 
 /**
  * Sprawdza, czy dana komenda jest jedną z komend argumentowych. Sprawdza napis
@@ -216,16 +214,23 @@ static bool FindArg(char* src, size_t len, char** arg)
 
 void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
 {
-  Poly p;
+  Poly p = PolyZero();
+  bool parsed;
   char* err;
   char* cmnd = src;
   char* arg;
 
   if (isdigit(*src) || *src == '-' || *src == '(') {
-    if (ParsePoly(src, &err, &p) && *err == '\0')
+    if ((parsed = ParsePoly(src, &err, &p)) && *err == '\0') {
       PushPoly(stack, &p);
-    else
+    } else {
+      /* jeśli udało się wczytać wielomian, ALE brakuje \n, to nie usunął
+       * go ParsePoly, a jest do wyrzucenia */
+      if (parsed && *err != '\0')
+        PolyDestroy(&p);
+
       ErrorTraceback(linum, "WRONG POLY");
+    }
 
     return;
   }
