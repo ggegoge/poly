@@ -331,7 +331,7 @@ Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff)
 
 void PolyNegComp(Poly* p)
 {
-  PolyMulCoeff(p, -1);
+  PolyMulCoeffComp(p, -1);
 }
 
 poly_exp_t MonoListDeg(const MonoList* head)
