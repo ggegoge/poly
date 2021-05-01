@@ -99,28 +99,28 @@ static inline poly_exp_t max(poly_exp_t a, poly_exp_t b)
   return (a < b) ? b : a;
 }
 
-poly_exp_t PolyDegBy(const Poly* p, size_t var_idx)
+poly_exp_t PolyDegBy(const Poly* p, size_t idx)
 {
-  poly_exp_t max_deg = -1;
+  poly_exp_t deg = -1;
 
   if (PolyIsCoeff(p))
     return PolyCoeffDeg(p);
 
   /* jesteśmy w wielomianie danej zmiennej */
-  if (var_idx == 0)
+  if (idx == 0)
     return MonoListDeg(p->list);
 
   /* stopniem względem tej zmiennej będzie największy z tych stopni znalezionych
    * rekurencyjnie */
   for (MonoList* pl = p->list; pl; pl = pl->tail)
-    max_deg = max(max_deg, PolyDegBy(&pl->m.p, var_idx - 1));
+    deg = max(deg, PolyDegBy(&pl->m.p, idx - 1));
 
-  return max_deg;
+  return deg;
 }
 
 poly_exp_t PolyDeg(const Poly* p)
 {
-  poly_exp_t max_deg = -1;
+  poly_exp_t deg = -1;
 
   if (PolyIsCoeff(p))
     return PolyCoeffDeg(p);
@@ -129,9 +129,9 @@ poly_exp_t PolyDeg(const Poly* p)
    * zmiennych na jedną i szukanie największej potęgi, zatem to właśnie robię
    * dodając wykładniki i rekurencyjnie się zagłębiając w czeluści dalekich x */
   for (MonoList* pl = p->list; pl; pl = pl->tail)
-    max_deg = max(max_deg, pl->m.exp + PolyDeg(&pl->m.p));
+    deg = max(deg, pl->m.exp + PolyDeg(&pl->m.p));
 
-  return max_deg;
+  return deg;
 }
 
 bool PolyIsEq(const Poly* p, const Poly* q)
@@ -166,14 +166,12 @@ bool PolyIsEq(const Poly* p, const Poly* q)
  */
 static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
 {
-  poly_coeff_t b;
+  poly_coeff_t b = 1;
 
   assert(n >= 0);
 
-  if (n == 0)
+  if (n == 0 || a == 1)
     return 1;
-
-  b = 1;
 
   while (n > 1) {
     if (n % 2 == 0) {

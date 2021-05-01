@@ -9,12 +9,12 @@ który można ujrzeć w sekcji _dodatkowe strony_ dokumentacji.
 
 ### Opis programu
 
-Tegoroczne duże zadanie polega na zaimplementowaniu operacji na wielomianach
-rzadkich wielu zmiennych.
+Tegoroczne duże zadanie polega na zaimplementowaniu biblioteki
+operacji na wielomianach rzadkich wielu zmiennych.
 
 Program został podzielony na dwa moduły.
-1. `poly`
-2. `poly_lib`
+1. `poly` -- wielomianowa biblioteka standardowa
+2. `poly_lib` -- rozszerzenie `poly` i funkcje pomocnicze dlań
 
 #### Pliki nagłówkowe
 

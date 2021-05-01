@@ -84,7 +84,8 @@ static void MonoAddComp(Mono* m, const Mono* t)
  * @param[in] m : wskaźnik na pierwszy z jednomianów
  * @param[in] t : wskaźnik na dru1gi z jednomianów
  * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
- * przypadku 1, 0 oznacza równość -- konwencja zgodna z C.
+ * przypadku 1, 0 oznacza równość -- konwencja zgodna ze zwyczajową C, wystarczy
+ * sprawdzić znak aby poznać porządek między dwójką jednomianów.
  */
 static inline int MonoCmp(const Mono* m, const Mono* t)
 {
@@ -220,8 +221,7 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff)
     new = PolyFromCoeff(coeff + p->coeff);
   } else {
     m = MonoPseudoCoeff(coeff);
-    new.coeff = 0;
-    new.list = MonoListClone(p->list);
+    new = PolyClone(p);
     MonoListInsert(&new.list, &m);
   }
 
