@@ -50,8 +50,10 @@ static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 
   c = strtol(src, &strto_err, 10);
 
-  if (errno == ERANGE)
+  if (errno == ERANGE) {
+    errno = 0;
     return false;
+  }
 
   if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
     return false;
@@ -152,6 +154,7 @@ static bool ParseMono(char* src, char** err, Mono* m)
   e = strtol(src, &strto_err, 10);
 
   if (errno == ERANGE || e > 2147483647 || e < 0) {
+    errno = 0;
     PolyDestroy(&p);
     return false;
   }
@@ -180,14 +183,43 @@ static void ErrorTraceback(size_t linum, char* s)
 static void ParseCommand(char* cmnd, char* arg, size_t linum,
                          struct Stack* stack);
 
-void ParseLine(char* src, size_t linum, struct Stack* stack)
+
+/**
+ * Sprawdza, czy dana komenda jest jedną z komend argumentowych. Sprawdza napis
+ * @p src pod kątem jakichś spacji. W przypadku ich znalezienia zwraca `true`
+ * i ustawia odpowiednio wskaźnik @p cmnd na początek komendy i @p arg na tenże
+ * argument w stylu quasi-`strtok`owym -- ustawia znak '`\0`' na pozycji spacji
+ * aby następna obróbka argumentu była prosta. Do tego dodaje taki null bajt
+ * w miejscu `\n` co również ułatwia.
+ * @param[in] src : napis
+ * @param[in] len : jego długość
+ * @param[out] arg : wskazuje na argument
+ * @return czy znaleziono argument?
+ */
+static bool FindArg(char* src, size_t len, char** arg)
+{
+  bool res = false;
+
+  for (size_t i = 0; i < len; ++i) {
+    if (src[i] == ' ') {
+      src[i] = '\0';
+      /* komenda zaczyna się tuż po spacji */
+      *arg = src + i + 1;
+      res =  true;
+    } else if (src[i] == '\n') {
+      src[i] = '\0';
+    }
+  }
+
+  return res;
+}
+
+void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
 {
   Poly p;
   char* err;
-  char* cmnd;
+  char* cmnd = src;
   char* arg;
-  char* rest;
-  bool single_arg = true;
 
   if (isdigit(*src) || *src == '-' || *src == '(') {
     if (ParsePoly(src, &err, &p) && *err == '\0')
@@ -198,15 +230,9 @@ void ParseLine(char* src, size_t linum, struct Stack* stack)
     return;
   }
 
-  cmnd = strtok(src, " \n");
-  arg = strtok(NULL, " \n");
-  rest = strtok(NULL, " \n");
-
-  if (strcmp(cmnd, "deg_by") == 0 || strcmp(cmnd, "at") == 0)
-    single_arg = false;
-
-  if (rest || (single_arg && arg)) {
-    ErrorTraceback(linum, "WRONG COMMAND");
+  if (FindArg(src, len, &arg) && strcmp(cmnd, "deg_by") != 0 &&
+      strcmp(cmnd, "at") != 0) {
+    ErrorTraceback(linum, "WRONG COMMAND -- no args for this one");
     return;
   }
 
@@ -255,7 +281,7 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
   } else if (strcmp(cmnd, "deg_by") == 0) {
     idx = strtoull(arg, &err, 10);
 
-    if (errno == ERANGE || *err != '\0') {
+    if (errno == ERANGE || *err != '\0' || *arg == '\0') {
       errno = 0;
       ErrorTraceback(linum, "DEG BY WRONG VARIABLE");
     } else {
@@ -264,7 +290,7 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
   } else if (strcmp(cmnd, "at") == 0) {
     x = strtol(arg, &err, 10);
 
-    if (errno == ERANGE || *err != '\0') {
+    if (errno == ERANGE || *err != '\0' || *arg == '\0') {
       errno = 0;
       ErrorTraceback(linum, "AT WRONG VALUE");
     } else {

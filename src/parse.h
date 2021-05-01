@@ -32,6 +32,6 @@ bool ParsePoly(char* src, char** err, Poly* p);
  * @param[in] linum : numer obecnego wiersza
  * @param[in] stack : stos kalkulacyjny
  */
-void ParseLine(char* src, size_t linum, struct Stack* stack);
+void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack);
 
 #endif

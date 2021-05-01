@@ -83,7 +83,7 @@ void read(struct Stack* stack, bool prettification)
 
     if (!is_comment && !is_eof && !empty(line, len) &&
         LowerLine(&line, len))
-      ParseLine(line, linum, stack);
+      ParseLine(line, len, linum, stack);
 
     ++linum;
   }
