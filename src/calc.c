@@ -1,7 +1,15 @@
+/** @file
+  Interaktywny kalkulator działający na wielomianach wielu zmiennych.
+
+  @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
+  @copyright Uniwersytet Warszawski
+  @date maj 2021
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
 
@@ -9,18 +17,21 @@
 #include "poly.h"
 #include "parse.h"
 
-
 #define COMMENT_MARKER '#'
 
-static bool check_line(char** s, size_t line_num, size_t line_len);
+void read(struct Stack*, bool prettification);
 
-void read(struct Stack*);
-
-int main(void)
+int main(int argc, char* argv[])
 {
   struct Stack stack = EmptyStack();
-  printf("---< Poly Calc >-----------< v. 0.1 >----\n");
-  read(&stack);
+
+  if (argc >= 2 && strcmp(argv[1], "-p") == 0) {
+    printf("---< Poly Calc >-----------< v. 0.2 >----\n");
+    read(&stack, true);
+  } else {
+    read(&stack, false);
+  }
+
   StackDestroy(&stack);
   return 0;
 }
@@ -28,10 +39,17 @@ int main(void)
 /* Modulik do wczytywania -- kopia z wierszarza
  * TODO: dodać checki na liniach */
 
-static ssize_t
-read_line(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
+static bool LowerLine(char** s, size_t line_len);
 
+static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
+                         bool* is_comment);
 
+/**
+ * Sprawdzian pustości linii.
+ * @param[in] line : linia
+ * @param[in] len : długość linii
+ * @return czy linia jest pusta
+ */
 static bool empty(char* line, size_t len)
 {
   bool is_empty = true;
@@ -42,7 +60,12 @@ static bool empty(char* line, size_t len)
   return is_empty;
 }
 
-void read(struct Stack* stack)
+/**
+ * Czytanie komend ze standardowego wejścia.
+ * @param[in] stack : stos kalkulatora
+ * @param[in] prettification : jeśli jest `true` to dodaje pseudo prompt
+ */
+void read(struct Stack* stack, bool prettification)
 {
   ssize_t len;
   size_t linum = 1;
@@ -53,11 +76,13 @@ void read(struct Stack* stack)
 
 
   while (!feof(stdin) && !is_eof) {
-    printf("|%lu|> ", linum);
+    if (prettification)
+      printf("|%lu|> ", linum);
+
     len = read_line(&line, &size, &is_eof, &is_comment);
 
     if (!is_comment && !is_eof && !empty(line, len) &&
-        check_line(&line, linum, len))
+        LowerLine(&line, len))
       ParseLine(line, linum, stack);
 
     ++linum;
@@ -66,6 +91,14 @@ void read(struct Stack* stack)
   free(line);
 }
 
+/**
+ * Wczytywanie pojedynczych linii ze standardowego wejścia.
+ * @param[in] ptr : bufor do zapisywania linii
+ * @param[in] size : wielkość bufora
+ * @param[out] is_eof : czy ta linia zawiera koniec wejścia
+ * @param[out] is_comment : czy to nie linijka komentarzowa
+ * @return długość wczytanej linii
+ */
 static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
                          bool* is_comment)
 {
@@ -97,33 +130,27 @@ static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
   return len;
 }
 
-
-#define MIN_WORD_ASCII 33
-#define MAX_WORD_ASCII 126
-
-/**
- * Szybki sprawdzian poprawności znaku -- znak jest ok, jeśli jest to whitespace
- * lub należy do odpowiedniego zakresu */
-static inline bool correct_char(char c)
-{
-  return isspace(c) || (c >= MIN_WORD_ASCII && c <= MAX_WORD_ASCII);
-}
-
+/* /\**
+ *  * Szybki sprawdzian poprawności znaku -- znak jest ok, jeśli jest to whitespace
+ *  * lub należy do odpowiedniego zakresu *\/
+ * static inline bool correct_char(char c)
+ * {
+ *   return isspace(c) || (c >= MIN_WORD_ASCII && c <= MAX_WORD_ASCII);
+ * } */
 
 /**
  * Sprawdzian zakresu znakow w line_num-tej linii s długości line_len, error
  * w przypadku nieprawidłowości. Do tego lekka normalizacja -- wszystkie duże
  * litery (poprawne) zostają zmienione ma małe. Zwraca informację o poprawności
  * danej linii. */
-static bool check_line(char** s, size_t line_num, size_t line_len)
+static bool LowerLine(char** s, size_t line_len)
 {
   for (size_t i = 0; i < line_len; ++i) {
-    if (!correct_char((*s)[i])) {
-      fprintf(stderr, "check line ERROR %lu\n", line_num);
-      return false;
-    } else {
-      (*s)[i] = tolower((*s)[i]);
-    }
+    /* if (!correct_char((*s)[i])) {
+     *   fprintf(stderr, "check line ERROR %lu\n", line_num);
+     *   return false;
+     * } else { } */
+    (*s)[i] = tolower((*s)[i]);
   }
 
   return true;

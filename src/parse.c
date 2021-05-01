@@ -1,3 +1,10 @@
+/** @file
+  Wczytywanie wielomianów bądź komend z postaci tekstowej.
+
+  @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
+  @copyright Uniwersytet Warszawski
+  @date maj 2021
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,6 +21,8 @@
 
 
 /*
+ * BNF wielomianów:
+ *
  * <poly> ::= <mono-list> | <coeff>
  * <mono-list> ::= <mono> { + <mono-list> }
  * <mono> ::= ( <poly>, <exp> )
@@ -22,7 +31,14 @@
  * <exp> ::= 0..2147483647
  */
 
-/* TODO -- self ewidentne */
+/**
+ * Wczytanie ze stringa @p src wielomianu stałego.
+ * @param[in] src : string wejściowy
+ * @param[out] err : wskazuje na pierwszy niewczytany znak z @p src
+ * @param[out] p : wielomian pod którym zapisany zostaje ewentualny wynik
+ * @return powodzenie wczytania -- czy na wejściu obecne były jedynie właściwe
+ * znaki.
+ */
 static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 {
   if (!(isdigit(*src) || *src == '-'))
@@ -103,6 +119,13 @@ bool ParsePoly(char* src, char** err, Poly* p)
   return true;
 }
 
+/**
+ * Wczytanie jednomianu z tekstu.
+ * @param[in] src : tekst wejściowy
+ * @param[out] err : wskazuje pierwszy niewczytany znak
+ * @param[out] m : zapisany jednomian
+ * @return czy udało się wczytać poprawny jednomian
+ */
 static bool ParseMono(char* src, char** err, Mono* m)
 {
   Poly p;
@@ -147,7 +170,12 @@ static bool ParseMono(char* src, char** err, Mono* m)
 
 #define WHITE " \t\n\v\f\r"
 
-void ErrorTraceback(size_t linum, char* s)
+/**
+ * Wypisanie wyjątku wczytywaniowego na wyjście diagnostyczne.
+ * @param[in] linum : numer wiersza, na którym znajduje się błąd
+ * @param[in] s : treść błędu
+ */
+static void ErrorTraceback(size_t linum, char* s)
 {
   fprintf(stderr, "ERROR %lu %s\n", linum, s);
 }
@@ -188,6 +216,14 @@ void ParseLine(char* src, size_t linum, struct Stack* stack)
   ParseCommand(cmnd, arg, linum, stack);
 }
 
+/**
+ * Wczytanie komendy @p cmnd z opcjonalnymi argumentami @p arg i wywołanie
+ * stosownej operacji na stosie @p stack.
+ * @param[in] cmnd : treść komendy
+ * @param[in] arg : opcjonalnie -- argument komendy @p cmnd
+ * @param[in] linum : numer obecnego wiersza
+ * @param[in] stack : stos kalkulacyjny
+ */
 static void ParseCommand(char* cmnd, char* arg, size_t linum,
                          struct Stack* stack)
 {
