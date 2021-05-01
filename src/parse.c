@@ -37,9 +37,12 @@ static bool ParsePolyCoeff(char* src, char** err, Poly* p)
   if (errno == ERANGE)
     return false;
 
-
   if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
     return false;
+
+  while (*strto_err == '\n') {
+    ++strto_err;
+  }
 
   *err = strto_err;
   *p = PolyFromCoeff(c);
@@ -48,10 +51,9 @@ static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 
 static bool ParseMono(char* src, char** err, Mono* m);
 
-/* to na razie czyta jedynie listę, jak odróżnić koef? */
 bool ParsePoly(char* src, char** err, Poly* p)
 {
-  bool mono_read;
+  size_t pluses = 0;
   Mono m;
   *err = src;
 
@@ -59,27 +61,41 @@ bool ParsePoly(char* src, char** err, Poly* p)
   if (isdigit(*src) || *src == '-')
     return ParsePolyCoeff(src, err, p);
 
+  if (*src != '(')
+    return false;
+
   *p = PolyZero();
 
-  while (*src != '\n' && *src != ',' && *src != '\0') {
+  while (*src != ',' && *src != '\0') {
+    if (*src == '+')
+      ++pluses;
+
     if (*src == '+' || isspace(*src) || *src != '(') {
       ++src;
       continue;
     }
 
-    mono_read = ParseMono(src, err, &m);
+    /* po plusie musi nastąpić jednomian */
 
-    if (!mono_read) {
+    if ((pluses != 0  && *src != '(') || pluses > 1 || !ParseMono(src, err, &m)) {
       PolyDestroy(p);
       return false;
     }
 
-    if (!PolyIsZero(&m.p))      
+    if (!PolyIsZero(&m.p))
       MonoListInsert(&p->list, &m);
 
     assert(**err == ')');
     src = ++*err;
+    pluses = 0;
   }
+
+  if (pluses != 0) {
+    PolyDestroy(p);
+    return false;
+  }
+
+  *err = src;
 
   if (PolyIsPseudoCoeff(p->list))
     Decoeffise(p);
@@ -89,7 +105,6 @@ bool ParsePoly(char* src, char** err, Poly* p)
 
 static bool ParseMono(char* src, char** err, Mono* m)
 {
-  bool poly_read;
   Poly p;
   long e;
   char* strto_err;
@@ -97,15 +112,20 @@ static bool ParseMono(char* src, char** err, Mono* m)
   *err = src;
   assert(*src == '(');
 
-  poly_read = ParsePoly(src + 1, err, &p);
-
-  if (!(**err == ',' && poly_read)) {
+  if (!(ParsePoly(src + 1, err, &p) &&** err == ',')) {
     /* błond */
     PolyDestroy(&p);
     return false;
   }
 
   src = *err + 1;
+
+  /* po przecinku następuje dodatni wykładnik */
+  if (!isdigit(*src)) {
+    PolyDestroy(&p);
+    return false;
+  }
+
   e = strtol(src, &strto_err, 10);
 
   if (errno == ERANGE || e > 2147483647 || e < 0) {
@@ -145,7 +165,7 @@ void ParseLine(char* src, size_t linum, struct Stack* stack)
   bool single_arg = true;
 
   if (isdigit(*src) || *src == '-' || *src == '(') {
-    if (ParsePoly(src, &err, &p))
+    if (ParsePoly(src, &err, &p) && *err == '\0')
       PushPoly(stack, &p);
     else
       ErrorTraceback(linum, "WRONG POLY");
