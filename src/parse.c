@@ -66,6 +66,7 @@ static bool ParseMono(char* src, char** err, Mono* m);
 
 bool ParsePoly(char* src, char** err, Poly* p)
 {
+  bool beginning = true;
   size_t pluses = 0;
   Mono m;
   *err = src;
@@ -85,15 +86,19 @@ bool ParsePoly(char* src, char** err, Poly* p)
 
     if (*src == '+' || *src == '\n') {
       ++src;
+      beginning = false;
       continue;
     }
 
-    /* po plusie musi nastąpić jednomian */
-
-    if (*src != '(' || pluses > 1 || !ParseMono(src, err, &m)) {
+    /* jak wynika z BNFu -- poza początkiem, po jednomianie musi następować
+     * plus jeśli ma wystąpić jeszcze jakiś inny */
+    if (*src != '(' || pluses > 1 || (pluses == 0 && !beginning) ||
+        !ParseMono(src, err, &m)) {
       PolyDestroy(p);
       return false;
     }
+
+    beginning = false;
 
     if (!PolyIsZero(&m.p))
       MonoListInsert(&p->list, &m);
@@ -220,7 +225,7 @@ void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
   char* cmnd = src;
   char* arg;
 
-  if (isdigit(*src) || *src == '-' || *src == '(') {
+  if (!isalpha(*src)) {
     if ((parsed = ParsePoly(src, &err, &p)) && *err == '\0') {
       PushPoly(stack, &p);
     } else {
