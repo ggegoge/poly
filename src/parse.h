@@ -29,6 +29,7 @@ bool ParsePoly(char* src, char** err, Poly* p);
  * Odpowiednie wczytanie komendy z @p src i wywołanie stosownych operacji na
  * stosie kalkulacyjnym.
  * @param[in] src : tekst do parsunku
+ * @param[in] len : długość rzeczonej linii
  * @param[in] linum : numer obecnego wiersza
  * @param[in] stack : stos kalkulacyjny
  */

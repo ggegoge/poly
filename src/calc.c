@@ -17,15 +17,23 @@
 #include "poly.h"
 #include "parse.h"
 
+/**
+ * Znacznik komentarza. */
 #define COMMENT_MARKER '#'
 
 void read(struct Stack*, bool prettification);
 
+/**
+ * Główna procedura programu, włącza właściwy interpreter i inicjalizuje stos
+ * kalkulatora. Przyjmuje argumenty z linii poleceń: jeśli jest nim `-p` bądź
+ * `--pretty` to będzie wypisywać dodatkowo lekkie uładnienia dla użytkownika.
+ */
 int main(int argc, char* argv[])
 {
   struct Stack stack = EmptyStack();
 
-  if (argc >= 2 && strcmp(argv[1], "-p") == 0) {
+  if (argc >= 2 && (strcmp(argv[1], "-p") == 0 ||
+                    strcmp(argv[1], "--pretty") == 0)) {
     printf("---< Poly Calc >-----------< v. 0.2 >----\n");
     read(&stack, true);
   } else {

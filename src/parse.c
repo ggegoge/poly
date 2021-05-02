@@ -242,7 +242,7 @@ void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
 
   if (FindArg(src, len, &arg) && strcmp(cmnd, "deg_by") != 0 &&
       strcmp(cmnd, "at") != 0) {
-    ErrorTraceback(linum, "WRONG COMMAND -- no args for this one");
+    ErrorTraceback(linum, "WRONG COMMAND");
     return;
   }
 
