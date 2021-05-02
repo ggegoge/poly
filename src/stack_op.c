@@ -252,23 +252,40 @@ static void PrintMono(const Mono* m)
 }
 
 /**
- * Wypisanie od tyłu (jeszcze nie xd) wielomianu @p p.
+ * Wypisanie od tyłu (albowiem trzymane są one w kolejności malejącej, a rząda
+ * się od nas wypisania ich w wykładnikami rosnąco) listy jednomianów. Ze
+ * względu  na tę odtylniość jest to robione schematem rekurencyjnego wybrania
+ * się na sam koniec listy by następnie stopniowo wracać i dopiero wypisywać.
+ * Jednomiany są rozdzielone plusami.
+ * @param[in] ml : lista jednomianów
+ */
+static void PrintMonoList(MonoList* ml)
+{
+  if (!ml)
+    return;
+
+  PrintMonoList(ml->tail);
+
+  /* przed pierwszym jednomianem nie ma plusa */
+  if (!ml->tail) {
+    PrintMono(&ml->m);
+  } else {
+    printf("+");
+    PrintMono(&ml->m);
+  }
+}
+
+/**
+ * Wypisanie w kolejności rosnących wykładników wielomianu @p p.
  * @param[in] p : wielomian
  */
 static void PrintPoly(const Poly* p)
 {
-  if (PolyIsCoeff(p)) {
+  if (PolyIsCoeff(p))
     printf("%ld", p->coeff);
-  } else {
-    PrintMono(&(p->list->m));
-    
-    for (MonoList* ml = p->list->tail; ml; ml = ml->tail) {
-      printf(" + ");
-      PrintMono(&(ml->m));
-    }
-  }
+  else
+    PrintMonoList(p->list);
 }
-
 
 void Print(struct Stack* stack, size_t linum)
 {
