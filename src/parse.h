@@ -26,13 +26,13 @@
 bool ParsePoly(char* src, char** err, Poly* p);
 
 /**
- * Odpowiednie wczytanie komendy z @p src i wywołanie stosownych operacji na
- * stosie kalkulacyjnym.
+ * Odpowiednie wczytanie komendy z pojedynczej linii @p src i wywołanie
+ * stosownych operacji na stosie kalkulacyjnym.
  * @param[in] src : tekst do parsunku
  * @param[in] len : długość rzeczonej linii
  * @param[in] linum : numer obecnego wiersza
  * @param[in] stack : stos kalkulacyjny
  */
-void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack);
+void ParseLn(char* src, size_t len, size_t linum, struct Stack* stack);
 
 #endif

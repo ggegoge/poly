@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-static bool UpperLine(char** s, size_t line_len);
+static bool UpperLine(char* s, size_t line_len);
 
 static ssize_t
 ReadLn(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
@@ -88,9 +88,9 @@ void Interpret(struct Stack* stack, bool prettification)
 
     if (!is_comment && !is_eof && !empty(line, len)) {
       if (prettification)
-        UpperLine(&line, len);
+        UpperLine(line, len);
 
-      ParseLine(line, len, linum, stack);
+      ParseLn(line, len, linum, stack);
     }
 
     ++linum;
@@ -111,7 +111,7 @@ static ssize_t ReadLn(char** ptr, size_t* size, bool* is_eof,
                          bool* is_comment)
 {
   ssize_t len;
-  /* za pomocą c wysonduję czy to nie jest linia komentarna pierwien niźli ją
+  /* za pomocą c wysonduję czy to nie jest linia komentarna pierwiej niźli ją
    * wczytam getline'em */
   int c = getc(stdin);
 
@@ -143,10 +143,10 @@ static ssize_t ReadLn(char** ptr, size_t* size, bool* is_eof,
  * w przypadku nieprawidłowości. Do tego lekka normalizacja -- wszystkie duże
  * litery (poprawne) zostają zmienione ma małe. Zwraca informację o poprawności
  * danej linii. */
-static bool UpperLine(char** s, size_t line_len)
+static bool UpperLine(char* s, size_t line_len)
 {
   for (size_t i = 0; i < line_len; ++i)
-    (*s)[i] = toupper((*s)[i]);
+    s[i] = toupper(s[i]);
 
   return true;
 }

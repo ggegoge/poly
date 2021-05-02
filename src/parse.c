@@ -221,7 +221,7 @@ static bool FindArg(char* src, size_t len, char** arg)
 static void
 ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
 
-void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
+void ParseLn(char* src, size_t len, size_t linum, struct Stack* stack)
 {
   Poly p = PolyZero();
   bool parsed;
