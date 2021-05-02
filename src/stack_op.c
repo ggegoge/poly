@@ -78,7 +78,7 @@ void Pop(struct Stack* stack, size_t linum)
  * listy. Jak widzą nawet osoby obeznane z tymi językami, jest to nazewnictwo
  * dość
  * [ezoteryczne](https://www.gnu.org/software/emacs/manual/html_node/eintr/Strange-Names.html)
- * i lekko _przedawnione_ (co więcej:
+ * i lekko _przedawnione_. Co więcej:
  * [sami stwierdzają](https://www.gnu.org/software/emacs/manual/html_node/eintr/car-_0026-cdr.html),
  * że lepszą nazwą byłoby chociażby `first`, jednakże jest to owoc długiej
  * tradycji i w ramach hołdu dla języka __lisp__ zachowam tę konwencję.
