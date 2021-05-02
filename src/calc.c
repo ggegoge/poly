@@ -21,7 +21,7 @@
  * Znacznik komentarza. */
 #define COMMENT_MARKER '#'
 
-void read(struct Stack*, bool prettification);
+void Interpret(struct Stack*, bool prettification);
 
 /**
  * Główna procedura programu, włącza właściwy interpreter i inicjalizuje stos
@@ -35,25 +35,22 @@ int main(int argc, char* argv[])
   if (argc >= 2 && (strcmp(argv[1], "-p") == 0 ||
                     strcmp(argv[1], "--pretty") == 0)) {
     printf("---< Poly Calc >-----------< v. 0.2 >----\n");
-    read(&stack, true);
+    Interpret(&stack, true);
   } else {
-    read(&stack, false);
+    Interpret(&stack, false);
   }
 
   StackDestroy(&stack);
   return 0;
 }
 
-/* Modulik do wczytywania -- kopia z wierszarza
- * TODO: dodać checki na liniach */
-
 static bool UpperLine(char** s, size_t line_len);
 
-static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
-                         bool* is_comment);
+static ssize_t
+ReadLn(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
 
 /**
- * Sprawdzian pustości linii.
+ * Sprawdzian pustości linii (all white == pusta (_na razie_)).
  * @param[in] line : linia
  * @param[in] len : długość linii
  * @return czy linia jest pusta
@@ -73,7 +70,7 @@ static bool empty(char* line, size_t len)
  * @param[in] stack : stos kalkulatora
  * @param[in] prettification : jeśli jest `true` to dodaje pseudo prompt
  */
-void read(struct Stack* stack, bool prettification)
+void Interpret(struct Stack* stack, bool prettification)
 {
   ssize_t len;
   size_t linum = 1;
@@ -87,7 +84,7 @@ void read(struct Stack* stack, bool prettification)
     if (prettification)
       printf("|%lu|> ", linum);
 
-    len = read_line(&line, &size, &is_eof, &is_comment);
+    len = ReadLn(&line, &size, &is_eof, &is_comment);
 
     if (!is_comment && !is_eof && !empty(line, len)) {
       if (prettification)
@@ -110,7 +107,7 @@ void read(struct Stack* stack, bool prettification)
  * @param[out] is_comment : czy to nie linijka komentarzowa
  * @return długość wczytanej linii
  */
-static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
+static ssize_t ReadLn(char** ptr, size_t* size, bool* is_eof,
                          bool* is_comment)
 {
   ssize_t len;
@@ -140,14 +137,6 @@ static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
 
   return len;
 }
-
-/* /\**
- *  * Szybki sprawdzian poprawności znaku -- znak jest ok, jeśli jest to whitespace
- *  * lub należy do odpowiedniego zakresu *\/
- * static inline bool correct_char(char c)
- * {
- *   return isspace(c) || (c >= MIN_WORD_ASCII && c <= MAX_WORD_ASCII);
- * } */
 
 /**
  * Sprawdzian zakresu znakow w line_num-tej linii s długości line_len, error

@@ -70,6 +70,7 @@ bool ParsePoly(char* src, char** err, Poly* p)
   size_t pluses = 0;
   Mono m;
   *err = src;
+  *p = PolyZero();
 
   /* przypadek pierwszy -- wielomian współczynnny */
   if (isdigit(*src) || *src == '-')
@@ -78,13 +79,11 @@ bool ParsePoly(char* src, char** err, Poly* p)
   if (*src != '(')
     return false;
 
-  *p = PolyZero();
-
   while (*src != ',' && *src != '\0') {
-    if (*src == '+')
-      ++pluses;
-
     if (*src == '+' || *src == '\n') {
+      if (*src == '+')
+        ++pluses;
+
       ++src;
       beginning = false;
       continue;
@@ -98,13 +97,12 @@ bool ParsePoly(char* src, char** err, Poly* p)
       return false;
     }
 
-    beginning = false;
-
     if (!PolyIsZero(&m.p))
       MonoListInsert(&p->list, &m);
 
     assert(**err == ')');
     src = ++*err;
+    beginning = false;
     pluses = 0;
   }
 
@@ -113,11 +111,10 @@ bool ParsePoly(char* src, char** err, Poly* p)
     return false;
   }
 
-  *err = src;
-
   if (PolyIsPseudoCoeff(p->list))
     Decoeffise(p);
 
+  *err = src;
   return true;
 }
 
@@ -183,9 +180,6 @@ static void ErrorTraceback(size_t linum, char* s)
   fprintf(stderr, "ERROR %lu %s\n", linum, s);
 }
 
-static void
-ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
-
 /**
  * Sprawdza, czy dana komenda jest jedną z komend argumentowych. Sprawdza napis
  * @p src pod kątem jakichś spacji. W przypadku ich znalezienia zwraca `true`
@@ -223,6 +217,9 @@ static bool FindArg(char* src, size_t len, char** arg)
 
   return res;
 }
+
+static void
+ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
 
 void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
 {
