@@ -85,7 +85,7 @@ void Pop(struct Stack* stack, size_t linum)
  * @param[in] stack : stos
  * @return adres pierwszego wielomianu na stosie
  */
-Poly* CarStack(struct Stack* stack)
+Poly* Car(struct Stack* stack)
 {
   assert(stack->height >= 1);
   return &stack->list->p;
@@ -98,7 +98,7 @@ Poly* CarStack(struct Stack* stack)
  * @param[in] stack : stos
  * @return adres drugiego wielomianu ze stosu
  */
-Poly* CadrStack(struct Stack* stack)
+Poly* Cadr(struct Stack* stack)
 {
   assert(stack->height >= 2);
   return &stack->list->rest->p;
@@ -121,7 +121,7 @@ static void BinOp(struct Stack* stack, Poly (*op)(const Poly*, const Poly*),
     return;
   }
 
-  new = op(CarStack(stack), CadrStack(stack));
+  new = op(Car(stack), Cadr(stack));
   Pop(stack, linum);
   Pop(stack, linum);
   PushPoly(stack, &new);
@@ -151,7 +151,7 @@ void Clone(struct Stack* stack, size_t linum)
     return;
   }
 
-  cpy = PolyClone(CarStack(stack));
+  cpy = PolyClone(Car(stack));
   PushPoly(stack, &cpy);
 }
 
@@ -162,7 +162,7 @@ void Neg(struct Stack* stack, size_t linum)
     return;
   }
 
-  PolyNegComp(CarStack(stack));
+  PolyNegComp(Car(stack));
 }
 
 void IsCoeff(struct Stack* stack, size_t linum)
@@ -172,7 +172,7 @@ void IsCoeff(struct Stack* stack, size_t linum)
     return;
   }
 
-  if (PolyIsCoeff(CarStack(stack)))
+  if (PolyIsCoeff(Car(stack)))
     printf("1\n");
   else
     printf("0\n");
@@ -185,7 +185,7 @@ void IsZero(struct Stack* stack, size_t linum)
     return;
   }
 
-  if (PolyIsZero(CarStack(stack)))
+  if (PolyIsZero(Car(stack)))
     printf("1\n");
   else
     printf("0\n");
@@ -198,7 +198,7 @@ void IsEq(struct Stack* stack, size_t linum)
     return;
   }
 
-  if (PolyIsEq(CarStack(stack), CadrStack(stack)))
+  if (PolyIsEq(Car(stack), Cadr(stack)))
     printf("1\n");
   else
     printf("0\n");
@@ -211,7 +211,7 @@ void Deg(struct Stack* stack, size_t linum)
     return;
   }
 
-  printf("%d\n", PolyDeg(CarStack(stack)));
+  printf("%d\n", PolyDeg(Car(stack)));
 }
 
 void DegBy(struct Stack* stack, unsigned long long idx, size_t linum)
@@ -221,7 +221,7 @@ void DegBy(struct Stack* stack, unsigned long long idx, size_t linum)
     return;
   }
 
-  printf("%d\n", PolyDegBy(CarStack(stack), idx));
+  printf("%d\n", PolyDegBy(Car(stack), idx));
 }
 
 void At(struct Stack* stack, poly_coeff_t x, size_t linum)
@@ -233,7 +233,7 @@ void At(struct Stack* stack, poly_coeff_t x, size_t linum)
     return;
   }
 
-  new = PolyAt(CarStack(stack), x);
+  new = PolyAt(Car(stack), x);
   Pop(stack, linum);
   PushPoly(stack, &new);
 }
@@ -294,6 +294,6 @@ void Print(struct Stack* stack, size_t linum)
     return;
   }
 
-  PrintPoly(CarStack(stack));
+  PrintPoly(Car(stack));
   printf("\n");
 }
