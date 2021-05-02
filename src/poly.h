@@ -102,7 +102,7 @@ static inline bool PolyIsZero(const Poly* p);
  */
 static inline Mono MonoFromPoly(const Poly* p, poly_exp_t n)
 {
-  assert(n == 0 || !PolyIsZero(p));
+  /* assert(n == 0 || !PolyIsZero(p)); */
   return (Mono) {
     .p = *p, .exp = n
   };
