@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 /* Modulik do wczytywania -- kopia z wierszarza
  * TODO: dodać checki na liniach */
 
-static bool LowerLine(char** s, size_t line_len);
+static bool UpperLine(char** s, size_t line_len);
 
 static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
                          bool* is_comment);
@@ -89,9 +89,12 @@ void read(struct Stack* stack, bool prettification)
 
     len = read_line(&line, &size, &is_eof, &is_comment);
 
-    if (!is_comment && !is_eof && !empty(line, len) &&
-        LowerLine(&line, len))
+    if (!is_comment && !is_eof && !empty(line, len)) {
+      if (prettification)
+        UpperLine(&line, len);
+
       ParseLine(line, len, linum, stack);
+    }
 
     ++linum;
   }
@@ -151,15 +154,10 @@ static ssize_t read_line(char** ptr, size_t* size, bool* is_eof,
  * w przypadku nieprawidłowości. Do tego lekka normalizacja -- wszystkie duże
  * litery (poprawne) zostają zmienione ma małe. Zwraca informację o poprawności
  * danej linii. */
-static bool LowerLine(char** s, size_t line_len)
+static bool UpperLine(char** s, size_t line_len)
 {
-  for (size_t i = 0; i < line_len; ++i) {
-    /* if (!correct_char((*s)[i])) {
-     *   fprintf(stderr, "check line ERROR %lu\n", line_num);
-     *   return false;
-     * } else { } */
-    (*s)[i] = tolower((*s)[i]);
-  }
+  for (size_t i = 0; i < line_len; ++i)
+    (*s)[i] = toupper((*s)[i]);
 
   return true;
 }

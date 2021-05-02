@@ -131,7 +131,6 @@ bool ParsePoly(char* src, char** err, Poly* p)
 static bool ParseMono(char* src, char** err, Mono* m)
 {
   Poly p = PolyZero();
-  /* bool parsed; */
   long e;
   char* strto_err;
 
@@ -202,15 +201,23 @@ ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
 static bool FindArg(char* src, size_t len, char** arg)
 {
   bool res = false;
+  /* bool spaced = false; */
+  *arg = "";
 
   for (size_t i = 0; i < len; ++i) {
-    if (src[i] == ' ') {
+    if (!res && src[i] == ' ') {
       src[i] = '\0';
       /* komenda zaczyna się tuż po spacji */
       *arg = src + i + 1;
       res =  true;
     } else if (src[i] == '\n') {
       src[i] = '\0';
+    } else if (!res  && isspace(src[i]) && i != 0) {
+      /* inny whitespace niż spacja to wciąż rozdział, ale wiemy, że
+       * ze złym argumentem */
+      *arg = "\t";
+      src[i] = '\0';
+      res = true;
     }
   }
 
@@ -240,8 +247,8 @@ void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
     return;
   }
 
-  if (FindArg(src, len, &arg) && strcmp(cmnd, "deg_by") != 0 &&
-      strcmp(cmnd, "at") != 0) {
+  if (FindArg(src, len, &arg) && strcmp(cmnd, "DEG_BY") != 0 &&
+      strcmp(cmnd, "AT") != 0) {
     ErrorTraceback(linum, "WRONG COMMAND");
     return;
   }
@@ -264,43 +271,43 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
   poly_coeff_t x;
   char* err;
 
-  if (strcmp(cmnd, "add") == 0) {
+  if (strcmp(cmnd, "ADD") == 0) {
     Add(stack, linum);
-  } else if (strcmp(cmnd, "mul") == 0) {
+  } else if (strcmp(cmnd, "MUL") == 0) {
     Mul(stack, linum);
-  } else if (strcmp(cmnd, "clone") == 0) {
+  } else if (strcmp(cmnd, "CLONE") == 0) {
     Clone(stack, linum);
-  } else if (strcmp(cmnd, "neg") == 0) {
+  } else if (strcmp(cmnd, "NEG") == 0) {
     Neg(stack, linum);
-  } else if (strcmp(cmnd, "zero") == 0) {
+  } else if (strcmp(cmnd, "ZERO") == 0) {
     Zero(stack);
-  } else if (strcmp(cmnd, "is_coeff") == 0) {
+  } else if (strcmp(cmnd, "IS_COEFF") == 0) {
     IsCoeff(stack, linum);
-  } else if (strcmp(cmnd, "is_zero") == 0) {
+  } else if (strcmp(cmnd, "IS_ZERO") == 0) {
     IsZero(stack, linum);
-  } else if (strcmp(cmnd, "sub") == 0) {
+  } else if (strcmp(cmnd, "SUB") == 0) {
     Sub(stack, linum);
-  } else if (strcmp(cmnd, "is_eq") == 0) {
+  } else if (strcmp(cmnd, "IS_EQ") == 0) {
     IsEq(stack, linum);
-  } else if (strcmp(cmnd, "deg") == 0) {
+  } else if (strcmp(cmnd, "DEG") == 0) {
     Deg(stack, linum);
-  } else if (strcmp(cmnd, "print") == 0) {
+  } else if (strcmp(cmnd, "PRINT") == 0) {
     Print(stack, linum);
-  } else if (strcmp(cmnd, "pop") == 0) {
+  } else if (strcmp(cmnd, "POP") == 0) {
     Pop(stack, linum);
-  } else if (strcmp(cmnd, "deg_by") == 0) {
+  } else if (strcmp(cmnd, "DEG_BY") == 0) {
     idx = strtoull(arg, &err, 10);
 
-    if (errno == ERANGE || *err != '\0' || *arg == '\0') {
+    if (!isdigit(*arg) || errno == ERANGE || *err != '\0' || *arg == '\0') {
       errno = 0;
       ErrorTraceback(linum, "DEG BY WRONG VARIABLE");
     } else {
       DegBy(stack, idx, linum);
     }
-  } else if (strcmp(cmnd, "at") == 0) {
+  } else if (strcmp(cmnd, "AT") == 0) {
     x = strtol(arg, &err, 10);
 
-    if (errno == ERANGE || *err != '\0' || *arg == '\0') {
+    if (!isdigit(*arg) || errno == ERANGE || *err != '\0' || *arg == '\0') {
       errno = 0;
       ErrorTraceback(linum, "AT WRONG VALUE");
     } else {
