@@ -19,6 +19,10 @@ struct Stack {
   size_t size;                  /**< fizyczna wielkość tablicy w pamięci */
 };
 
+/**
+ * Utworzenie nowego pustego stosu.
+ * @return pusty stos
+ */
 struct Stack EmptyStack(void);
 
 /**

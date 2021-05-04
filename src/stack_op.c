@@ -13,7 +13,12 @@
 #include "poly_lib.h"
 #include "stack_op.h"
 
+/**
+ * Początkowa wielkość stosu. */
 #define INIT_STACK_SIZE 16
+
+/**
+ * Mnożnik względem którego rozszerza się tablica stosowa. */
 #define ARR_RESIZE 2
 
 /**
@@ -67,10 +72,10 @@ void PushPoly(struct Stack* stack, Poly* p)
  * `car` i `cdr` zwracające odpowiednio
  * [głowę i ogon](https://en.wikipedia.org/wiki/CAR_and_CDR)
  * listy. Jak widzą nawet osoby obeznane z tymi językami, jest to nazewnictwo
- * dość
- * [ezoteryczne](https://www.gnu.org/software/emacs/manual/html_node/eintr/Strange-Names.html)
- * i lekko _przedawnione_. Co więcej:
- * [sami stwierdzają](https://www.gnu.org/software/emacs/manual/html_node/eintr/car-_0026-cdr.html),
+ * dość [ezoteryczne]
+ * (https://www.gnu.org/software/emacs/manual/html_node/eintr/Strange-Names.html)
+ * i lekko _przedawnione_. Co więcej: [sami stwierdzają]
+ * (https://www.gnu.org/software/emacs/manual/html_node/eintr/car-_0026-cdr.html),
  * że lepszą nazwą byłoby chociażby `first`, jednakże jest to owoc długiej
  * tradycji i w ramach hołdu dla języka __lisp__ zachowam tę konwencję.
  * @param[in] stack : stos
@@ -85,7 +90,7 @@ Poly* Car(struct Stack* stack)
 /**
  * Złożenie tradycyjnych operacji `car` i `cdr`
  * (https://en.wikipedia.org/wiki/CAR_and_CDR#Compositions)
- * zwraca więc _głowę ogona listy_ czyli jej drugi element rzecz jasna.
+ * zwraca więc _głowę ogona listy_ czyli drugi element stosu rzecz jasna.
  * @param[in] stack : stos
  * @return adres drugiego wielomianu ze stosu
  */
