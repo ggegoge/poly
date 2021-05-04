@@ -44,10 +44,10 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-static bool UpperLine(char* s, size_t line_len);
+static void UpperLine(char* s, size_t line_len);
 
 static ssize_t
-ReadLn(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
+ReadLine(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
 
 /**
  * Sprawdzian pustości linii (all white == pusta (_na razie_)).
@@ -84,13 +84,13 @@ void Interpret(struct Stack* stack, bool prettification)
     if (prettification)
       printf("|%lu|> ", linum);
 
-    len = ReadLn(&line, &size, &is_eof, &is_comment);
+    len = ReadLine(&line, &size, &is_eof, &is_comment);
 
     if (!is_comment && !is_eof && !empty(line, len)) {
       if (prettification)
         UpperLine(line, len);
 
-      ParseLn(line, len, linum, stack);
+      ParseLine(line, len, linum, stack);
     }
 
     ++linum;
@@ -107,8 +107,8 @@ void Interpret(struct Stack* stack, bool prettification)
  * @param[out] is_comment : czy to nie linijka komentarzowa
  * @return długość wczytanej linii
  */
-static ssize_t ReadLn(char** ptr, size_t* size, bool* is_eof,
-                         bool* is_comment)
+static ssize_t ReadLine(char** ptr, size_t* size, bool* is_eof,
+                        bool* is_comment)
 {
   ssize_t len;
   /* za pomocą c wysonduję czy to nie jest linia komentarna pierwiej niźli ją
@@ -139,14 +139,9 @@ static ssize_t ReadLn(char** ptr, size_t* size, bool* is_eof,
 }
 
 /**
- * Sprawdzian zakresu znakow w line_num-tej linii s długości line_len, error
- * w przypadku nieprawidłowości. Do tego lekka normalizacja -- wszystkie duże
- * litery (poprawne) zostają zmienione ma małe. Zwraca informację o poprawności
- * danej linii. */
-static bool UpperLine(char* s, size_t line_len)
+ * Zmienia litery na wielkie w linijce @p s długości @p len. */
+static void UpperLine(char* s, size_t len)
 {
-  for (size_t i = 0; i < line_len; ++i)
+  for (size_t i = 0; i < len; ++i)
     s[i] = toupper(s[i]);
-
-  return true;
 }

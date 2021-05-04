@@ -42,7 +42,7 @@ void StackDestroy(struct Stack* stack)
 struct Stack EmptyStack()
 {
   struct Stack stack;
-  
+
   stack.height = 0;
   stack.size = INIT_STACK_SIZE;
   stack.polys = malloc(stack.size * sizeof(Poly));
