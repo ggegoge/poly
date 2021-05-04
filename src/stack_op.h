@@ -12,29 +12,18 @@
 #include "poly.h"
 
 /**
- * Lista wielomianów. */
-struct PolyList {
-  Poly p;                       /**< wielomian */
-  struct PolyList* rest;        /**< ogon listy */
-};
-
-/**
  * Stos z wielomianami. */
 struct Stack {
-  struct PolyList* list;        /**< lista wielomianów złożonych na stosie */
+  Poly* polys;                  /**< tablica wielomianów złożonych na stosie */
   size_t height;                /**< obecna wysokość stosu */
+  size_t size;                  /**< fizyczna wielkość tablicy w pamięci */
 };
 
 /**
  * Utworzenie nowego pustego stosu.
  * @return pusty stos
  */
-static inline struct Stack EmptyStack(void)
-{
-  return (struct Stack) {
-    .height = 0, .list = NULL
-  };
-}
+struct Stack EmptyStack(void);
 
 /**
  * Usunięcie stosu @p stack z pamięci.
