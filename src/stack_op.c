@@ -13,6 +13,9 @@
 #include "poly_lib.h"
 #include "stack_op.h"
 
+#define INIT_STACK_SIZE 16
+#define ARR_RESIZE 2
+
 /**
  * Wypisanie komunikatu o niedopełnieniu stosu względem operacji, jaką chciałoby
  * się na nim wykonać.
@@ -23,51 +26,39 @@ static void StackUnderflow(size_t linum)
   fprintf(stderr, "ERROR %lu STACK UNDERFLOW\n", linum);
 }
 
-/**
- * Usunięcie z pamięci listy wielomianów.
- * @param[in] pl : głowa listy
- */
-static void PolyListDestroy(struct PolyList* pl)
-{
-  if (!pl)
-    return;
-
-  PolyListDestroy(pl->rest);
-  PolyDestroy(&pl->p);
-  free(pl);
-}
-
 void StackDestroy(struct Stack* stack)
 {
-  PolyListDestroy(stack->list);
+  for (size_t i = 0; i < stack->height; ++i)
+    PolyDestroy(stack->polys + i);
+
+  free(stack->polys);
+}
+
+struct Stack EmptyStack()
+{
+  struct Stack stack;
+  
+  stack.height = 0;
+  stack.size = INIT_STACK_SIZE;
+  stack.polys = malloc(stack.size * sizeof(Poly));
+
+  if (!stack.polys)
+    exit(1);
+
+  return stack;
 }
 
 void PushPoly(struct Stack* stack, Poly* p)
 {
-  struct PolyList* new = malloc(sizeof(struct PolyList));
+  if (++stack->height > stack->size) {
+    stack->size *= ARR_RESIZE;
+    stack->polys = realloc(stack->polys, stack->size * sizeof(Poly));
 
-  if (!new) exit(1);
-
-  new->rest = stack->list;
-  stack->list = new;
-  ++stack->height;
-  new->p = *p;
-}
-
-void Pop(struct Stack* stack, size_t linum)
-{
-  struct PolyList* top;
-
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
+    if (!stack->polys)
+      exit(1);
   }
 
-  top = stack->list;
-  --stack->height;
-  stack->list = stack->list->rest;
-  PolyDestroy(&top->p);
-  free(top);
+  stack->polys[stack->height - 1] = *p;
 }
 
 /**
@@ -88,7 +79,7 @@ void Pop(struct Stack* stack, size_t linum)
 Poly* Car(struct Stack* stack)
 {
   assert(stack->height >= 1);
-  return &stack->list->p;
+  return stack->polys + stack->height - 1;
 }
 
 /**
@@ -101,7 +92,18 @@ Poly* Car(struct Stack* stack)
 Poly* Cadr(struct Stack* stack)
 {
   assert(stack->height >= 2);
-  return &stack->list->rest->p;
+  return stack->polys + stack->height - 2;
+}
+
+void Pop(struct Stack* stack, size_t linum)
+{
+  if (stack->height < 1) {
+    StackUnderflow(linum);
+    return;
+  }
+
+  PolyDestroy(Car(stack));
+  --stack->height;
 }
 
 /**
