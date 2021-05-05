@@ -122,9 +122,23 @@ void Add(struct Stack* stack, size_t linum)
   Pop(stack, linum);
 }
 
-void Sub(struct Stack* stack, size_t linum)
+/**
+ * Odejmuje od wielomianu spod wierzchołka ten z wierzchołka (zgodnie z ONP,
+ * wbrew poleceniu... */
+void OldSub(struct Stack* stack, size_t linum)
 {
   Neg(stack, linum);
+  Add(stack, linum);
+}
+
+void Sub(struct Stack* stack, size_t linum)
+{
+  if (stack->height < 2) {
+    StackUnderflow(linum);
+    return;
+  }
+
+  PolyNegComp(Cadr(stack));
   Add(stack, linum);
 }
 

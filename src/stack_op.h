@@ -48,7 +48,8 @@ void Add(struct Stack* stack, size_t linum);
 
 /**
  * Odjęcie od siebie dwóch wielomianów ze szczytu stosu @p stack i odłożenie na
- * ich miejsce tejże różnicy.
+ * ich miejsce tejże różnicy. Odejmuje od wielomianu na wierzchołku ten pod
+ * wierzchołkiem.
  * @param[in] stack: stos kalkulacyjny
  * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
  */
