@@ -304,7 +304,8 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
   } else if (strcmp(cmnd, "AT") == 0) {
     x = strtol(arg, &err, 10);
 
-    if (!isdigit(*arg) || errno == ERANGE || *err != '\0' || *arg == '\0') {
+    if (!(isdigit(*arg) || *arg == '-') || errno == ERANGE || *err != '\0' ||
+        *arg == '\0') {
       errno = 0;
       ErrorTraceback(linum, "AT WRONG VALUE");
     } else {
