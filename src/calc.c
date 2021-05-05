@@ -55,14 +55,18 @@ ReadLine(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
  * @param[in] len : długość linii
  * @return czy linia jest pusta
  */
-static bool empty(char* line, size_t len)
+static bool IsEmpty(char* line, size_t len)
 {
-  bool is_empty = true;
+  bool emptiness = true;
 
-  for (size_t i = 0; i < len && is_empty; ++i)
-    is_empty = isspace(line[i]);
+  for (size_t i = 0; i < len; ++i) {
+    emptiness = emptiness && line[i] == '\n';
 
-  return is_empty;
+    if (line[i] == '\0' && i != len - 1)
+      line[i] = '.';
+  }
+
+  return emptiness;
 }
 
 /**
@@ -86,7 +90,7 @@ void Interpret(struct Stack* stack, bool prettification)
 
     len = ReadLine(&line, &size, &is_eof, &is_comment);
 
-    if (!is_comment && !is_eof && !empty(line, len)) {
+    if (!is_comment && !is_eof && !IsEmpty(line, len)) {
       if (prettification)
         UpperLine(line, len);
 
