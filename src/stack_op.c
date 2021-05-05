@@ -55,7 +55,7 @@ struct Stack EmptyStack()
 
 void PushPoly(struct Stack* stack, Poly* p)
 {
-  if (++stack->height > stack->size) {
+  if (stack->height >= stack->size) {
     stack->size *= ARR_RESIZE;
     stack->polys = realloc(stack->polys, stack->size * sizeof(Poly));
 
@@ -63,7 +63,7 @@ void PushPoly(struct Stack* stack, Poly* p)
       exit(1);
   }
 
-  stack->polys[stack->height - 1] = *p;
+  stack->polys[stack->height++] = *p;
 }
 
 /**
