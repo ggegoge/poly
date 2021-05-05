@@ -81,7 +81,7 @@ void PushPoly(struct Stack* stack, Poly* p)
  * @param[in] stack : stos
  * @return adres pierwszego wielomianu na stosie
  */
-Poly* Car(struct Stack* stack)
+Poly* Car(const struct Stack* stack)
 {
   assert(stack->height >= 1);
   return stack->polys + stack->height - 1;
@@ -94,7 +94,7 @@ Poly* Car(struct Stack* stack)
  * @param[in] stack : stos
  * @return adres drugiego wielomianu ze stosu
  */
-Poly* Cadr(struct Stack* stack)
+Poly* Cadr(const struct Stack* stack)
 {
   assert(stack->height >= 2);
   return stack->polys + stack->height - 2;
@@ -167,7 +167,7 @@ void Neg(struct Stack* stack, size_t linum)
   PolyNegComp(Car(stack));
 }
 
-void IsCoeff(struct Stack* stack, size_t linum)
+void IsCoeff(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);
@@ -180,7 +180,7 @@ void IsCoeff(struct Stack* stack, size_t linum)
     printf("0\n");
 }
 
-void IsZero(struct Stack* stack, size_t linum)
+void IsZero(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);
@@ -193,7 +193,7 @@ void IsZero(struct Stack* stack, size_t linum)
     printf("0\n");
 }
 
-void IsEq(struct Stack* stack, size_t linum)
+void IsEq(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 2) {
     StackUnderflow(linum);
@@ -206,7 +206,7 @@ void IsEq(struct Stack* stack, size_t linum)
     printf("0\n");
 }
 
-void Deg(struct Stack* stack, size_t linum)
+void Deg(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);
@@ -216,7 +216,7 @@ void Deg(struct Stack* stack, size_t linum)
   printf("%d\n", PolyDeg(Car(stack)));
 }
 
-void DegBy(struct Stack* stack, unsigned long long idx, size_t linum)
+void DegBy(const struct Stack* stack, unsigned long long idx, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);
@@ -289,7 +289,7 @@ static void PrintPoly(const Poly* p)
     PrintMonoList(p->list);
 }
 
-void Print(struct Stack* stack, size_t linum)
+void Print(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);

@@ -92,7 +92,7 @@ static inline void Zero(struct Stack* stack)
  * @param[in] stack: stos kalkulacyjny
  * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
  */
-void IsCoeff(struct Stack* stack, size_t linum);
+void IsCoeff(const struct Stack* stack, size_t linum);
 
 /**
  * Sprawdzian czy wielomian z czubka stosu to wielomian zerowy. W razie
@@ -100,7 +100,7 @@ void IsCoeff(struct Stack* stack, size_t linum);
  * @param[in] stack: stos kalkulacyjny
  * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
  */
-void IsZero(struct Stack* stack, size_t linum);
+void IsZero(const struct Stack* stack, size_t linum);
 
 /**
  * Sprawdzian czy dwa wielomiany z czubka stosu są równe. W razie
@@ -108,7 +108,7 @@ void IsZero(struct Stack* stack, size_t linum);
  * @param[in] stack: stos kalkulacyjny
  * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
  */
-void IsEq(struct Stack* stack, size_t linum);
+void IsEq(const struct Stack* stack, size_t linum);
 
 /**
  * Podanie stopnia wielomianu z czubka stosu (wypisuje się go na standardowe
@@ -116,14 +116,14 @@ void IsEq(struct Stack* stack, size_t linum);
  * @param[in] stack: stos kalkulacyjny
  * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
  */
-void Deg(struct Stack* stack, size_t linum);
+void Deg(const struct Stack* stack, size_t linum);
 
 /**
  * Wypisanie wielomianu z czubka stosy
  * @param[in] stack: stos kalkulacyjny
  * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
  */
-void Print(struct Stack* stack, size_t linum);
+void Print(const struct Stack* stack, size_t linum);
 
 /**
  * Usunięcie wielomianu z czubka stosu.
@@ -141,7 +141,7 @@ void Pop(struct Stack* stack, size_t linum);
  * @param[in] idx : indeks zmiennej
  * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
  */
-void DegBy(struct Stack* stack, unsigned long long idx, size_t linum);
+void DegBy(const struct Stack* stack, unsigned long long idx, size_t linum);
 
 /**
  * Podstawienie do wielomianu z czubka @p stack pod główną zmienną wartości
