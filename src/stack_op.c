@@ -55,7 +55,7 @@ struct Stack EmptyStack()
 
 void PushPoly(struct Stack* stack, Poly* p)
 {
-  if (++stack->height > stack->size) {
+  if (stack->height >= stack->size) {
     stack->size *= ARR_RESIZE;
     stack->polys = realloc(stack->polys, stack->size * sizeof(Poly));
 
@@ -63,7 +63,7 @@ void PushPoly(struct Stack* stack, Poly* p)
       exit(1);
   }
 
-  stack->polys[stack->height - 1] = *p;
+  stack->polys[stack->height++] = *p;
 }
 
 /**
@@ -81,7 +81,7 @@ void PushPoly(struct Stack* stack, Poly* p)
  * @param[in] stack : stos
  * @return adres pierwszego wielomianu na stosie
  */
-Poly* Car(struct Stack* stack)
+Poly* Car(const struct Stack* stack)
 {
   assert(stack->height >= 1);
   return stack->polys + stack->height - 1;
@@ -94,7 +94,7 @@ Poly* Car(struct Stack* stack)
  * @param[in] stack : stos
  * @return adres drugiego wielomianu ze stosu
  */
-Poly* Cadr(struct Stack* stack)
+Poly* Cadr(const struct Stack* stack)
 {
   assert(stack->height >= 2);
   return stack->polys + stack->height - 2;
@@ -111,15 +111,38 @@ void Pop(struct Stack* stack, size_t linum)
   --stack->height;
 }
 
+void Add(struct Stack* stack, size_t linum)
+{
+  if (stack->height < 2) {
+    StackUnderflow(linum);
+    return;
+  }
+
+  PolyAddComp(Cadr(stack), Car(stack));
+  Pop(stack, linum);
+}
+
 /**
- * Wykonanie (w dość naiwny sposób) operacji operatora binarnego @p op na
- * dwu wielomianach z czubka stosu @p stack.
- * @param[in] stack : stos
- * @param[in] op : operator binarny na wielomianach
- * @param[in] linum : numer linii, z której wywołano tę komendę
- */
-static void BinOp(struct Stack* stack, Poly (*op)(const Poly*, const Poly*),
-                  size_t linum)
+ * Odejmuje od wielomianu spod wierzchołka ten z wierzchołka (zgodnie z ONP,
+ * wbrew poleceniu... */
+void OldSub(struct Stack* stack, size_t linum)
+{
+  Neg(stack, linum);
+  Add(stack, linum);
+}
+
+void Sub(struct Stack* stack, size_t linum)
+{
+  if (stack->height < 2) {
+    StackUnderflow(linum);
+    return;
+  }
+
+  PolyNegComp(Cadr(stack));
+  Add(stack, linum);
+}
+
+void Mul(struct Stack* stack, size_t linum)
 {
   Poly new;
 
@@ -128,25 +151,11 @@ static void BinOp(struct Stack* stack, Poly (*op)(const Poly*, const Poly*),
     return;
   }
 
-  new = op(Car(stack), Cadr(stack));
+  new = PolyMul(Car(stack), Cadr(stack));
   Pop(stack, linum);
   Pop(stack, linum);
   PushPoly(stack, &new);
-}
 
-void Add(struct Stack* stack, size_t linum)
-{
-  BinOp(stack, PolyAdd, linum);
-}
-
-void Sub(struct Stack* stack, size_t linum)
-{
-  BinOp(stack, PolySub, linum);
-}
-
-void Mul(struct Stack* stack, size_t linum)
-{
-  BinOp(stack, PolyMul, linum);
 }
 
 void Clone(struct Stack* stack, size_t linum)
@@ -172,7 +181,7 @@ void Neg(struct Stack* stack, size_t linum)
   PolyNegComp(Car(stack));
 }
 
-void IsCoeff(struct Stack* stack, size_t linum)
+void IsCoeff(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);
@@ -185,7 +194,7 @@ void IsCoeff(struct Stack* stack, size_t linum)
     printf("0\n");
 }
 
-void IsZero(struct Stack* stack, size_t linum)
+void IsZero(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);
@@ -198,7 +207,7 @@ void IsZero(struct Stack* stack, size_t linum)
     printf("0\n");
 }
 
-void IsEq(struct Stack* stack, size_t linum)
+void IsEq(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 2) {
     StackUnderflow(linum);
@@ -211,7 +220,7 @@ void IsEq(struct Stack* stack, size_t linum)
     printf("0\n");
 }
 
-void Deg(struct Stack* stack, size_t linum)
+void Deg(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);
@@ -221,7 +230,7 @@ void Deg(struct Stack* stack, size_t linum)
   printf("%d\n", PolyDeg(Car(stack)));
 }
 
-void DegBy(struct Stack* stack, unsigned long long idx, size_t linum)
+void DegBy(const struct Stack* stack, unsigned long long idx, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);
@@ -294,7 +303,7 @@ static void PrintPoly(const Poly* p)
     PrintMonoList(p->list);
 }
 
-void Print(struct Stack* stack, size_t linum)
+void Print(const struct Stack* stack, size_t linum)
 {
   if (stack->height < 1) {
     StackUnderflow(linum);

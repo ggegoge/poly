@@ -64,7 +64,16 @@ static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 
 static bool ParseMono(char* src, char** err, Mono* m);
 
-bool ParsePoly(char* src, char** err, Poly* p)
+/**
+ * Próba sparsowania __wielomianu__ ze stringa @p src. Ustawia @p err na pierwszy
+ * niewczytany znak (coś jak funkcja biblioteczna `strtod`) i pod @p p ładuje
+ * wczytany wielomian.
+ * @param[in] src : źródło do wczytania wielomianu zeń
+ * @param[in] err : wskazuje pierwszy niewczytany znak
+ * @param[out] p : miejsce na wynikowy wielomian
+ * @return czy udało się wczytać wielomian
+ */
+static bool ParsePoly(char* src, char** err, Poly* p)
 {
   bool beginning = true;
   size_t pluses = 0;
@@ -221,6 +230,7 @@ static bool FindArg(char* src, size_t len, char** arg)
 static void
 ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
 
+
 void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
 {
   Poly p = PolyZero();
@@ -304,7 +314,8 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
   } else if (strcmp(cmnd, "AT") == 0) {
     x = strtol(arg, &err, 10);
 
-    if (!isdigit(*arg) || errno == ERANGE || *err != '\0' || *arg == '\0') {
+    if (!(isdigit(*arg) || *arg == '-') || errno == ERANGE || *err != '\0' ||
+        *arg == '\0') {
       errno = 0;
       ErrorTraceback(linum, "AT WRONG VALUE");
     } else {

@@ -15,17 +15,6 @@
 #include "poly.h"
 
 /**
- * Próba sparsowania __wielomianu__ ze stringa @p src. Ustawia @p err na pierwszy
- * niewczytany znak (coś jak funkcja biblioteczna `strtod`) i pod @p p ładuje
- * wczytany wielomian.
- * @param[in] src : źródło do wczytania wielomianu zeń
- * @param[in] err : wskazuje pierwszy niewczytany znak
- * @param[out] p : miejsce na wynikowy wielomian
- * @return czy udało się wczytać wielomian
- */
-bool ParsePoly(char* src, char** err, Poly* p);
-
-/**
  * Odpowiednie wczytanie komendy z pojedynczej linii @p src i wywołanie
  * stosownych operacji na stosie kalkulacyjnym.
  * @param[in] src : tekst do parsunku
