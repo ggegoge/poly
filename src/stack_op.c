@@ -111,15 +111,24 @@ void Pop(struct Stack* stack, size_t linum)
   --stack->height;
 }
 
-/**
- * Wykonanie (w dość naiwny sposób) operacji operatora binarnego @p op na
- * dwu wielomianach z czubka stosu @p stack.
- * @param[in] stack : stos
- * @param[in] op : operator binarny na wielomianach
- * @param[in] linum : numer linii, z której wywołano tę komendę
- */
-static void BinOp(struct Stack* stack, Poly (*op)(const Poly*, const Poly*),
-                  size_t linum)
+void Add(struct Stack* stack, size_t linum)
+{
+  if (stack->height < 2) {
+    StackUnderflow(linum);
+    return;
+  }
+
+  PolyAddComp(Cadr(stack), Car(stack));
+  Pop(stack, linum);
+}
+
+void Sub(struct Stack* stack, size_t linum)
+{
+  Neg(stack, linum);
+  Add(stack, linum);
+}
+
+void Mul(struct Stack* stack, size_t linum)
 {
   Poly new;
 
@@ -128,25 +137,11 @@ static void BinOp(struct Stack* stack, Poly (*op)(const Poly*, const Poly*),
     return;
   }
 
-  new = op(Car(stack), Cadr(stack));
+  new = PolyMul(Car(stack), Cadr(stack));
   Pop(stack, linum);
   Pop(stack, linum);
   PushPoly(stack, &new);
-}
 
-void Add(struct Stack* stack, size_t linum)
-{
-  BinOp(stack, PolyAdd, linum);
-}
-
-void Sub(struct Stack* stack, size_t linum)
-{
-  BinOp(stack, PolySub, linum);
-}
-
-void Mul(struct Stack* stack, size_t linum)
-{
-  BinOp(stack, PolyMul, linum);
 }
 
 void Clone(struct Stack* stack, size_t linum)
