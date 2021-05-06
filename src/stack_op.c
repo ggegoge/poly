@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "poly.h"
 #include "poly_lib.h"
@@ -20,16 +21,6 @@
 /**
  * Mnożnik względem którego rozszerza się tablica stosowa. */
 #define ARR_RESIZE 2
-
-/**
- * Wypisanie komunikatu o niedopełnieniu stosu względem operacji, jaką chciałoby
- * się na nim wykonać.
- * @param[in] linum : numer wiersza
- */
-static void StackUnderflow(size_t linum)
-{
-  fprintf(stderr, "ERROR %lu STACK UNDERFLOW\n", linum);
-}
 
 void StackDestroy(struct Stack* stack)
 {
@@ -100,149 +91,146 @@ static Poly* Cadr(const struct Stack* stack)
   return stack->polys + stack->height - 2;
 }
 
-void Pop(struct Stack* stack, size_t linum)
+bool Pop(struct Stack* stack)
 {
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 1)
+    return false;
 
   PolyDestroy(Car(stack));
   --stack->height;
+
+  return true;
 }
 
-void Add(struct Stack* stack, size_t linum)
+bool Add(struct Stack* stack)
 {
-  if (stack->height < 2) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 2)
+    return false;
 
   PolyAddComp(Cadr(stack), Car(stack));
-  Pop(stack, linum);
+  Pop(stack);
+
+  return true;
 }
 
-void Sub(struct Stack* stack, size_t linum)
+bool Sub(struct Stack* stack)
 {
-  if (stack->height < 2) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 2)
+    return false;
 
   PolyNegComp(Cadr(stack));
-  Add(stack, linum);
+  return Add(stack);
 }
 
-void Mul(struct Stack* stack, size_t linum)
+bool Mul(struct Stack* stack)
 {
   Poly new;
 
-  if (stack->height < 2) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 2)
+    return false;
 
   new = PolyMul(Car(stack), Cadr(stack));
-  Pop(stack, linum);
-  Pop(stack, linum);
+  Pop(stack);
+  Pop(stack);
   PushPoly(stack, &new);
 
+  return true;
 }
 
-void Clone(struct Stack* stack, size_t linum)
+bool Clone(struct Stack* stack)
 {
   Poly cpy;
 
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 1)
+    return false;
 
   cpy = PolyClone(Car(stack));
   PushPoly(stack, &cpy);
+
+  return true;
 }
 
-void Neg(struct Stack* stack, size_t linum)
+bool Neg(struct Stack* stack)
 {
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 1)
+    return false;
 
   PolyNegComp(Car(stack));
+
+  return true;
 }
 
-void IsCoeff(const struct Stack* stack, size_t linum)
+/**
+ * Obsługa komend o charakterze predykatowym. Wypisuje `1` jeśli zachodzi
+ * predykat @p p; wpp. wypisuje `0`.
+ * @param[in] p : predykat
+ */
+static void Predicate(bool p)
 {
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
-  }
-
-  if (PolyIsCoeff(Car(stack)))
-    printf("1\n");
-  else
-    printf("0\n");
+  if (p) printf("1\n");
+  else printf("0\n");
 }
 
-void IsZero(const struct Stack* stack, size_t linum)
+bool IsCoeff(const struct Stack* stack)
 {
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 1)
+    return false;
 
-  if (PolyIsZero(Car(stack)))
-    printf("1\n");
-  else
-    printf("0\n");
+  Predicate(PolyIsCoeff(Car(stack)));
+
+  return true;
 }
 
-void IsEq(const struct Stack* stack, size_t linum)
+bool IsZero(const struct Stack* stack)
 {
-  if (stack->height < 2) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 1)
+    return false;
 
-  if (PolyIsEq(Car(stack), Cadr(stack)))
-    printf("1\n");
-  else
-    printf("0\n");
+  Predicate(PolyIsZero(Car(stack)));
+
+  return true;
 }
 
-void Deg(const struct Stack* stack, size_t linum)
+bool IsEq(const struct Stack* stack)
 {
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 2)
+    return false;
+
+  Predicate(PolyIsEq(Car(stack), Cadr(stack)));
+
+  return true;
+}
+
+bool Deg(const struct Stack* stack)
+{
+  if (stack->height < 1)
+    return false;
 
   printf("%d\n", PolyDeg(Car(stack)));
+
+  return true;
 }
 
-void DegBy(const struct Stack* stack, unsigned long long idx, size_t linum)
+bool DegBy(const struct Stack* stack, unsigned long long idx)
 {
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 1)
+    return false;
 
   printf("%d\n", PolyDegBy(Car(stack), idx));
+  return true;
 }
 
-void At(struct Stack* stack, poly_coeff_t x, size_t linum)
+bool At(struct Stack* stack, poly_coeff_t x)
 {
   Poly new;
 
-  if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
-  }
+  if (stack->height < 1)
+    return false;
 
   new = PolyAt(Car(stack), x);
-  Pop(stack, linum);
+  Pop(stack);
   PushPoly(stack, &new);
+  return true;
 }
 
 static void PrintPoly(const Poly* p);
@@ -294,13 +282,14 @@ static void PrintPoly(const Poly* p)
     PrintMonoList(p->list);
 }
 
-void Print(const struct Stack* stack, size_t linum)
+bool Print(const struct Stack* stack)
 {
   if (stack->height < 1) {
-    StackUnderflow(linum);
-    return;
+    return false;
   }
 
   PrintPoly(Car(stack));
   printf("\n");
+
+  return true;
 }

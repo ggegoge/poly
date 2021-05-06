@@ -9,6 +9,8 @@
 #ifndef _STACK_OP_H_
 #define _STACK_OP_H_
 
+#include <stdbool.h>
+
 #include "poly.h"
 
 /**
@@ -42,40 +44,40 @@ void PushPoly(struct Stack* stack, Poly* p);
  * Zsumowanie dwóch wielomianów ze szczytu stosu @p stack i odłożenie na ich
  * miejsce tejże sumy.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void Add(struct Stack* stack, size_t linum);
+bool Add(struct Stack* stack);
 
 /**
  * Odjęcie od siebie dwóch wielomianów ze szczytu stosu @p stack i odłożenie na
  * ich miejsce tejże różnicy. Odejmuje od wielomianu na wierzchołku ten pod
  * wierzchołkiem.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void Sub(struct Stack* stack, size_t linum);
+bool Sub(struct Stack* stack);
 
 /**
  * Pomnożenie dwóch wielomianów ze szczytu stosu @p stack i odłożenie na ich
  * miejsce tegoż iloczynu.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void Mul(struct Stack* stack, size_t linum);
+bool Mul(struct Stack* stack);
 
 /**
  * Skopiowanie wielomianu z czubka stosu i wrzucenie go na ten właśnie czubek.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void Clone(struct Stack* stack, size_t linum);
+bool Clone(struct Stack* stack);
 
 /**
  * Zanegowanie wielomianu wierzchniego.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void Neg(struct Stack* stack, size_t linum);
+bool Neg(struct Stack* stack);
 
 /**
  * Wstawienie wielomianu zerowego na czubek stosu.
@@ -91,47 +93,47 @@ static inline void Zero(struct Stack* stack)
  * Sprawdzian czy wielomian z czubka stosu to wielomian stały. W razie
  * zaistnienia takiej sytuacji na wyjście wypisywana jest jedynka; wpp. zero.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void IsCoeff(const struct Stack* stack, size_t linum);
+bool IsCoeff(const struct Stack* stack);
 
 /**
  * Sprawdzian czy wielomian z czubka stosu to wielomian zerowy. W razie
  * zaistnienia takiej sytuacji na wyjście wypisywana jest jedynka; wpp. zero.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void IsZero(const struct Stack* stack, size_t linum);
+bool IsZero(const struct Stack* stack);
 
 /**
  * Sprawdzian czy dwa wielomiany z czubka stosu są równe. W razie
  * zaistnienia takiej sytuacji na wyjście wypisywana jest jedynka; wpp. zero.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void IsEq(const struct Stack* stack, size_t linum);
+bool IsEq(const struct Stack* stack);
 
 /**
  * Podanie stopnia wielomianu z czubka stosu (wypisuje się go na standardowe
  * wyjście).
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void Deg(const struct Stack* stack, size_t linum);
+bool Deg(const struct Stack* stack);
 
 /**
  * Wypisanie wielomianu z czubka stosy
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void Print(const struct Stack* stack, size_t linum);
+bool Print(const struct Stack* stack);
 
 /**
  * Usunięcie wielomianu z czubka stosu.
  * @param[in] stack: stos kalkulacyjny
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void Pop(struct Stack* stack, size_t linum);
+bool Pop(struct Stack* stack);
 
 /* Komendy dwuargumentowe: */
 
@@ -140,17 +142,17 @@ void Pop(struct Stack* stack, size_t linum);
  * @p idx.
  * @param[in] stack: stos kalkulacyjny
  * @param[in] idx : indeks zmiennej
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void DegBy(const struct Stack* stack, unsigned long long idx, size_t linum);
+bool DegBy(const struct Stack* stack, unsigned long long idx);
 
 /**
  * Podstawienie do wielomianu z czubka @p stack pod główną zmienną wartości
  * @p x i podmianka tego pierwotnego wielomianu na ten po podstawieniu.
  * @param[in] stack: stos kalkulacyjny
  * @param[in] x : wartość do podstawienia pod zmienną główną
- * @param[in] linum : numer wiersza, z którego została wywołana ta komenda
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
  */
-void At(struct Stack* stack, poly_coeff_t x, size_t linum);
+bool At(struct Stack* stack, poly_coeff_t x);
 
 #endif

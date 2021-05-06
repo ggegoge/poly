@@ -276,31 +276,33 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
   unsigned long long idx;
   poly_coeff_t x;
   char* err;
+  /* czy nie nastąpiło niedopełnienie stosu */
+  bool stacked = true;
 
   if (strcmp(cmnd, "ADD") == 0) {
-    Add(stack, linum);
+    stacked = Add(stack);
   } else if (strcmp(cmnd, "MUL") == 0) {
-    Mul(stack, linum);
+    stacked = Mul(stack);
   } else if (strcmp(cmnd, "CLONE") == 0) {
-    Clone(stack, linum);
+    stacked = Clone(stack);
   } else if (strcmp(cmnd, "NEG") == 0) {
-    Neg(stack, linum);
+    stacked = Neg(stack);
   } else if (strcmp(cmnd, "ZERO") == 0) {
     Zero(stack);
   } else if (strcmp(cmnd, "IS_COEFF") == 0) {
-    IsCoeff(stack, linum);
+    stacked = IsCoeff(stack);
   } else if (strcmp(cmnd, "IS_ZERO") == 0) {
-    IsZero(stack, linum);
+    stacked = IsZero(stack);
   } else if (strcmp(cmnd, "SUB") == 0) {
-    Sub(stack, linum);
+    stacked = Sub(stack);
   } else if (strcmp(cmnd, "IS_EQ") == 0) {
-    IsEq(stack, linum);
+    stacked = IsEq(stack);
   } else if (strcmp(cmnd, "DEG") == 0) {
-    Deg(stack, linum);
+    stacked = Deg(stack);
   } else if (strcmp(cmnd, "PRINT") == 0) {
-    Print(stack, linum);
+    stacked = Print(stack);
   } else if (strcmp(cmnd, "POP") == 0) {
-    Pop(stack, linum);
+    stacked = Pop(stack);
   } else if (strcmp(cmnd, "DEG_BY") == 0) {
     idx = strtoull(arg, &err, 10);
 
@@ -308,7 +310,7 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
       errno = 0;
       ErrorTraceback(linum, "DEG BY WRONG VARIABLE");
     } else {
-      DegBy(stack, idx, linum);
+      stacked = DegBy(stack, idx);
     }
   } else if (strcmp(cmnd, "AT") == 0) {
     x = strtol(arg, &err, 10);
@@ -318,9 +320,12 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
       errno = 0;
       ErrorTraceback(linum, "AT WRONG VALUE");
     } else {
-      At(stack, x, linum);
+      stacked = At(stack, x);
     }
   } else {
     ErrorTraceback(linum, "WRONG COMMAND");
   }
+
+  if (!stacked)
+    ErrorTraceback(linum, "STACK UNDERFLOW");
 }
