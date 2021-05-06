@@ -81,7 +81,7 @@ void PushPoly(struct Stack* stack, Poly* p)
  * @param[in] stack : stos
  * @return adres pierwszego wielomianu na stosie
  */
-Poly* Car(const struct Stack* stack)
+static Poly* Car(const struct Stack* stack)
 {
   assert(stack->height >= 1);
   return stack->polys + stack->height - 1;
@@ -94,7 +94,7 @@ Poly* Car(const struct Stack* stack)
  * @param[in] stack : stos
  * @return adres drugiego wielomianu ze stosu
  */
-Poly* Cadr(const struct Stack* stack)
+static Poly* Cadr(const struct Stack* stack)
 {
   assert(stack->height >= 2);
   return stack->polys + stack->height - 2;
@@ -259,10 +259,10 @@ static void PrintMono(const Mono* m)
 }
 
 /**
- * Wypisanie od tyłu (albowiem trzymane są one w kolejności malejącej, a rząda
+ * Wypisanie od tyłu (albowiem trzymane są one w kolejności malejącej, a żąda
  * się od nas wypisania ich w wykładnikami rosnąco) listy jednomianów. Ze
  * względu  na tę odtylniość jest to robione schematem rekurencyjnego wybrania
- * się na sam koniec listy by następnie stopniowo wracać i dopiero wypisywać.
+ * się na sam koniec listy, by następnie stopniowo wracać i dopiero wypisywać.
  * Jednomiany są rozdzielone plusami.
  * @param[in] ml : lista jednomianów
  */

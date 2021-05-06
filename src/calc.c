@@ -1,5 +1,7 @@
 /** @file
-  Interaktywny kalkulator działający na wielomianach wielu zmiennych.
+  Interaktywny kalkulator działający na wielomianach wielu zmiennych. Kod w tym
+  pliku odpowiada przede wszystkim za obsługę wczytywania tekstu z wejścia,
+  który to odsyła do parse.c celem dalszego przetworzenia.
 
   @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
@@ -21,7 +23,7 @@
  * Znacznik komentarza. */
 #define COMMENT_MARKER '#'
 
-void Interpret(struct Stack*, bool prettification);
+static void Interpret(struct Stack*, bool prettification);
 
 /**
  * Główna procedura programu, włącza właściwy interpreter i inicjalizuje stos
@@ -50,7 +52,9 @@ static ssize_t
 ReadLine(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
 
 /**
- * Sprawdzian pustości linii (all white == pusta (_na razie_)).
+ * Sprawdzian pustości linii. Do tego niejawne zmienienie ukrytych `\0` na
+ * kropki, aby to nie sprawiało problemów dalszym funkcjom, na których działanie
+ * wpływa obecność `\0` w napisie.
  * @param[in] line : linia
  * @param[in] len : długość linii
  * @return czy linia jest pusta
@@ -74,7 +78,7 @@ static bool IsEmpty(char* line, size_t len)
  * @param[in] stack : stos kalkulatora
  * @param[in] prettification : jeśli jest `true` to dodaje pseudo prompt
  */
-void Interpret(struct Stack* stack, bool prettification)
+static void Interpret(struct Stack* stack, bool prettification)
 {
   ssize_t len;
   size_t linum = 1;
@@ -107,7 +111,7 @@ void Interpret(struct Stack* stack, bool prettification)
  * Wczytywanie pojedynczych linii ze standardowego wejścia.
  * @param[in] ptr : bufor do zapisywania linii
  * @param[in] size : wielkość bufora
- * @param[out] is_eof : czy ta linia zawiera koniec wejścia
+ * @param[out] is_eof : czy nie skończyło się wejście
  * @param[out] is_comment : czy to nie linijka komentarzowa
  * @return długość wczytanej linii
  */

@@ -194,8 +194,8 @@ static void ErrorTraceback(size_t linum, char* s)
  * @p src pod kątem jakichś spacji. W przypadku ich znalezienia zwraca `true`
  * i ustawia odpowiednio wskaźnik @p cmnd na początek komendy i @p arg na tenże
  * argument w stylu quasi-`strtok`owym -- ustawia znak '`\0`' na pozycji spacji
- * aby następna obróbka argumentu była prosta. Do tego dodaje taki null bajt
- * w miejscu `\n` co również ułatwia.
+ * aby następna obróbka komendy i argumentu była prosta (`strcmp`). Do tego
+ * dodaje taki null bajt w miejscu `\n`.
  * @param[in] src : napis
  * @param[in] len : jego długość
  * @param[out] arg : wskazuje na argument
@@ -204,7 +204,6 @@ static void ErrorTraceback(size_t linum, char* s)
 static bool FindArg(char* src, size_t len, char** arg)
 {
   bool res = false;
-  /* bool spaced = false; */
   *arg = "";
 
   for (size_t i = 0; i < len; ++i) {
@@ -216,8 +215,8 @@ static bool FindArg(char* src, size_t len, char** arg)
     } else if (src[i] == '\n') {
       src[i] = '\0';
     } else if (!res  && isspace(src[i]) && i != 0) {
-      /* inny whitespace niż spacja to wciąż rozdział, ale wiemy, że
-       * ze złym argumentem */
+      /* inny whitespace niż spacja to wciąż rozdział na argument, ale wiemy, że
+       * ze złym argumentem -- ustawiam więc "\t" */
       *arg = "\t";
       src[i] = '\0';
       res = true;
