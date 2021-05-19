@@ -40,24 +40,22 @@
  */
 static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 {
-  char* strto_err;
   poly_coeff_t c;
 
-  c = strtol(src, &strto_err, 10);
+  c = strtol(src, err, 10);
 
   if (errno == ERANGE) {
     errno = 0;
     return false;
   }
 
-  if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
+  if (**err != '\0' && **err != ',' && **err != '\n')
     return false;
 
-  while (*strto_err == '\n') {
-    ++strto_err;
+  if (**err == '\n') {
+    ++*err;
   }
 
-  *err = strto_err;
   *p = PolyFromCoeff(c);
   return true;
 }
@@ -135,7 +133,6 @@ static bool ParseMono(char* src, char** err, Mono* m)
 {
   Poly p = PolyZero();
   long e;
-  char* strto_err;
 
   *err = src;
   assert(*src == '(');
@@ -157,15 +154,13 @@ static bool ParseMono(char* src, char** err, Mono* m)
     return false;
   }
 
-  e = strtol(src, &strto_err, 10);
+  e = strtol(src, err, 10);
 
   if (errno == ERANGE || e > 2147483647 || e < 0) {
     errno = 0;
     PolyDestroy(&p);
     return false;
   }
-
-  *err = strto_err;
 
   if (**err != ')') {
     PolyDestroy(&p);
