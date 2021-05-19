@@ -137,7 +137,7 @@ static bool ParseMono(char* src, char** err, Mono* m)
   *err = src;
   assert(*src == '(');
 
-  if (!ParsePoly(src + 1, err, &p))
+  if (!ParsePoly(++src, err, &p))
     return false;
   else if (**err != ',') {
     /* jeśli udało się wczytać, ale brakuje przecinka, tzn, że musimy sami
@@ -146,7 +146,7 @@ static bool ParseMono(char* src, char** err, Mono* m)
     return false;
   }
 
-  src = *err + 1;
+  src = ++*err;
 
   /* po przecinku następuje dodatni wykładnik */
   if (!isdigit(*src)) {
