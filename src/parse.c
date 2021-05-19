@@ -30,6 +30,9 @@
  * <exp> ::= 0..2147483647
  */
 
+/** Maksymalna dopuszczalna wartość wykładnika wielomianu. */
+#define EXP_MAX 2147483647
+
 /**
  * Wczytanie ze stringa @p src wielomianu stałego.
  * @param[in] src : string wejściowy
@@ -162,7 +165,7 @@ static bool ParseMono(char* src, char** err, Mono* m)
 
   e = strtol(src, &strto_err, 10);
 
-  if (errno == ERANGE || e > 2147483647 || e < 0) {
+  if (errno == ERANGE || e > EXP_MAX || e < 0) {
     errno = 0;
     PolyDestroy(&p);
     return false;
