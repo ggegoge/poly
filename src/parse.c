@@ -221,6 +221,14 @@ static bool FindArg(char* src, size_t len, char** arg)
 static void
 ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
 
+/**
+ * Mówi czy komenda @p cmnd jest jedną z wymagających argumentu.
+ * @param[in] cmnd : komenda
+ * @return czy to komenda argumentowa */
+static bool IsArgd(char* cmnd)
+{
+  return strcmp(cmnd, "DEG_BY") == 0 || strcmp(cmnd, "AT") == 0;
+}
 
 void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
 {
@@ -245,8 +253,9 @@ void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
     return;
   }
 
-  if (FindArg(src, len, &arg) && strcmp(cmnd, "DEG_BY") != 0 &&
-      strcmp(cmnd, "AT") != 0) {
+  /* szukam argumentu i ustawiam odpowiednio arg. jeśli znajdę argument, to
+   * sprawdzam czy cmnd jest dwuargumentowa, inaczej istnienie arg to błąd */
+  if (FindArg(src, len, &arg) && !IsArgd(cmnd)) {
     ErrorTraceback(linum, "WRONG COMMAND");
     return;
   }
