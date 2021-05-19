@@ -185,11 +185,11 @@ static bool ParseMono(char* src, char** err, Mono* m)
 /**
  * Wypisanie wyjątku wczytywaniowego na wyjście diagnostyczne.
  * @param[in] linum : numer wiersza, na którym znajduje się błąd
- * @param[in] s : treść błędu
+ * @param[in] message : treść błędu
  */
-static void ErrorTraceback(size_t linum, char* s)
+static void ErrorTraceback(size_t linum, char* message)
 {
-  fprintf(stderr, "ERROR %lu %s\n", linum, s);
+  fprintf(stderr, "ERROR %lu %s\n", linum, message);
 }
 
 /**
