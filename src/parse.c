@@ -74,7 +74,7 @@ static bool ParseMono(char* src, char** err, Mono* m);
 static bool ParsePoly(char* src, char** err, Poly* p)
 {
   /* kontrolowanie czy plusy pojawiły się tam gdzie trzeba */
-  bool plus_awaited = false;
+  bool isplus = false;
   Mono m;
   *err = src;
   *p = PolyZero();
@@ -86,18 +86,18 @@ static bool ParsePoly(char* src, char** err, Poly* p)
     return false;
 
   while (*src != ',' && *src != '\0') {
-    if (*src == '+' && !plus_awaited) {
+    if (*src == '+' && !isplus) {
       PolyDestroy(p);
       return false;
     }
 
     if (*src == '+' || *src == '\n') {
-      plus_awaited = *src != '+' ? plus_awaited : false;
+      isplus = *src != '+' ? isplus : false;
       ++src;
       continue;
     }
 
-    if (*src != '(' || plus_awaited || !ParseMono(src, err, &m)) {
+    if (*src != '(' || isplus || !ParseMono(src, err, &m)) {
       PolyDestroy(p);
       return false;
     }
@@ -107,10 +107,10 @@ static bool ParsePoly(char* src, char** err, Poly* p)
 
     assert(**err == ')');
     src = ++*err;
-    plus_awaited = true;
+    isplus = true;
   }
 
-  if (!plus_awaited) {
+  if (!isplus) {
     PolyDestroy(p);
     return false;
   }

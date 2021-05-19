@@ -46,10 +46,10 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-static void UpperLine(char* s, size_t line_len);
+static void UpperLine(char* s, size_t len);
 
 static ssize_t
-ReadLine(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
+ReadLine(char** ptr, size_t* size, bool* iseof, bool* iscomment);
 
 /**
  * Sprawdzian pustości linii. Do tego niejawne zmienienie ukrytych `\0` na
@@ -84,17 +84,17 @@ static void Interpret(struct Stack* stack, bool prettification)
   size_t linum = 1;
   size_t size = 0;
   char* line = NULL;
-  bool is_comment = false;
-  bool is_eof = false;
+  bool iscomment = false;
+  bool iseof = false;
 
 
-  while (!feof(stdin) && !is_eof) {
+  while (!feof(stdin) && !iseof) {
     if (prettification)
       printf("|%lu|> ", linum);
 
-    len = ReadLine(&line, &size, &is_eof, &is_comment);
+    len = ReadLine(&line, &size, &iseof, &iscomment);
 
-    if (!is_comment && !is_eof && !IsEmpty(line, len)) {
+    if (!iscomment && !iseof && !IsEmpty(line, len)) {
       if (prettification)
         UpperLine(line, len);
 
@@ -111,12 +111,12 @@ static void Interpret(struct Stack* stack, bool prettification)
  * Wczytywanie pojedynczych linii ze standardowego wejścia.
  * @param[in] ptr : bufor do zapisywania linii
  * @param[in] size : wielkość bufora
- * @param[out] is_eof : czy nie skończyło się wejście
- * @param[out] is_comment : czy to nie linijka komentarzowa
+ * @param[out] iseof : czy nie skończyło się wejście
+ * @param[out] iscomment : czy to nie linijka komentarzowa
  * @return długość wczytanej linii
  */
-static ssize_t ReadLine(char** ptr, size_t* size, bool* is_eof,
-                        bool* is_comment)
+static ssize_t ReadLine(char** ptr, size_t* size, bool* iseof,
+                        bool* iscomment)
 {
   ssize_t len;
   /* za pomocą c wysonduję czy to nie jest linia komentarna pierwiej niźli ją
@@ -124,11 +124,11 @@ static ssize_t ReadLine(char** ptr, size_t* size, bool* is_eof,
   int c = getc(stdin);
 
   if (c == EOF) {
-    *is_eof = true;
+    *iseof = true;
     return EOF;
   }
 
-  if ((*is_comment = c == COMMENT_MARKER)) {
+  if ((*iscomment = c == COMMENT_MARKER)) {
     /* w przypadku komentarza nie chcemy ładować linii do getline'a, więc
      * jedziemy aż do końca linii */
     while (!feof(stdin) && getc(stdin) != '\n');
@@ -138,7 +138,7 @@ static ssize_t ReadLine(char** ptr, size_t* size, bool* is_eof,
 
   ungetc(c, stdin);
   len = getline(ptr, size, stdin);
-  *is_eof = len == EOF;
+  *iseof = len == EOF;
 
   if (!ptr || errno == ENOMEM || errno == EOVERFLOW)
     exit(1);
