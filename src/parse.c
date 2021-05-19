@@ -75,13 +75,12 @@ static bool ParseMono(char* src, char** err, Mono* m);
  */
 static bool ParsePoly(char* src, char** err, Poly* p)
 {
-  bool beginning = true;
-  size_t pluses = 0;
+  /* kontrolowanie czy plusy pojawiły się tam gdzie trzeba */
+  bool plus_awaited = false;
   Mono m;
   *err = src;
   *p = PolyZero();
 
-  /* przypadek pierwszy -- wielomian współczynnny */
   if (isdigit(*src) || *src == '-')
     return ParsePolyCoeff(src, err, p);
 
@@ -89,19 +88,18 @@ static bool ParsePoly(char* src, char** err, Poly* p)
     return false;
 
   while (*src != ',' && *src != '\0') {
-    if (*src == '+' || *src == '\n') {
-      if (*src == '+')
-        ++pluses;
+    if (*src == '+' && !plus_awaited) {
+      PolyDestroy(p);
+      return false;
+    }
 
+    if (*src == '+' || *src == '\n') {
+      plus_awaited = *src != '+' ? plus_awaited : false;
       ++src;
-      beginning = false;
       continue;
     }
 
-    /* jak wynika z BNFu -- poza początkiem, po jednomianie musi następować
-     * plus jeśli ma wystąpić jeszcze jakiś inny */
-    if (*src != '(' || pluses > 1 || (pluses == 0 && !beginning) ||
-        !ParseMono(src, err, &m)) {
+    if (*src != '(' || plus_awaited || !ParseMono(src, err, &m)) {
       PolyDestroy(p);
       return false;
     }
@@ -111,11 +109,10 @@ static bool ParsePoly(char* src, char** err, Poly* p)
 
     assert(**err == ')');
     src = ++*err;
-    beginning = false;
-    pluses = 0;
+    plus_awaited = true;
   }
 
-  if (pluses != 0) {
+  if (!plus_awaited) {
     PolyDestroy(p);
     return false;
   }
