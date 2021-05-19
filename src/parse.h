@@ -24,4 +24,4 @@
  */
 void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack);
 
-#endif
+#endif  /* _PARSE_H_ */

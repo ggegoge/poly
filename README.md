@@ -30,31 +30,31 @@ Jest opisane w poleceniu do drugiej części. Dodatkowo dostarczam
 dodanie opcji `-p` lub `---pretty` która uruchamia przyjemniejszy
 interfejs użytkowniczy. Działają też wtedy komendy pisane małymi
 literami co ułatwia użytek.
-```
-λ ./poly --pretty
----< Poly Calc >-----------< v. 0.4 >----
-|1|> (1,1)
-|2|> 1
-|3|> add
-|4|> print
-(1,0)+(1,1)
-|5|> clone
-|6|> mul
-|7|> print
-(1,0)+(2,1)+(1,2)
-|8|> at 3
-|9|> print
-16
-|10|> is_zero
-0
-|11|> clone
-|12|> neg
-|13|> add
-|14|> is_zero
-1
-|15|> pop
-|16|> 
-```
+
+    λ ./poly --pretty
+    ---< Poly Calc >-----------< v. 0.4 >----
+    |1|> (1,1)
+    |2|> 1
+    |3|> add
+    |4|> print
+    (1,0)+(1,1)
+    |5|> clone
+    |6|> mul
+    |7|> print
+    (1,0)+(2,1)+(1,2)
+    |8|> at 3
+    |9|> print
+    16
+    |10|> is_zero
+    0
+    |11|> clone
+    |12|> neg
+    |13|> add
+    |14|> is_zero
+    1
+    |15|> pop
+    |16|> 
+
 Jest to jednak jedynie __dodatek__, oficjalna wersja zakłada używanie
 samego `./poly`.
 
@@ -141,23 +141,17 @@ list, po każdej przechodzę raz, ergo liniowość.
 Mnożenie jest zwykłym naiwnym algorytmem kwadratowym.
 
 Operacje na stosie dziedziczą złożoność ze zwykłej
-biblioteki. Pozostaje wciąż pole na optymalizację: zamiast robić
-np. operację `ADD` (czyli `+`) w ten sposób:
-```
-new = first(stack) + second(stack);
-pop(stack);
-pop(stack);
-push(new);
-```
-możnaby wykorzystać potencjał operatorów `+=`. Pozostawiam to na razie
-jako zadanie dla czytelnika.
+biblioteki. Dodatkowo została zastosowana optymalizacja możliwa dzięki
+`poly_lib.h` -- operatory `+=`. Dzięki temu dodając wielomiany z góry
+stosu nie muszę tworzyć trzeciego, zrzucać dwu i go wstawiać, a po
+prostu zrobić `+=` dla drugiego i zrzucić jedynie ten najwyższy.
 
 ### Wygląd dokumentacji
 
 W pliku `Doxyfile.in` mam linijkę
-```
-HTML_EXTRA_STYLESHEET  = ../css/doxygen_theme_flat.css
-```
+
+    HTML_EXTRA_STYLESHEET  = ../css/doxygen_theme_flat.css
+
 która odpowiada za wygląd tej dokumentacji -- korzystam z cssa
 [_z tego repozytorium gitowego_](https://github.com/kcwongjoe/doxygen_theme_flat_design),
 które jest olicensjonowane licencją MIT (jest zatem open

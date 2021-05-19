@@ -155,4 +155,4 @@ bool DegBy(const struct Stack* stack, unsigned long long idx);
  */
 bool At(struct Stack* stack, poly_coeff_t x);
 
-#endif
+#endif  /* _STACK_OP_H_ */

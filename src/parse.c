@@ -239,7 +239,8 @@ void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
   char* arg;
 
   if (!isalpha(*src)) {
-    if ((parsed = ParsePoly(src, &err, &p)) && *err == '\0') {
+    parsed = ParsePoly(src, &err, &p);
+    if (parsed && *err == '\0') {
       PushPoly(stack, &p);
     } else {
       /* jeśli udało się wczytać wielomian, ALE brakuje \n, to nie usunął
