@@ -101,7 +101,7 @@ static void Trim(struct Stack* stack)
   if (stack->height >= INIT_STACK_SIZE &&
       stack->height * ARR_RESIZE * ARR_RESIZE <= stack->size) {
     stack->size /= ARR_RESIZE;
-    stack->polys = realloc(stack->polys, stack->size);
+    stack->polys = realloc(stack->polys, stack->size * sizeof(Poly));
 
     if (!stack->polys)
       exit(1);
