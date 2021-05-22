@@ -67,7 +67,7 @@ static bool ParseMono(char* src, char** err, Mono* m);
  * niewczytany znak (coś jak funkcja biblioteczna `strtod`) i pod @p p ładuje
  * wczytany wielomian.
  * @param[in] src : źródło do wczytania wielomianu zeń
- * @param[in] err : wskazuje pierwszy niewczytany znak
+ * @param[out] err : wskazuje pierwszy niewczytany znak
  * @param[out] p : miejsce na wynikowy wielomian
  * @return czy udało się wczytać wielomian
  */
@@ -188,7 +188,7 @@ static void ErrorTraceback(size_t linum, char* s)
  * argument w stylu quasi-`strtok`owym -- ustawia znak '`\0`' na pozycji spacji
  * aby następna obróbka komendy i argumentu była prosta (`strcmp`). Do tego
  * dodaje taki null bajt w miejscu `\n`.
- * @param[in] src : napis
+ * @param[in,out] src : napis
  * @param[in] len : jego długość
  * @param[out] arg : wskazuje na argument
  * @return czy znaleziono argument?
@@ -218,8 +218,8 @@ static bool FindArg(char* src, size_t len, char** arg)
   return res;
 }
 
-static void
-ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
+static void ParseCommand(char* cmnd, char* arg, size_t linum,
+                         struct Stack* stack);
 
 /**
  * Mówi czy komenda @p cmnd jest jedną z wymagających argumentu.
@@ -269,7 +269,7 @@ void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
  * @param[in] cmnd : treść komendy
  * @param[in] arg : opcjonalnie -- argument komendy @p cmnd
  * @param[in] linum : numer obecnego wiersza
- * @param[in] stack : stos kalkulacyjny
+ * @param[in,out] stack : stos kalkulacyjny
  */
 static void ParseCommand(char* cmnd, char* arg, size_t linum,
                          struct Stack* stack)
