@@ -28,7 +28,7 @@ MonoList* MonoListClone(const MonoList* head);
 
 /**
  * Wstawienie jednomianu w odpowiednie miejsce listy.
- * @param[in] head : głowa listy
+ * @param[in,out] head : głowa listy
  * @param[in] m : nowy jednomian
  */
 void MonoListInsert(MonoList** head, Mono* m);
@@ -45,7 +45,7 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff);
  * Suma dwu wielomianów, ale w wersji `compound assignment' tj nie tworzy
  * nowego wielomianu, a jedynie modyfikuje ten ''po lewej''. Odpowiednik
  * operatora `+=`. Dla @p p i @p q wykonuje `p += q`.
- * @param[in] p : wielomian @f$ p @f$
+ * @param[in,out] p : wielomian @f$ p @f$
  * @param[in] q : wielomian @f$ q @f$
  */
 void PolyAddComp(Poly* p, const Poly* q);
@@ -66,7 +66,7 @@ bool PolyIsPseudoCoeff(const MonoList* ml);
  * Zmiana pseudowspółczynnika w normalny. Funkcja bierze wielomian @p p będący
  * pseudowspółczynnikiem (patrz: `PolyIsPseudoCoeff` celem zrozumienia pojęcia)
  * i zmienia go w standardowy wykładnik.
- * @param[in] p : wielomian będący pseudo wykładnikiem
+ * @param[in,out] p : wielomian będący pseudo wykładnikiem
  */
 void Decoeffise(Poly* p);
 
@@ -77,6 +77,12 @@ void Decoeffise(Poly* p);
  * @return @f$ c p(x) @f$
  */
 Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff);
+
+/**
+ * Uprzeciwnienie wielomianu @p p.
+ * @param[in,out] p : wielomian
+ */
+void PolyNegComp(Poly* p);
 
 /**
  * Iloczyn jednomianów.

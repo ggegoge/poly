@@ -70,7 +70,7 @@ void Decoeffise(Poly* p)
 /**
  * Suma dwóch jednomów równych stopni, również modyfikująca pierwszy z nich
  * (analogiczny mechanizm jak opisany w `PolyAddComp` czyli operator `+=`).
- * @param[in] m : jednomian
+ * @param[in,out] m : jednomian
  * @param[in] t : jednomian
  */
 static void MonoAddComp(Mono* m, const Mono* t)
@@ -96,7 +96,7 @@ static inline int MonoCmp(const Mono* m, const Mono* t)
  * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
  * tychże. Jest to robione w formie `+=` -- zmienia się @p lhead w oparciu
  * o @p rhead, która pozostaje niezmieniona.
- * @param[in] lhead : głowa lewej listy
+ * @param[in,out] lhead : głowa lewej listy
  * @param[in] rhead : głowa prawej listy
  * @return głowa listy jednomianów zawierająca zsumowane wszystkie jednomiany
  * z oryginalnych @p lhead i @p rhead.
@@ -279,7 +279,7 @@ static MonoList* MonoListMulCoeff(MonoList* head, poly_coeff_t coeff);
 /**
  * Pomnożenie wielomianu @p p przez współczynnik @p coeff ''w miejscu''.
  * Odpowiednik operacji `p *= c`.
- * @param[in] p : wielomian @f$ p(x) @f$
+ * @param[in,out] p : wielomian @f$ p(x) @f$
  * @param[in] coeff : współczynnik @f$ c @f$
  */
 static void PolyMulCoeffComp(Poly* p, poly_coeff_t coeff)
@@ -294,7 +294,7 @@ static void PolyMulCoeffComp(Poly* p, poly_coeff_t coeff)
  * Pomnożenie listy przez skalar. Każdy element listy zaczynającej się
  * w @p head zostaje pomnożony przez współczynnik @p coeff wraz z pozbyciem się
  * wyzerowanych jednomianów w razie, gdy takowe się nadażą.
- * @param[in] head : głowa listy
+ * @param[in,out] head : głowa listy
  * @param[in] coeff : skalar
  * @return głowa przemnożonej listy
  */
@@ -327,6 +327,11 @@ Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff)
     Decoeffise(&pc);
 
   return pc;
+}
+
+void PolyNegComp(Poly* p)
+{
+  PolyMulCoeffComp(p, -1);
 }
 
 poly_exp_t MonoListDeg(const MonoList* head)
