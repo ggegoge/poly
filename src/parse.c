@@ -55,9 +55,8 @@ static bool ParsePolyCoeff(char* src, char** err, Poly* p)
   if (**err != '\0' && **err != ',' && **err != '\n')
     return false;
 
-  if (**err == '\n') {
+  if (**err == '\n')
     ++*err;
-  }
 
   *p = PolyFromCoeff(c);
   return true;
@@ -140,9 +139,9 @@ static bool ParseMono(char* src, char** err, Mono* m)
   *err = src;
   assert(*src == '(');
 
-  if (!ParsePoly(++src, err, &p))
+  if (!ParsePoly(++src, err, &p)) {
     return false;
-  else if (**err != ',') {
+  } else if (**err != ',') {
     /* jeśli udało się wczytać, ale brakuje przecinka, tzn, że musimy sami
      * usunąć ten wielomian ponieważ ParsePoly tego nie zrobiło */
     PolyDestroy(&p);

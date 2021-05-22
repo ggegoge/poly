@@ -46,11 +46,6 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-static void UpperLine(char* s, size_t len);
-
-static ssize_t ReadLine(char** ptr, size_t* size, bool* is_eof,
-                        bool* is_comment);
-
 /**
  * Sprawdzian pustości linii. Do tego niejawne zmienienie ukrytych `\0` na
  * kropki, aby to nie sprawiało problemów dalszym funkcjom, na których działanie
@@ -61,18 +56,22 @@ static ssize_t ReadLine(char** ptr, size_t* size, bool* is_eof,
  */
 static bool IsEmpty(char* line, size_t len)
 {
-  bool emptiness = true;
+  bool is_empty = true;
 
   for (size_t i = 0; i < len; ++i) {
-    emptiness = emptiness && line[i] == '\n';
+    is_empty = is_empty && line[i] == '\n';
 
     if (line[i] == '\0' && i != len - 1)
       line[i] = '.';
   }
 
-  return emptiness;
+  return is_empty;
 }
 
+static void UpperLine(char* s, size_t len);
+
+static ssize_t ReadLine(char** ptr, size_t* size, bool* is_eof,
+                        bool* is_comment);
 /**
  * Czytanie komend ze standardowego wejścia.
  * @param[in] stack : stos kalkulatora
