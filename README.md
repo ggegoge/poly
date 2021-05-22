@@ -163,4 +163,4 @@ różowy kolor.
 ------------
 
 \author Grzegorz Cichosz
-\date kwiecień 2021
+\date kwiecień i maj 2021
