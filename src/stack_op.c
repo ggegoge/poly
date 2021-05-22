@@ -91,6 +91,23 @@ static Poly* Cadr(const struct Stack* stack)
   return stack->polys + stack->height - 2;
 }
 
+/**
+ * Przycięcie stosu w razie sytuacji gdy za duża jego część leży odłogiem.
+ * Robi to tylko wtedy, gdy obecna wysokość @p stack jest odległa od jego
+ * fizycznej wielkości 'o dwa powiększenia'.
+ */
+static void Trim(struct Stack* stack)
+{
+  if (stack->height >= INIT_STACK_SIZE &&
+      stack->height * ARR_RESIZE * ARR_RESIZE <= stack->size) {
+    stack->size /= ARR_RESIZE;
+    stack->polys = realloc(stack->polys, stack->size);
+
+    if (!stack->polys)
+      exit(1);
+  }
+}
+
 bool Pop(struct Stack* stack)
 {
   if (stack->height < 1)
@@ -98,7 +115,7 @@ bool Pop(struct Stack* stack)
 
   PolyDestroy(Car(stack));
   --stack->height;
-
+  Trim(stack);
   return true;
 }
 
