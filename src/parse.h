@@ -20,7 +20,7 @@
  * @param[in] src : tekst do parsunku
  * @param[in] len : długość rzeczonej linii
  * @param[in] linum : numer obecnego wiersza
- * @param[in] stack : stos kalkulacyjny
+ * @param[in,out] stack : stos kalkulacyjny
  */
 void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack);
 

@@ -46,16 +46,16 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-static void UpperLine(char* s, size_t line_len);
+static void UpperLine(char* s, size_t len);
 
-static ssize_t
-ReadLine(char** ptr, size_t* size, bool* is_eof, bool* is_comment);
+static ssize_t ReadLine(char** ptr, size_t* size, bool* is_eof,
+                        bool* is_comment);
 
 /**
  * Sprawdzian pustości linii. Do tego niejawne zmienienie ukrytych `\0` na
  * kropki, aby to nie sprawiało problemów dalszym funkcjom, na których działanie
  * wpływa obecność `\0` w napisie.
- * @param[in] line : linia
+ * @param[in,out] line : linia
  * @param[in] len : długość linii
  * @return czy linia jest pusta
  */
@@ -87,7 +87,6 @@ static void Interpret(struct Stack* stack, bool prettification)
   bool is_comment = false;
   bool is_eof = false;
 
-
   while (!feof(stdin) && !is_eof) {
     if (prettification)
       printf("|%lu|> ", linum);
@@ -109,8 +108,8 @@ static void Interpret(struct Stack* stack, bool prettification)
 
 /**
  * Wczytywanie pojedynczych linii ze standardowego wejścia.
- * @param[in] ptr : bufor do zapisywania linii
- * @param[in] size : wielkość bufora
+ * @param[in,out] ptr : bufor do zapisywania linii
+ * @param[in,out] size : wielkość bufora
  * @param[out] is_eof : czy nie skończyło się wejście
  * @param[out] is_comment : czy to nie linijka komentarzowa
  * @return długość wczytanej linii

@@ -43,24 +43,22 @@
  */
 static bool ParsePolyCoeff(char* src, char** err, Poly* p)
 {
-  char* strto_err;
   poly_coeff_t c;
 
-  c = strtol(src, &strto_err, 10);
+  c = strtol(src, err, 10);
 
   if (errno == ERANGE) {
     errno = 0;
     return false;
   }
 
-  if (*strto_err != '\0' && *strto_err != ',' && *strto_err != '\n')
+  if (**err != '\0' && **err != ',' && **err != '\n')
     return false;
 
-  while (*strto_err == '\n') {
-    ++strto_err;
+  if (**err == '\n') {
+    ++*err;
   }
 
-  *err = strto_err;
   *p = PolyFromCoeff(c);
   return true;
 }
@@ -72,19 +70,18 @@ static bool ParseMono(char* src, char** err, Mono* m);
  * niewczytany znak (coś jak funkcja biblioteczna `strtod`) i pod @p p ładuje
  * wczytany wielomian.
  * @param[in] src : źródło do wczytania wielomianu zeń
- * @param[in] err : wskazuje pierwszy niewczytany znak
+ * @param[out] err : wskazuje pierwszy niewczytany znak
  * @param[out] p : miejsce na wynikowy wielomian
  * @return czy udało się wczytać wielomian
  */
 static bool ParsePoly(char* src, char** err, Poly* p)
 {
-  bool beginning = true;
-  size_t pluses = 0;
+  /* kontrolowanie czy plusy pojawiły się tam gdzie trzeba */
+  bool plus_awaited = false;
   Mono m;
   *err = src;
   *p = PolyZero();
 
-  /* przypadek pierwszy -- wielomian współczynnny */
   if (isdigit(*src) || *src == '-')
     return ParsePolyCoeff(src, err, p);
 
@@ -92,19 +89,18 @@ static bool ParsePoly(char* src, char** err, Poly* p)
     return false;
 
   while (*src != ',' && *src != '\0') {
-    if (*src == '+' || *src == '\n') {
-      if (*src == '+')
-        ++pluses;
+    if (*src == '+' && !plus_awaited) {
+      PolyDestroy(p);
+      return false;
+    }
 
+    if (*src == '+' || *src == '\n') {
+      plus_awaited = *src != '+' ? plus_awaited : false;
       ++src;
-      beginning = false;
       continue;
     }
 
-    /* jak wynika z BNFu -- poza początkiem, po jednomianie musi następować
-     * plus jeśli ma wystąpić jeszcze jakiś inny */
-    if (*src != '(' || pluses > 1 || (pluses == 0 && !beginning) ||
-        !ParseMono(src, err, &m)) {
+    if (*src != '(' || plus_awaited || !ParseMono(src, err, &m)) {
       PolyDestroy(p);
       return false;
     }
@@ -114,11 +110,10 @@ static bool ParsePoly(char* src, char** err, Poly* p)
 
     assert(**err == ')');
     src = ++*err;
-    beginning = false;
-    pluses = 0;
+    plus_awaited = true;
   }
 
-  if (pluses != 0) {
+  if (!plus_awaited) {
     PolyDestroy(p);
     return false;
   }
@@ -141,12 +136,11 @@ static bool ParseMono(char* src, char** err, Mono* m)
 {
   Poly p = PolyZero();
   long e;
-  char* strto_err;
 
   *err = src;
   assert(*src == '(');
 
-  if (!ParsePoly(src + 1, err, &p))
+  if (!ParsePoly(++src, err, &p))
     return false;
   else if (**err != ',') {
     /* jeśli udało się wczytać, ale brakuje przecinka, tzn, że musimy sami
@@ -155,7 +149,7 @@ static bool ParseMono(char* src, char** err, Mono* m)
     return false;
   }
 
-  src = *err + 1;
+  src = ++*err;
 
   /* po przecinku następuje dodatni wykładnik */
   if (!isdigit(*src)) {
@@ -163,15 +157,13 @@ static bool ParseMono(char* src, char** err, Mono* m)
     return false;
   }
 
-  e = strtol(src, &strto_err, 10);
+  e = strtol(src, err, 10);
 
   if (errno == ERANGE || e > EXP_MAX || e < 0) {
     errno = 0;
     PolyDestroy(&p);
     return false;
   }
-
-  *err = strto_err;
 
   if (**err != ')') {
     PolyDestroy(&p);
@@ -199,7 +191,7 @@ static void ErrorTraceback(size_t linum, char* message)
  * argument w stylu quasi-`strtok`owym -- ustawia znak '`\0`' na pozycji spacji
  * aby następna obróbka komendy i argumentu była prosta (`strcmp`). Do tego
  * dodaje taki null bajt w miejscu `\n`.
- * @param[in] src : napis
+ * @param[in,out] src : napis
  * @param[in] len : jego długość
  * @param[out] arg : wskazuje na argument
  * @return czy znaleziono argument?
@@ -229,9 +221,17 @@ static bool FindArg(char* src, size_t len, char** arg)
   return res;
 }
 
-static void
-ParseCommand(char* cmnd, char* arg, size_t linum, struct Stack* stack);
+static void ParseCommand(char* cmnd, char* arg, size_t linum,
+                         struct Stack* stack);
 
+/**
+ * Mówi czy komenda @p cmnd jest jedną z wymagających argumentu.
+ * @param[in] cmnd : komenda
+ * @return czy to komenda argumentowa */
+static bool IsArgd(char* cmnd)
+{
+  return strcmp(cmnd, "DEG_BY") == 0 || strcmp(cmnd, "AT") == 0;
+}
 
 void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
 {
@@ -257,8 +257,9 @@ void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
     return;
   }
 
-  if (FindArg(src, len, &arg) && strcmp(cmnd, "DEG_BY") != 0 &&
-      strcmp(cmnd, "AT") != 0) {
+  /* szukam argumentu i ustawiam odpowiednio arg. jeśli znajdę argument, to
+   * sprawdzam czy cmnd jest dwuargumentowa, inaczej istnienie arg to błąd */
+  if (FindArg(src, len, &arg) && !IsArgd(cmnd)) {
     ErrorTraceback(linum, "WRONG COMMAND");
     return;
   }
@@ -272,7 +273,7 @@ void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
  * @param[in] cmnd : treść komendy
  * @param[in] arg : opcjonalnie -- argument komendy @p cmnd
  * @param[in] linum : numer obecnego wiersza
- * @param[in] stack : stos kalkulacyjny
+ * @param[in,out] stack : stos kalkulacyjny
  */
 static void ParseCommand(char* cmnd, char* arg, size_t linum,
                          struct Stack* stack)

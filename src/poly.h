@@ -91,8 +91,6 @@ static inline Poly PolyZero(void)
   return PolyFromCoeff(0);
 }
 
-static inline bool PolyIsZero(const Poly* p);
-
 /**
  * Tworzy jednomian @f$px_i^n@f$.
  * Przejmuje na własność zawartość struktury wskazywanej przez @p p.
