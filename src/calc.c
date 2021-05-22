@@ -87,7 +87,6 @@ static void Interpret(struct Stack* stack, bool prettification)
   bool iscomment = false;
   bool iseof = false;
 
-
   while (!feof(stdin) && !iseof) {
     if (prettification)
       printf("|%lu|> ", linum);
