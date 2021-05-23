@@ -89,6 +89,9 @@ o funkcjach czysto liczbowych takich jak maksimum czy potęga. Nie są w
 żaden sposób częścią _szerokiej biblioteki wielomianowej_ jak można by
 nazwać `poly_lib`.
 
+Zastosowanie biblioteki jest do zaobserwowania w dostarczonym odgórnie
+`poly_example.c`.
+
 Plik `poly_lib.c` składa się z funkcji zadeklarowanych w
 odpowiadającym sobie pliku nagłówkowym jak i niektórych dodatkowych,
 które deklaruję jako `static` albowiem nie korzystam z nich poza tym

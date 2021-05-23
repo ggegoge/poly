@@ -94,7 +94,7 @@ static Poly* Cadr(const struct Stack* stack)
 /**
  * Przycięcie stosu w razie sytuacji gdy za duża jego część leży odłogiem.
  * Robi to tylko wtedy, gdy obecna wysokość @p stack jest odległa od jego
- * fizycznej wielkości 'o dwa powiększenia'.
+ * fizycznej wielkości ''o dwa powiększenia'' celem uniknięcia _efektu jojo_.
  */
 static void Trim(struct Stack* stack)
 {
