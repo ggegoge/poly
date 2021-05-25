@@ -1,6 +1,5 @@
 /** @file
-  Konieczne funkcje do wczytywania wielomianów i operacji stosowych na nich
-  z tekstu.
+  Konieczne funkcje do wczytywania wielomianów i operacji stosowych z tekstu.
 
   @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
@@ -12,11 +11,10 @@
 #define _PARSE_H_
 
 #include "stack_op.h"
-#include "poly.h"
 
 /**
- * Odpowiednie wczytanie komendy z pojedynczej linii @p src i wywołanie
- * stosownych operacji na stosie kalkulacyjnym.
+ * Odpowiednie wczytanie komendy z @p linum-tej linii @p src i wywołanie
+ * stosownych operacji na stosie kalkulacyjnym @p stack.
  * @param[in] src : tekst do parsunku
  * @param[in] len : długość rzeczonej linii
  * @param[in] linum : numer obecnego wiersza
