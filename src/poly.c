@@ -237,16 +237,28 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
   Poly pow;
   Poly mul;
 
+  if (PolyIsCoeff(p))
+    return PolyClone(p);
+
+  /* chyba zwracamy 0 w tej gałęzi */
   if (k <= 0) {
-    for (MonoList* pl = p->list; pl; pl = pl->tail) {
-      tmp = PolyCompose(&pl->m.p, k - 1, q);
-      PolyAddComp(&res, &tmp);
-      PolyDestroy(&tmp);
-    }
+    /* for (MonoList* pl = p->list; pl; pl = pl->tail) {
+     *   tmp = PolyCompose(&pl->m.p, k - 1, q);
+     *   PolyAddComp(&res, &tmp);
+     *   PolyDestroy(&tmp);
+     * } */
   } else {
     for (MonoList* pl = p->list; pl; pl = pl->tail) {
       tmp = PolyCompose(&pl->m.p, k - 1, q + 1);
-      pow = PolyPow(q, pl->m.exp);
+
+      if (PolyIsZero(&tmp))
+        continue;
+
+      if (!PolyIsCoeff(q))
+        pow = PolyPow(q, pl->m.exp);
+      else
+        pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));
+
       mul = PolyMul(&pow, &tmp);
       PolyAddComp(&res, &mul);
       PolyDestroy(&tmp);
