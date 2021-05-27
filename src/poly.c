@@ -229,3 +229,34 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
 
   return sum;
 }
+
+Poly PolyOwnMonos(size_t count, Mono monos[])
+{
+  Poly p;
+
+  if (!count || !monos)
+    return PolyZero();
+
+  p = PolyAddMonos(count, monos);
+  free(monos);
+  return p;
+}
+
+Poly PolyCloneMonos(size_t count, const Mono monos[])
+{
+  Poly p;
+  Mono* cloned;
+
+  if (!count || !monos)
+    return PolyZero();
+
+  cloned = malloc(count * sizeof(Mono));
+
+  if (!cloned) exit(1);
+
+  for (size_t i = 0; i < count; ++i)
+    cloned[i] = MonoClone(monos + i);
+
+  p = PolyOwnMonos(count, cloned);
+  return p;
+}
