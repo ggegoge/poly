@@ -264,7 +264,7 @@ static void RevStackSlice(struct Stack* stack, size_t k)
   Poly tmp;
   assert(stack->height >= k + 1);
   
-  for (l = stack->height - k - 2, r = stack->height - 2; l < r; ++l, ++r) {
+  for (l = stack->height - k - 1, r = stack->height - 2; l < r; ++l, --r) {
     tmp = stack->polys[l];
     stack->polys[l] = stack->polys[r];
     stack->polys[r] = tmp;
