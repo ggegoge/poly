@@ -229,3 +229,31 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
 
   return sum;
 }
+
+Poly PolyCompose(const Poly* p, size_t k, const Poly q[])
+{
+  Poly tmp;
+  Poly res = PolyZero();
+  Poly pow;
+  Poly mul;
+
+  if (k <= 0) {
+    for (MonoList* pl = p->list; pl; pl = pl->tail) {
+      tmp = PolyCompose(&pl->m.p, k - 1, q);
+      PolyAddComp(&res, &tmp);
+      PolyDestroy(&tmp);
+    }
+  } else {
+    for (MonoList* pl = p->list; pl; pl = pl->tail) {
+      tmp = PolyCompose(&pl->m.p, k - 1, q + 1);
+      pow = PolyPow(q, pl->m.exp);
+      mul = PolyMul(&pow, &tmp);
+      PolyAddComp(&res, &mul);
+      PolyDestroy(&tmp);
+      PolyDestroy(&mul);
+      PolyDestroy(&pow);
+    }
+  }
+
+  return res;
+}

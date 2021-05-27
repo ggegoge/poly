@@ -239,7 +239,8 @@ bool PolyIsEq(const Poly* p, const Poly* q);
  */
 Poly PolyAt(const Poly* p, poly_coeff_t x);
 
-/** Złożenie wielomianu @p p z @p k wielomianami z tablicy @p q.
+/**
+ * Złożenie wielomianu @p p z @p k wielomianami z tablicy @p q.
  * Jeśli oryginalny wielomian miał postać @f$p(x_0, x_1,\ldots, x_{l-1})@f$, to
  * po dokonaniu złożenia z wielomianami @f$q_0, q_1,\ldots, q_{k-1}@f$ przyjmie
  * dla @f$k \geq l@f$ postać @f$p(q_0, q_1,\ldots, q_{l-1})@f$, a dla

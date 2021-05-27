@@ -352,3 +352,36 @@ bool MonoIsEq(const Mono* m, const Mono* t)
 {
   return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
 }
+
+/* todo: composing */
+
+Poly PolyPow(const Poly* p, poly_coeff_t n)
+{
+  Poly pow = PolyFromCoeff(1);
+  /* nie zmieniam argumentów */
+  Poly a = PolyClone(p);
+  Poly tmp;
+
+  assert(!PolyIsCoeff(p));
+  assert(n >= 0);
+
+  if (n == 0)
+    return pow;
+
+  while (n) {
+    if (n % 2 == 1) {
+      tmp = PolyMul(&pow, &a);
+      PolyDestroy(&pow);
+      pow = tmp;
+    }
+
+    n /= 2;
+
+    tmp = PolyMul(&a, &a);
+    PolyDestroy(&a);
+    a = tmp;
+  }
+
+  PolyDestroy(&a);
+  return pow;
+}
