@@ -4048,13 +4048,19 @@ static const test_list_t test_list[] = {
   TEST(MemoryGroup),
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
+  bool testy_ok = true;
+  bool all;
+
   if (argc != 2)
-    return TEST_WRONG;
+    all = true;
+  else
+    all = strcmp(argv[1], "all") == 0;
 
   for (size_t i = 0; i < SIZE(test_list); ++i)
-    if (strcmp(argv[1], test_list[i].name) == 0)
-      return test_list[i].function() ? TEST_PASS : TEST_FAIL;
+    if (all || strcmp(argv[1], test_list[i].name) == 0)
+      testy_ok &= test_list[i].function(); /* ? TEST_PASS : TEST_FAIL; */
 
-  return TEST_WRONG;
+  return testy_ok ? TEST_PASS : TEST_WRONG;
 }
