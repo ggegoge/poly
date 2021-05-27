@@ -250,36 +250,15 @@ bool At(struct Stack* stack, poly_coeff_t x)
   return true;
 }
 
-/**
- * Obrócenie @p k wielomianów spod czubka stosu na tablicy stosowej. Funkcja
- * pomocnicza dla @ref Compose. Obraca je w taki sposób, że pierwszy pozostaje
- * na miejscu i dopiero kolejne @p k poniżej są obracane.
- * @param[in,out] stack : stos
- * @param[in] k : ile wielomianów do obrotu
- */
-static void RevStackSlice(struct Stack* stack, size_t k)
-{
-  /* obracam pomiędzy l i r __włącznie__ */
-  size_t l, r;
-  Poly tmp;
-  assert(stack->height >= k + 1);
-  
-  for (l = stack->height - k - 1, r = stack->height - 2; l < r; ++l, --r) {
-    tmp = stack->polys[l];
-    stack->polys[l] = stack->polys[r];
-    stack->polys[r] = tmp;
-  }
-}
-
 bool Compose(struct Stack* stack, size_t k)
 {
   Poly composee;
-  
+
   if (stack->height < k + 1)
     return false;
 
-  RevStackSlice(stack, k);
   composee = PolyCompose(Car(stack), k, stack->polys + stack->height - k - 1);
+
   /* usuwam k+1 najwyższych */
   for (size_t i = 0; i <= k; ++i)
     Pop(stack);
