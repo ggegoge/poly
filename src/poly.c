@@ -211,25 +211,6 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
   return res;
 }
 
-Poly PolyAddMonos(size_t count, const Mono monos[])
-{
-  Poly sum = PolyZero();
-  Mono m;
-
-  for (size_t i = 0; i < count; ++i) {
-    if (PolyIsZero(&monos[i].p))
-      continue;
-
-    m = monos[i];
-    MonoListInsert(&sum.list, &m);
-  }
-
-  if (PolyIsPseudoCoeff(sum.list))
-    Decoeffise(&sum);
-
-  return sum;
-}
-
 Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 {
   Poly tmp;
@@ -268,4 +249,23 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
   }
 
   return res;
+}
+
+Poly PolyAddMonos(size_t count, const Mono monos[])
+{
+  Poly sum = PolyZero();
+  Mono m;
+
+  for (size_t i = 0; i < count; ++i) {
+    if (PolyIsZero(&monos[i].p))
+      continue;
+
+    m = monos[i];
+    MonoListInsert(&sum.list, &m);
+  }
+
+  if (PolyIsPseudoCoeff(sum.list))
+    Decoeffise(&sum);
+
+  return sum;
 }
