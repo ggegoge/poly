@@ -230,7 +230,7 @@ Poly PolyAddMonos(size_t count, const Mono monos[])
   return sum;
 }
 
-Poly PolyCompose(const Poly* p, size_t k, const Poly q[])
+Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 {
   Poly tmp;
   Poly res = PolyZero();

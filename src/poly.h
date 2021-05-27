@@ -251,6 +251,6 @@ Poly PolyAt(const Poly* p, poly_coeff_t x);
  * @param[in] q : tablica wielomianów do złożenia
  * @return efekt złożenia @p p z wielomianami z @p q.
  */
-Poly PolyCompose(const Poly* p, size_t k, const Poly q[]);
+Poly PolyCompose(const Poly* p, size_t k, const Poly* q);
 
 #endif /* __POLY_H__ */
