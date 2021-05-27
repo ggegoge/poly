@@ -155,4 +155,13 @@ bool DegBy(const struct Stack* stack, unsigned long long idx);
  */
 bool At(struct Stack* stack, poly_coeff_t x);
 
+/**
+ * Podstawienie @p k najwyższych wielomianów ze @p stack pod główną odpowiednie
+ * zmienne i podmianka tych pierwotnych wielomianów na ten po podstawieniu.
+ * @param[in,out] stack : stos kalkulacyjny
+ * @param[in] k : liczba wielomianów do podstawienia
+ * @return czy nie nastąpiło niedopełnienie stosu @p stack
+ */
+bool Compose(struct Stack* stack, size_t k);
+
 #endif  /* _STACK_OP_H_ */
