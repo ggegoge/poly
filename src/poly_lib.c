@@ -359,7 +359,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 {
   Poly pow = PolyFromCoeff(1);
   /* nie zmieniam argumentów */
-  Poly a = PolyClone(p);
+  Poly a;
   Poly tmp;
 
   assert(!PolyIsCoeff(p));
@@ -368,6 +368,8 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
   if (n == 0)
     return pow;
 
+  a = PolyClone(p);
+  
   while (n) {
     if (n % 2 == 1) {
       tmp = PolyMul(&pow, &a);
