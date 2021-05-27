@@ -254,7 +254,8 @@ bool Compose(struct Stack* stack, size_t k)
 {
   Poly composee;
 
-  if (stack->height < k + 1)
+  /* druga część jest tutaj celem bornienia się przed k = ULONG_MAX */
+  if (stack->height < k + 1 || k + 1 < 1)
     return false;
 
   composee = PolyCompose(Car(stack), k, stack->polys + stack->height - k - 1);
