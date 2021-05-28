@@ -3357,8 +3357,8 @@ static bool AtTest2(void)
   if (!PolyIsEq(&p3, &p2))
     result = false;
 
-  if (PolyDeg(&p) != (upper_size - 1) + (poly_depth * ((poly_exp_t)poly_size -
-                                         1)))
+  if (PolyDeg(&p) != (poly_exp_t)(upper_size - 1) + (poly_depth * ((
+        poly_exp_t)poly_size - 1)))
     result = false;
 
   if (PolyDegBy(&p, 0) != upper_size - 1)
