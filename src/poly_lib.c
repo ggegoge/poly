@@ -50,6 +50,17 @@ MonoList* MonoListClone(const MonoList* head)
   return elem;
 }
 
+Mono* CloneMonoArray(size_t count, const Mono monos[])
+{
+  Mono* cloned = malloc(count * sizeof(Mono));
+  CHECK_PTR(cloned);
+
+  for (size_t i = 0; i < count; ++i)
+    cloned[i] = MonoClone(monos + i);
+
+  return cloned;
+}
+
 /* pseudowspółczynnik ma formę c x^0 */
 bool PolyIsPseudoCoeff(const MonoList* ml)
 {

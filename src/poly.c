@@ -290,12 +290,7 @@ Poly PolyCloneMonos(size_t count, const Mono monos[])
   if (!count || !monos)
     return PolyZero();
 
-  cloned = malloc(count * sizeof(Mono));
-
-  if (!cloned) exit(1);
-
-  for (size_t i = 0; i < count; ++i)
-    cloned[i] = MonoClone(monos + i);
+  cloned = CloneMonoArray(count, monos);
 
   p = PolyOwnMonos(count, cloned);
   return p;

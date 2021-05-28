@@ -124,6 +124,12 @@ poly_exp_t MonoListDeg(const MonoList* head);
  */
 bool MonoIsEq(const Mono* m, const Mono* t);
 
-
+/**
+ * Dokonanie głębokiej kopii tablicy @p monos.
+ * @param[in] count : wielkość tablicy
+ * @param[in] monos : rzeczona tablica
+ * @return głęboka kopia tablicy i jej wielomianów
+ */
+Mono* CloneMonoArray(size_t count, const Mono monos[]);
 
 #endif /* __POLY_LIB_H__ */
