@@ -358,8 +358,8 @@ bool MonoIsEq(const Mono* m, const Mono* t)
 Poly PolyPow(const Poly* p, poly_coeff_t n)
 {
   Poly pow = PolyFromCoeff(1);
-  /* nie zmieniam argumentów */
   Poly a;
+  bool changed = false;
   Poly tmp;
 
   assert(!PolyIsCoeff(p));
@@ -368,8 +368,8 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
   if (n == 0)
     return pow;
 
-  a = PolyClone(p);
-  
+  a = *p;
+
   while (n) {
     if (n % 2 == 1) {
       tmp = PolyMul(&pow, &a);
@@ -380,7 +380,12 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
     n /= 2;
 
     tmp = PolyMul(&a, &a);
-    PolyDestroy(&a);
+
+    if (changed)
+      PolyDestroy(&a);
+    else
+      changed = !changed;
+
     a = tmp;
   }
 
