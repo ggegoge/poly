@@ -3324,7 +3324,7 @@ static bool AtTest2(void)
 {
   const size_t poly_size = 6;
   const size_t poly_depth = 3;
-  const size_t upper_size = 5;
+  const int upper_size = 5;
   bool result = true;
   Poly p = PolyFromCoeff(1);
   Mono* m = calloc(poly_size, sizeof (Mono));
