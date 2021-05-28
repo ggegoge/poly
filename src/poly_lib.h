@@ -94,6 +94,13 @@ void PolyNegComp(Poly* p);
 Mono MonoMul(const Mono* m, const Mono* t);
 
 /**
+ * Podnoszenie wielomianu @p p do potęgi @p n.
+ * @param[in] p : wielomain @f$p@f$
+ * @param[in] n : wykładnik @f$n@f$
+ * @return spotęgowany wielomian @f$p^n@f$ */
+Poly PolyPow(const Poly* p, poly_coeff_t n);
+
+/**
  * Obliczenie współczynnika wielomianu stałego.
  * @param[in] p : wielomian stały
  * @return stopień wielomianu

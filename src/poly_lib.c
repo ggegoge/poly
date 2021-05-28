@@ -336,7 +336,7 @@ void PolyNegComp(Poly* p)
 
 poly_exp_t MonoListDeg(const MonoList* head)
 {
-  assert(head != NULL);
+  assert(head);
   return head->m.exp;
 }
 
@@ -351,4 +351,53 @@ poly_exp_t PolyCoeffDeg(const Poly* p)
 bool MonoIsEq(const Mono* m, const Mono* t)
 {
   return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
+}
+
+/* ten sam algorytm co w potęgowaniu liczb stosowanym w PolyAt w pliku poly.c */
+Poly PolyPow(const Poly* p, poly_coeff_t n)
+{
+  Poly pow = PolyFromCoeff(1);
+  Poly tmppow;
+  /* jako, że a to na początku płytka kopia p, to muszę wiedzieć czy się
+   * zmieniło zanim wywołam na nim destrukcję */
+  bool changed = false;
+  Poly a = *p;
+  Poly tmpa;
+
+  assert(!PolyIsCoeff(p));
+  assert(n >= 0);
+
+  if (n == 0)
+    return pow;
+
+  while (n > 1) {
+    if (n % 2 == 0) {
+      tmpa = PolyMul(&a, &a);
+      n /= 2;
+    } else {
+      tmppow = PolyMul(&pow, &a);
+      PolyDestroy(&pow);
+      pow = tmppow;
+      tmpa = PolyMul(&a, &a);
+      n = (n - 1) / 2;
+    }
+
+    if (changed)
+      PolyDestroy(&a);
+    else
+      changed = true;
+
+    a = tmpa;
+  }
+
+  tmppow = PolyMul(&a, &pow);
+  PolyDestroy(&pow);
+  pow = tmppow;
+
+  if (changed)
+    PolyDestroy(&a);
+  else
+    changed = true;
+
+  return pow;
 }

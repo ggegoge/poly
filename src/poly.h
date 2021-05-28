@@ -262,4 +262,18 @@ bool PolyIsEq(const Poly* p, const Poly* q);
  */
 Poly PolyAt(const Poly* p, poly_coeff_t x);
 
+/**
+ * Złożenie wielomianu @p p z @p k wielomianami z tablicy @p q.
+ * Jeśli oryginalny wielomian miał postać @f$p(x_0, x_1,\ldots, x_{l-1})@f$, to
+ * po dokonaniu złożenia z wielomianami @f$q_0, q_1,\ldots, q_{k-1}@f$ przyjmie
+ * dla @f$k \geq l@f$ postać @f$p(q_0, q_1,\ldots, q_{l-1})@f$, a dla
+ * @f$l > k@f$ te brakujące zmienne będą zmienione na 0 tj
+ * @f$p(q_0, q_1,\ldots, q_{k-1},0\ldots,0)@f$.
+ * @param[in] p : wielomian do podstawiania weń składowych
+ * @param[in] k : liczba wielomianów do złożenia z @p p
+ * @param[in] q : tablica wielomianów do złożenia
+ * @return efekt złożenia @p p z wielomianami z @p q.
+ */
+Poly PolyCompose(const Poly* p, size_t k, const Poly* q);
+
 #endif /* __POLY_H__ */

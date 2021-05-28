@@ -229,7 +229,8 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
  * @return czy to komenda argumentowa */
 static bool IsArgd(char* cmnd)
 {
-  return strcmp(cmnd, "DEG_BY") == 0 || strcmp(cmnd, "AT") == 0;
+  return strcmp(cmnd, "DEG_BY") == 0 || strcmp(cmnd, "AT") == 0 ||
+         strcmp(cmnd, "COMPOSE") == 0;
 }
 
 void ParseLine(char* src, size_t len, size_t linum, struct Stack* stack)
@@ -279,6 +280,7 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
 {
   unsigned long long idx;
   poly_coeff_t x;
+  size_t k;
   char* err;
   /* czy nie nastąpiło niedopełnienie stosu */
   bool stacked = true;
@@ -325,6 +327,15 @@ static void ParseCommand(char* cmnd, char* arg, size_t linum,
       ErrorTraceback(linum, "AT WRONG VALUE");
     } else {
       stacked = At(stack, x);
+    }
+  } else if (strcmp(cmnd, "COMPOSE") == 0) {
+    k = strtoul(arg, &err, 10);
+
+    if (!(isdigit(*arg)) || *arg == '-' || errno == ERANGE || *err != '\0') {
+      errno = 0;
+      ErrorTraceback(linum, "COMPOSE WRONG PARAMETER");
+    } else {
+      stacked = Compose(stack, k);
     }
   } else {
     ErrorTraceback(linum, "WRONG COMMAND");
