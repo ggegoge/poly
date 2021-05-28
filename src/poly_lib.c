@@ -360,7 +360,8 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
   Poly pow = PolyFromCoeff(1);
   Poly a;
   bool changed = false;
-  Poly tmp;
+  Poly tmpa;
+  Poly tmppow;
 
   assert(!PolyIsCoeff(p));
   assert(n >= 0);
@@ -370,25 +371,34 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 
   a = *p;
 
-  while (n) {
-    if (n % 2 == 1) {
-      tmp = PolyMul(&pow, &a);
+  while (n > 1) {
+    if (n % 2 == 0) {
+      tmpa = PolyMul(&a, &a);
+      n /= 2;
+    } else {
+      tmppow = PolyMul(&pow, &a);
       PolyDestroy(&pow);
-      pow = tmp;
+      pow = tmppow;
+      tmpa = PolyMul(&a, &a);
+      n = (n - 1) / 2;
     }
-
-    n /= 2;
-
-    tmp = PolyMul(&a, &a);
 
     if (changed)
       PolyDestroy(&a);
     else
-      changed = !changed;
+      changed = true;
 
-    a = tmp;
+    a = tmpa;
   }
 
-  PolyDestroy(&a);
+  tmppow = PolyMul(&a, &pow);
+  PolyDestroy(&pow);
+  pow = tmppow;
+
+  if (changed)
+    PolyDestroy(&a);
+  else
+    changed = true;
+
   return pow;
 }
