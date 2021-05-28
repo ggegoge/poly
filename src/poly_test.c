@@ -4258,9 +4258,11 @@ static bool MemoryGroup(void)
 // Liczba elementów tablicy x
 #define SIZE(x) (sizeof (x) / sizeof (x)[0])
 
+/**
+ * Pojedynczy test. */
 typedef struct {
-  char const* name;
-  bool (*function)(void);
+  char const* name;             /**< nazwa testu */
+  bool (*function)(void);       /**< funkcja testująca */
 } test_list_t;
 
 #define TEST(t) {#t, t}

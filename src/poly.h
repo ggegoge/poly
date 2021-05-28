@@ -273,7 +273,7 @@ Poly PolyAt(const Poly* p, poly_coeff_t x);
  * _Uwaga_: funkcja nie przejmuje tablicy wielomianów spod @p q na własność.
  * @param[in] p : wielomian do podstawiania weń składowych
  * @param[in] k : liczba wielomianów do złożenia z @p p
- * @param[in] q : wielomian do podstawienia pod @$fx_0@f$, za nim ułożone
+ * @param[in] q : wielomian do podstawienia pod @f$x_0@f$, za nim ułożone
  * są kolejne (_de facto_ tablica, ale implementacyjnie traktujemy to jako
  * czysty wskaźnik).
  * @return efekt złożenia @p p z wielomianami z @p q.
