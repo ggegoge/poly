@@ -3345,7 +3345,7 @@ static bool AtTest2(void)
   free(m);
   m = calloc(upper_size, sizeof (Mono));
 
-  for (size_t i = 0; i < upper_size; ++i) {
+  for (size_t i = 0; i < (long unsigned int)upper_size; ++i) {
     Poly tmp = PolyClone(&p);
     m[i] = MonoFromPoly(&tmp, i);
   }
