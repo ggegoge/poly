@@ -416,18 +416,16 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 static void MonoIncorporate(Mono* m, Mono* t);
 
 /**
- * Złączenie pełne list @p lhead i @p rhead wraz z przejęciem ich w całości. */
+ * Złączenie pełne list @p lhead i @p rhead wraz z przejęciem ich w całości.
+ * Jak @ref MonoListsMerge to było `+=`, tak to jest ''`+=+`''. */
 static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
 {
   int cmp;
   MonoList* tmp;
 
-  /* złączenie list à la merge sort dopóki obydwie nie są puste. */
   if (!lhead && !rhead)
     return NULL;
 
-  /* chcę podłączyć lhead jeśli rhead jest puste i na odwrót. jeśli obydwa
-   * niepuste, to podłączam w kolejności malejącej expów */
   if (!lhead)
     cmp = -1;
   else if (!rhead)
@@ -445,6 +443,7 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
       lhead->tail = MonoListsIncorporate(lhead->tail, tmp);
       return lhead;
     } else {
+      /* uwaga: ten przypadek jeszcze się nigdy nie włączył...? */
       MonoDestroy(&lhead->m);
       tmp = lhead->tail;
       free(lhead);
