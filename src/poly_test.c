@@ -4153,6 +4153,48 @@ static bool MemoryThiefTest(void)
   return true;
 }
 
+static bool ArrayFunctionsTest(void)
+{
+  Poly p, p1, p2;
+  Mono *monos = calloc(2, sizeof(Mono));
+  
+  assert(monos);
+  monos[0] = M(P(C(-1), 1), 1);
+  monos[1] = M(P(C(1), 1), 2);
+  p = PolyOwnMonos(2, monos);
+  PolyDestroy(&p);
+
+  monos = calloc(2, sizeof(Mono));
+  assert(monos);
+  monos[0] = M(P(C(-1), 1), 1);
+  monos[1] = M(P(C(1), 1), 2);
+  p1 = PolyCloneMonos(2, monos);
+  p2 = PolyCloneMonos(2, monos);
+  PolyDestroy(&p1);
+  PolyDestroy(&p2);
+  MonoDestroy(monos + 0);
+  MonoDestroy(monos + 1);
+  free(monos);
+  
+  /* własny */
+  monos = malloc(3 * sizeof(Mono));
+  monos[0] = M(P(C(-1), 1), 1);
+  monos[1] = M(P(C(-1), 1), 1);
+  monos[2] = M(P(C(-1), 1), 1);;
+  p1 = PolyCloneMonos(3, monos);
+  MonoDestroy(monos + 0);
+  monos[0] = M(C(1), 0);
+  p2 = PolyOwnMonos(3, monos);
+
+  if (PolyIsEq(&p1, &p2))
+    return false;
+  
+  PolyDestroy(&p1);
+  PolyDestroy(&p2);
+  
+  return true;
+}
+
 static bool MemoryFreeTest(void)
 {
   Poly* p = malloc(sizeof (struct Poly));
@@ -4257,11 +4299,12 @@ static const test_list_t test_list[] = {
   TEST(MemoryThiefTest),
   TEST(MemoryFreeTest),
   TEST(MemoryGroup),
+  TEST(ArrayFunctionsTest),
 };
 
 int main(int argc, char* argv[])
 {
-  bool testy_ok = true;
+  bool tests_ok = true;
   bool all;
 
   if (argc != 2)
@@ -4271,7 +4314,7 @@ int main(int argc, char* argv[])
 
   for (size_t i = 0; i < SIZE(test_list); ++i)
     if (all || strcmp(argv[1], test_list[i].name) == 0)
-      testy_ok &= test_list[i].function(); /* ? TEST_PASS : TEST_FAIL; */
+      tests_ok &= test_list[i].function(); /* ? TEST_PASS : TEST_FAIL; */
 
-  return testy_ok ? TEST_PASS : TEST_WRONG;
+  return tests_ok ? TEST_PASS : TEST_WRONG;
 }
