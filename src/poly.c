@@ -241,7 +241,8 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
         pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));
 
       mul = PolyMul(&pow, &tmp);
-      PolyIncorporate(&res, &mul);
+      if (!PolyIsZero(&mul))
+        PolyIncorporate(&res, &mul);
       /* PolyAddComp(&res, &mul); */
       PolyDestroy(&tmp);
       /* PolyDestroy(&mul); */

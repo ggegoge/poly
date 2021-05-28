@@ -413,7 +413,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
   return pow;
 }
 
-void MonoIncorporate(Mono* m, Mono* t);
+static void MonoIncorporate(Mono* m, Mono* t);
 
 /**
  * Złączenie pełne list @p lhead i @p rhead wraz z przejęciem ich w całości. */
@@ -435,23 +435,31 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
   else
     cmp = MonoCmp(&lhead->m, &rhead->m);
 
-  if (cmp == 0) {               /* lh == rh */
+  if (cmp == 0) {
     /* lh->m +=+ rh->m */
     MonoIncorporate(&lhead->m, &rhead->m);
 
     if (!PolyIsZero(&lhead->m.p)) {
-      lhead->tail = MonoListsIncorporate(lhead->tail, rhead->tail);
+      tmp = rhead->tail;
+      free(rhead);
+      lhead->tail = MonoListsIncorporate(lhead->tail, tmp);
       return lhead;
     } else {
       MonoDestroy(&lhead->m);
       tmp = lhead->tail;
       free(lhead);
-      return MonoListsIncorporate(tmp, rhead->tail);
+      lhead = tmp;
+      
+      tmp = rhead->tail;
+      free(rhead);
+      rhead = tmp;
+      
+      return MonoListsIncorporate(lhead, rhead);
     }
-  } else if (cmp > 0) {         /* lh > rh */
+  } else if (cmp > 0) {
     lhead->tail = MonoListsIncorporate(lhead->tail, rhead);
     return lhead;
-  } else {                      /* lh < rh */
+  } else {
     rhead->tail = MonoListsIncorporate(lhead, rhead->tail);
     return rhead;
   }
@@ -468,12 +476,13 @@ void PolyIncorporate(Poly* p, Poly* q)
     return;
   }
 
-  MonoListsIncorporate(p->list, q->list);
+  p->list = MonoListsIncorporate(p->list, q->list);
+
   if (PolyIsPseudoCoeff(p->list))
     Decoeffise(p);
 }
 
-void MonoIncorporate(Mono* m, Mono* t)
-{  
+static void MonoIncorporate(Mono* m, Mono* t)
+{
   PolyIncorporate(&m->p, &t->p);
 }
