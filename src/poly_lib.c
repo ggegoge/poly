@@ -353,8 +353,7 @@ bool MonoIsEq(const Mono* m, const Mono* t)
   return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
 }
 
-/* todo: composing */
-
+/* ten sam algorytm co w potęgowaniu liczb stosowanym w PolyAt w pliku poly.c */
 Poly PolyPow(const Poly* p, poly_coeff_t n)
 {
   Poly pow = PolyFromCoeff(1);
