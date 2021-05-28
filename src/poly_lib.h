@@ -51,6 +51,13 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff);
 void PolyAddComp(Poly* p, const Poly* q);
 
 /**
+ * Wtłoczenie wielomianu @p p w wielomian @p q -- @p p przejmuje całą pamięć
+ * należącą do @p q i wszystkie jego jednomiany, @p q przestaje być właściwym
+ * wielomianem, a staje się zaledwie częścią @p p.
+ */
+void PolyIncorporate(Poly* p, Poly* q);
+
+/**
  * Sprawdzian czy komórka listy @p ml nie jest przypadkiem
  * ''pseudowspółczynnikiem''. Funkcja mówi czy nie jest to przypadkiem lista,
  * w którą zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji

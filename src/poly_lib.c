@@ -412,3 +412,68 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 
   return pow;
 }
+
+void MonoIncorporate(Mono* m, Mono* t);
+
+/**
+ * Złączenie pełne list @p lhead i @p rhead wraz z przejęciem ich w całości. */
+static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
+{
+  int cmp;
+  MonoList* tmp;
+
+  /* złączenie list à la merge sort dopóki obydwie nie są puste. */
+  if (!lhead && !rhead)
+    return NULL;
+
+  /* chcę podłączyć lhead jeśli rhead jest puste i na odwrót. jeśli obydwa
+   * niepuste, to podłączam w kolejności malejącej expów */
+  if (!lhead)
+    cmp = -1;
+  else if (!rhead)
+    cmp = 1;
+  else
+    cmp = MonoCmp(&lhead->m, &rhead->m);
+
+  if (cmp == 0) {               /* lh == rh */
+    /* lh->m +=+ rh->m */
+    MonoIncorporate(&lhead->m, &rhead->m);
+
+    if (!PolyIsZero(&lhead->m.p)) {
+      lhead->tail = MonoListsIncorporate(lhead->tail, rhead->tail);
+      return lhead;
+    } else {
+      MonoDestroy(&lhead->m);
+      tmp = lhead->tail;
+      free(lhead);
+      return MonoListsIncorporate(tmp, rhead->tail);
+    }
+  } else if (cmp > 0) {         /* lh > rh */
+    lhead->tail = MonoListsIncorporate(lhead->tail, rhead);
+    return lhead;
+  } else {                      /* lh < rh */
+    rhead->tail = MonoListsIncorporate(lhead, rhead->tail);
+    return rhead;
+  }
+}
+
+void PolyIncorporate(Poly* p, Poly* q)
+{
+  if (PolyIsCoeff(p)) {
+    PolyAddComp(q, p);
+    *p = *q;
+    return;
+  } else if (PolyIsCoeff(q)) {
+    PolyAddComp(p, q);
+    return;
+  }
+
+  MonoListsIncorporate(p->list, q->list);
+  if (PolyIsPseudoCoeff(p->list))
+    Decoeffise(p);
+}
+
+void MonoIncorporate(Mono* m, Mono* t)
+{  
+  PolyIncorporate(&m->p, &t->p);
+}
