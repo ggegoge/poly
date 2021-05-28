@@ -3357,8 +3357,8 @@ static bool AtTest2(void)
   if (!PolyIsEq(&p3, &p2))
     result = false;
 
-  if (PolyDeg(&p) != (poly_exp_t)(upper_size - 1) + (poly_depth * ((
-        poly_exp_t)poly_size - 1)))
+  if (PolyDeg(&p) != (poly_exp_t)((upper_size - 1) + (poly_depth *
+                                  ((poly_exp_t)poly_size - 1))))
     result = false;
 
   if (PolyDegBy(&p, 0) != upper_size - 1)
@@ -4156,8 +4156,8 @@ static bool MemoryThiefTest(void)
 static bool ArrayFunctionsTest(void)
 {
   Poly p, p1, p2;
-  Mono *monos = calloc(2, sizeof(Mono));
-  
+  Mono* monos = calloc(2, sizeof(Mono));
+
   assert(monos);
   monos[0] = M(P(C(-1), 1), 1);
   monos[1] = M(P(C(1), 1), 2);
@@ -4175,7 +4175,7 @@ static bool ArrayFunctionsTest(void)
   MonoDestroy(monos + 0);
   MonoDestroy(monos + 1);
   free(monos);
-  
+
   /* własny */
   monos = malloc(3 * sizeof(Mono));
   monos[0] = M(P(C(-1), 1), 1);
@@ -4188,10 +4188,10 @@ static bool ArrayFunctionsTest(void)
 
   if (PolyIsEq(&p1, &p2))
     return false;
-  
+
   PolyDestroy(&p1);
   PolyDestroy(&p2);
-  
+
   return true;
 }
 
