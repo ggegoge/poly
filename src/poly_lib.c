@@ -336,7 +336,7 @@ void PolyNegComp(Poly* p)
 
 poly_exp_t MonoListDeg(const MonoList* head)
 {
-  assert(head != NULL);
+  assert(head);
   return head->m.exp;
 }
 
@@ -357,18 +357,18 @@ bool MonoIsEq(const Mono* m, const Mono* t)
 Poly PolyPow(const Poly* p, poly_coeff_t n)
 {
   Poly pow = PolyFromCoeff(1);
-  Poly a;
-  bool changed = false;
-  Poly tmpa;
   Poly tmppow;
+  /* jako, że a to na początku płytka kopia p, to muszę wiedzieć czy się
+   * zmieniło zanim wywołam na nim destrukcję */
+  bool changed = false;
+  Poly a = *p;
+  Poly tmpa;
 
   assert(!PolyIsCoeff(p));
   assert(n >= 0);
 
   if (n == 0)
     return pow;
-
-  a = *p;
 
   while (n > 1) {
     if (n % 2 == 0) {
