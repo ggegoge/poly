@@ -113,8 +113,23 @@ Mono MonoMul(const Mono* m, const Mono* t);
  * @return spotęgowany wielomian @f$p^n@f$ */
 Poly PolyPow(const Poly* p, poly_coeff_t n);
 
-Poly PolyGetPow(Poly* powers, size_t n);
+/**
+ * Tworzenie tablicy potęg wielomianu @p q celem podstawienia go do @p p.
+ * Rozmiar tablicy zapisany zostanie pod @p count.
+ * @param[in] p : wielomian pod który podstawiamy @p q
+ * @param[in] q : wielomian do spotęgowania
+ * @param[out] count : wielkość tablicy potęg
+ * @return tablica potęg @p q celem wymnożenia ich w @p p
+ */
 Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count);
+
+/**
+ * Dostań konkretną potęgę policzoną z pomocą tablicy @p powers.
+ * @param[in] powers : tablica potęgowa
+ * @param[in] n : wykładnik
+ * @return odpowiednia potęga
+ */
+Poly PolyGetPow(Poly* powers, size_t n);
 
 /**
  * Obliczenie współczynnika wielomianu stałego.
