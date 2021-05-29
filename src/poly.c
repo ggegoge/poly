@@ -204,8 +204,7 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
   for (MonoList* pl = p->list; pl; pl = pl->tail) {
     coeff = QuickPow(x, pl->m.exp);
     mul = PolyMulCoeff(&pl->m.p, coeff);
-    PolyAddComp(&res, &mul);
-    PolyDestroy(&mul);
+    PolyIncorporate(&res, &mul);
   }
 
   return res;
@@ -213,26 +212,19 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 
 Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 {
-  Poly tmp;
-  Poly res = PolyZero();
+  Poly subcomposee;
+  Poly composee = PolyZero();
   Poly pow;
   Poly mul;
 
   if (PolyIsCoeff(p))
     return PolyClone(p);
 
-  /* chyba zwracamy 0 w tej gałęzi */
-  if (k <= 0) {
-    /* for (MonoList* pl = p->list; pl; pl = pl->tail) {
-     *   tmp = PolyCompose(&pl->m.p, k - 1, q);
-     *   PolyAddComp(&res, &tmp);
-     *   PolyDestroy(&tmp);
-     * } */
-  } else {
+  if (k > 0) {
     for (MonoList* pl = p->list; pl; pl = pl->tail) {
-      tmp = PolyCompose(&pl->m.p, k - 1, q + 1);
+      subcomposee = PolyCompose(&pl->m.p, k - 1, q + 1);
 
-      if (PolyIsZero(&tmp))
+      if (PolyIsZero(&subcomposee))
         continue;
 
       if (!PolyIsCoeff(q))
@@ -240,17 +232,14 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
       else
         pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));
 
-      mul = PolyMul(&pow, &tmp);
-      if (!PolyIsZero(&mul))
-        PolyIncorporate(&res, &mul);
-      /* PolyAddComp(&res, &mul); */
-      PolyDestroy(&tmp);
-      /* PolyDestroy(&mul); */
+      mul = PolyMul(&pow, &subcomposee);
+      PolyIncorporate(&composee, &mul);
+      PolyDestroy(&subcomposee);
       PolyDestroy(&pow);
     }
   }
 
-  return res;
+  return composee;
 }
 
 Poly PolyAddMonos(size_t count, const Mono monos[])

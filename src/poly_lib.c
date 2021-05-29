@@ -111,6 +111,20 @@ static inline int MonoCmp(const Mono* m, const Mono* t)
  * @param[in] rhead : głowa lewej listy
  * @return -1 lub 0 lub 1 podobnie jak w @ref MonoCmp
  */
+static int MonoListsCmp(const MonoList* lhead, const MonoList* rhead)
+{
+  int cmp;
+
+  if (!lhead)
+    cmp = -1;
+  else if (!rhead)
+    cmp = 1;
+  else
+    cmp = MonoCmp(&lhead->m, &rhead->m);
+
+  return cmp;
+}
+
 /**
  * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
  * tychże. Jest to robione w formie `+=` -- zmienia się @p lhead w oparciu
@@ -132,14 +146,7 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
   if (!lhead && !rhead)
     return NULL;
 
-  /* chcę podłączyć lhead jeśli rhead jest puste i na odwrót. jeśli obydwa
-   * niepuste, to podłączam w kolejności malejącej expów */
-  if (!lhead)
-    cmp = -1;
-  else if (!rhead)
-    cmp = 1;
-  else
-    cmp = MonoCmp(&lhead->m, &rhead->m);
+  cmp = MonoListsCmp(lhead, rhead);
 
   if (cmp == 0) {               /* lh == rh */
     /* lh->m += rh->m */
@@ -386,7 +393,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
   assert(!PolyIsCoeff(p));
   assert(n >= 0);
 
-  if (n == 0)
+  if (n == 0 || PolyIsEq(p, &pow))
     return pow;
 
   while (n > 1) {
@@ -442,15 +449,9 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
   if (!lhead && !rhead)
     return NULL;
 
-  if (!lhead)
-    cmp = -1;
-  else if (!rhead)
-    cmp = 1;
-  else
-    cmp = MonoCmp(&lhead->m, &rhead->m);
+  cmp = MonoListsCmp(lhead, rhead);
 
   if (cmp == 0) {
-    /* lh->m +=+ rh->m */
     MonoIncorporate(&lhead->m, &rhead->m);
 
     if (!PolyIsZero(&lhead->m.p)) {
@@ -459,16 +460,15 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
       lhead->tail = MonoListsIncorporate(lhead->tail, tmp);
       return lhead;
     } else {
-      /* uwaga: ten przypadek jeszcze się nigdy nie włączył...? */
       MonoDestroy(&lhead->m);
       tmp = lhead->tail;
       free(lhead);
       lhead = tmp;
-      
+
       tmp = rhead->tail;
       free(rhead);
       rhead = tmp;
-      
+
       return MonoListsIncorporate(lhead, rhead);
     }
   } else if (cmp > 0) {
@@ -480,21 +480,23 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
   }
 }
 
-void PolyIncorporate(Poly* p, Poly* q)
+Poly* PolyIncorporate(Poly* p, Poly* q)
 {
   if (PolyIsCoeff(p)) {
     PolyAddComp(q, p);
     *p = *q;
-    return;
+    return p;
   } else if (PolyIsCoeff(q)) {
     PolyAddComp(p, q);
-    return;
+    return p;
   }
 
   p->list = MonoListsIncorporate(p->list, q->list);
 
   if (PolyIsPseudoCoeff(p->list))
     Decoeffise(p);
+
+  return p;
 }
 
 /**
