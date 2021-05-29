@@ -53,9 +53,15 @@ void PolyAddComp(Poly* p, const Poly* q);
 /**
  * Wtłoczenie wielomianu @p p w wielomian @p q -- @p p przejmuje całą pamięć
  * należącą do @p q i wszystkie jego jednomiany, @p q przestaje być właściwym
- * wielomianem, a staje się zaledwie częścią @p p.
+ * wielomianem, a staje się zaledwie częścią @p p. Efektywniejsza wersja
+ * @ref PolyAddComp, które było zaledwie `+=` -- prawy wielomian pozostawał
+ * bez zmian. Tutaj mamy tak jakby ''`+=+`'', łączymy @p p i @p q w całości,
+ * efektywnie pamięciowo.
+ * @param[in,out] p : wielomian @f$p@f$
+ * @param[in,out] q : wielomian @f$q@f$
+ * @return @f$ p +=+ q@f$
  */
-void PolyIncorporate(Poly* p, Poly* q);
+Poly* PolyIncorporate(Poly* p, Poly* q);
 
 /**
  * Sprawdzian czy komórka listy @p ml nie jest przypadkiem

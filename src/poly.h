@@ -270,6 +270,10 @@ Poly PolyAt(const Poly* p, poly_coeff_t x);
  * @f$l > k@f$ te brakujące zmienne będą zmienione na 0 tj.
  * @f$p(q_0, q_1,\ldots, q_{k-1},0\ldots,0)@f$.
  *
+ * Z punktu widzenia techniczno--rekurencyjnego mając wielomian będący sumą
+ * jednomianów @f$ p = m_1 + m_2 + \ldots @f$ zwracam
+ * @f[ \sum_i \texttt{compose}(m_i{\to}\texttt{p, k - 1, q + 1}) \cdot q^n. @f]
+ *
  * _Uwaga_: funkcja nie przejmuje tablicy wielomianów spod @p q na własność.
  * @param[in] p : wielomian do podstawiania weń składowych
  * @param[in] k : liczba wielomianów do złożenia z @p p

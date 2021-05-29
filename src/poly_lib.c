@@ -104,6 +104,14 @@ static inline int MonoCmp(const Mono* m, const Mono* t)
 }
 
 /**
+ * Funkcja wyznaczająca porządek merge'owania list jednomianów. Podłącza zawsze
+ * niepustą przed pustą, a w przypadku niepustości zarazem @p lhead i @p rhead
+ * porównuje ich wykładniki za pomocą @ref MonoCmp.
+ * @param[in] lhead : głowa lewej listy
+ * @param[in] rhead : głowa lewej listy
+ * @return -1 lub 0 lub 1 podobnie jak w @ref MonoCmp
+ */
+/**
  * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
  * tychże. Jest to robione w formie `+=` -- zmienia się @p lhead w oparciu
  * o @p rhead, która pozostaje niezmieniona.
@@ -417,7 +425,15 @@ static void MonoIncorporate(Mono* m, Mono* t);
 
 /**
  * Złączenie pełne list @p lhead i @p rhead wraz z przejęciem ich w całości.
- * Jak @ref MonoListsMerge to było `+=`, tak to jest ''`+=+`''. */
+ * Jak @ref MonoListsMerge to było `+=`, tak to jest ''`+=+`''. Zbiera każdy
+ * jednomian z @p lhead i @p rhead à la merge sort. Gdy na trafi na parę
+ * o równych wykładnikach włącza komórkę @p rhead w @p lhead i odrzuca @p rhead.
+ * W przypadku gdy dokonanie @p lhead `+=+` @p rhead doprowadzi do wyzerowania
+ * się @p lhead to odrzuca się obydwie spośród głów i przechodzi do ogonów.
+ * @param[in,out] lhead : głowa lewej listy
+ * @param[in,out] rhead : głowa prawej listy
+ * @return głowa listy @p lhead `+=+` @p rhead
+ */
 static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
 {
   int cmp;
@@ -481,6 +497,8 @@ void PolyIncorporate(Poly* p, Poly* q)
     Decoeffise(p);
 }
 
+/**
+ * Funkcja dualna do @ref PolyIncorporate. Łączy jednomiany @p m i @p t. */
 static void MonoIncorporate(Mono* m, Mono* t)
 {
   PolyIncorporate(&m->p, &t->p);
