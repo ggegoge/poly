@@ -212,7 +212,7 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 
 Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 {
-  Poly* powers;
+  Poly* powers = NULL;
   size_t count;
   Poly subcomposee;
   Poly composee = PolyZero();
