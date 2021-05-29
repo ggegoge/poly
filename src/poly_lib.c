@@ -431,14 +431,20 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
 {
   size_t n = PolyDegBy(p, 0);
-  Poly* powers;
+  Poly* powers = NULL;
+
   for (*count = 0; n > 0; ++*count, n /= 2);
-  powers = malloc(*count * sizeof(Poly));
-  CHECK_PTR(powers);
-  powers[0] = PolyClone(q);
-  for (size_t i = 1; i < *count; ++i) {
-    powers[i] = PolyMul(powers + i - 1, powers + i - 1);
+
+  if (*count != 0) {
+    powers = malloc(*count * sizeof(Poly));
+    CHECK_PTR(powers);
+    powers[0] = PolyClone(q);
+
+    for (size_t i = 1; i < *count; ++i) {
+      powers[i] = PolyMul(powers + i - 1, powers + i - 1);
+    }
   }
+
   return powers;
 }
 
@@ -447,16 +453,21 @@ Poly PolyGetPow(Poly* powers, size_t n)
   Poly res = PolyFromCoeff(1);
   Poly tmp;
   size_t i = 0;
-  
+
+  if (n == 0)
+    return PolyFromCoeff(1);
+
   while (n > 0) {
     if (n % 2 == 1) {
       tmp = PolyMul(&res, powers + i);
       PolyDestroy(&res);
       res = tmp;
     }
+
     ++i;
     n /= 2;
   }
+
   return res;
 }
 
