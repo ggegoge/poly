@@ -113,6 +113,9 @@ Mono MonoMul(const Mono* m, const Mono* t);
  * @return spotęgowany wielomian @f$p^n@f$ */
 Poly PolyPow(const Poly* p, poly_coeff_t n);
 
+Poly PolyGetPow(Poly* powers, size_t n);
+Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count);
+
 /**
  * Obliczenie współczynnika wielomianu stałego.
  * @param[in] p : wielomian stały

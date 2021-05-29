@@ -212,6 +212,8 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
 
 Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 {
+  Poly* powers;
+  size_t count;
   Poly subcomposee;
   Poly composee = PolyZero();
   Poly pow;
@@ -219,8 +221,11 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 
   if (PolyIsCoeff(p))
     return PolyClone(p);
-
+    
   if (k > 0) {
+    if (!PolyIsCoeff(q))
+      powers = PolyPowTable(p, q, &count);
+    
     for (MonoList* pl = p->list; pl; pl = pl->tail) {
       subcomposee = PolyCompose(&pl->m.p, k - 1, q + 1);
 
@@ -228,7 +233,7 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
         continue;
 
       if (!PolyIsCoeff(q))
-        pow = PolyPow(q, pl->m.exp);
+        pow = PolyGetPow(powers, pl->m.exp);
       else
         pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));
 
@@ -236,6 +241,11 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
       PolyIncorporate(&composee, &mul);
       PolyDestroy(&subcomposee);
       PolyDestroy(&pow);
+    }
+    if (!PolyIsCoeff(q)) {
+      for (size_t i = 0; i < count; ++i)
+        PolyDestroy(powers + i);
+      free(powers);
     }
   }
 
