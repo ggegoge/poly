@@ -65,8 +65,8 @@ bool PolyIsPseudoCoeff(const MonoList* ml);
 
 /**
  * Zmiana pseudowspółczynnika w normalny. Funkcja bierze wielomian @p p będący
- * pseudowspółczynnikiem (patrz: `PolyIsPseudoCoeff` celem zrozumienia pojęcia)
- * i zmienia go w standardowy wykładnik.
+ * pseudowspółczynnikiem (patrz: @ref PolyIsPseudoCoeff celem zrozumienia
+ * pojęcia) i zmienia go w standardowy wykładnik.
  * @param[in,out] p : wielomian będący pseudo wykładnikiem
  */
 void Decoeffise(Poly* p);

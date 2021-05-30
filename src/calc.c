@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 
   if (argc >= 2 && (strcmp(argv[1], "-p") == 0 ||
                     strcmp(argv[1], "--pretty") == 0)) {
-    printf("---< Poly Calc >-----------< v. 0.4 >----\n");
+    printf("---< Poly Calc >-----------< v. 0.6 >----\n");
     Interpret(&stack, true);
   } else {
     Interpret(&stack, false);
