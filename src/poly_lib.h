@@ -51,6 +51,19 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff);
 void PolyAddComp(Poly* p, const Poly* q);
 
 /**
+ * Wtłoczenie wielomianu @p p w wielomian @p q -- @p p przejmuje całą pamięć
+ * należącą do @p q i wszystkie jego jednomiany, @p q przestaje być właściwym
+ * wielomianem, a staje się zaledwie częścią @p p. Efektywniejsza wersja
+ * @ref PolyAddComp, które było zaledwie `+=` -- prawy wielomian pozostawał
+ * bez zmian. Tutaj mamy tak jakby ''`+=+`'', łączymy @p p i @p q w całości,
+ * efektywnie pamięciowo.
+ * @param[in,out] p : wielomian @f$p@f$
+ * @param[in,out] q : wielomian @f$q@f$
+ * @return @f$ p +=+ q@f$
+ */
+Poly* PolyIncorporate(Poly* p, Poly* q);
+
+/**
  * Sprawdzian czy komórka listy @p ml nie jest przypadkiem
  * ''pseudowspółczynnikiem''. Funkcja mówi czy nie jest to przypadkiem lista,
  * w którą zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
@@ -99,6 +112,24 @@ Mono MonoMul(const Mono* m, const Mono* t);
  * @param[in] n : wykładnik @f$n@f$
  * @return spotęgowany wielomian @f$p^n@f$ */
 Poly PolyPow(const Poly* p, poly_coeff_t n);
+
+/**
+ * Tworzenie tablicy potęg wielomianu @p q celem podstawienia go do @p p.
+ * Rozmiar tablicy zapisany zostanie pod @p count.
+ * @param[in] p : wielomian pod który podstawiamy @p q
+ * @param[in] q : wielomian do spotęgowania
+ * @param[out] count : wielkość tablicy potęg
+ * @return tablica potęg @p q celem wymnożenia ich w @p p
+ */
+Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count);
+
+/**
+ * Dostań konkretną potęgę policzoną z pomocą tablicy @p powers.
+ * @param[in] powers : tablica potęgowa
+ * @param[in] n : wykładnik
+ * @return odpowiednia potęga
+ */
+Poly PolyGetPow(Poly* powers, size_t n);
 
 /**
  * Obliczenie współczynnika wielomianu stałego.

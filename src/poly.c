@@ -204,51 +204,73 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
   for (MonoList* pl = p->list; pl; pl = pl->tail) {
     coeff = QuickPow(x, pl->m.exp);
     mul = PolyMulCoeff(&pl->m.p, coeff);
-    PolyAddComp(&res, &mul);
-    PolyDestroy(&mul);
+    PolyIncorporate(&res, &mul);
   }
 
   return res;
 }
 
+/**
+ * Czy wielomian ma wiele jednomianów.
+ * Mała pomocnicza funkcyjka dla @ref PolyCompose -- sprawdza czy wielomian @p p
+ * ma ''wiele'' jednomianów tj. czy użycie heurstyki liczenia optymalnych potęg
+ * użyciu tablicy potęg (patrz @ref PolyPowTable) jest uzasadnione.
+ *
+ * _Uwaga_: przyjmuję, że wielomian ma _wiele_ jednomianów gdy ma ich niemniej
+ * niż 2. Próg ten został określony doświadczalnie.
+ * @param[in] p : wielomian, który chcemy składać
+ * @return czy ma wiele jednomianów */
+static bool PolyHasManyMonos(const Poly* p)
+{
+  return p->list && p->list->tail && p->list->tail->tail;
+}
+
 Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 {
-  Poly tmp;
-  Poly res = PolyZero();
+  Poly* powers = NULL;
+  bool tbl_heuristic = PolyHasManyMonos(p) && !PolyIsCoeff(q);
+  size_t count;
+  Poly subcomposee;
+  Poly composee = PolyZero();
   Poly pow;
   Poly mul;
 
   if (PolyIsCoeff(p))
     return PolyClone(p);
 
-  /* chyba zwracamy 0 w tej gałęzi */
-  if (k <= 0) {
-    /* for (MonoList* pl = p->list; pl; pl = pl->tail) {
-     *   tmp = PolyCompose(&pl->m.p, k - 1, q);
-     *   PolyAddComp(&res, &tmp);
-     *   PolyDestroy(&tmp);
-     * } */
-  } else {
-    for (MonoList* pl = p->list; pl; pl = pl->tail) {
-      tmp = PolyCompose(&pl->m.p, k - 1, q + 1);
+  if (k > 0) {
+    if (tbl_heuristic)
+      powers = PolyPowTable(p, q, &count);
 
-      if (PolyIsZero(&tmp))
+    for (MonoList* pl = p->list; pl; pl = pl->tail) {
+      subcomposee = PolyCompose(&pl->m.p, k - 1, q + 1);
+
+      if (PolyIsZero(&subcomposee))
         continue;
 
-      if (!PolyIsCoeff(q))
-        pow = PolyPow(q, pl->m.exp);
-      else
+      if (PolyIsCoeff(q))
         pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));
+      else if (tbl_heuristic)
+        pow = PolyGetPow(powers, pl->m.exp);
+      else
+        pow = PolyPow(q, pl->m.exp);
 
-      mul = PolyMul(&pow, &tmp);
-      PolyAddComp(&res, &mul);
-      PolyDestroy(&tmp);
-      PolyDestroy(&mul);
+
+      mul = PolyMul(&pow, &subcomposee);
+      PolyIncorporate(&composee, &mul);
+      PolyDestroy(&subcomposee);
       PolyDestroy(&pow);
+    }
+
+    if (tbl_heuristic) {
+      for (size_t i = 0; i < count; ++i)
+        PolyDestroy(powers + i);
+
+      free(powers);
     }
   }
 
-  return res;
+  return composee;
 }
 
 Poly PolyAddMonos(size_t count, const Mono monos[])

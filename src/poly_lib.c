@@ -104,6 +104,28 @@ static inline int MonoCmp(const Mono* m, const Mono* t)
 }
 
 /**
+ * Funkcja wyznaczająca porządek merge'owania list jednomianów. Podłącza zawsze
+ * niepustą przed pustą, a w przypadku niepustości zarazem @p lhead i @p rhead
+ * porównuje ich wykładniki za pomocą @ref MonoCmp.
+ * @param[in] lhead : głowa lewej listy
+ * @param[in] rhead : głowa lewej listy
+ * @return -1 lub 0 lub 1 podobnie jak w @ref MonoCmp
+ */
+static int MonoListsCmp(const MonoList* lhead, const MonoList* rhead)
+{
+  int cmp;
+
+  if (!lhead)
+    cmp = -1;
+  else if (!rhead)
+    cmp = 1;
+  else
+    cmp = MonoCmp(&lhead->m, &rhead->m);
+
+  return cmp;
+}
+
+/**
  * Złączenie dwu list jednomianów w jedną nową, która odpowiada zsumowaniu
  * tychże. Jest to robione w formie `+=` -- zmienia się @p lhead w oparciu
  * o @p rhead, która pozostaje niezmieniona.
@@ -124,14 +146,7 @@ static MonoList* MonoListsMerge(MonoList* lhead, const MonoList* rhead)
   if (!lhead && !rhead)
     return NULL;
 
-  /* chcę podłączyć lhead jeśli rhead jest puste i na odwrót. jeśli obydwa
-   * niepuste, to podłączam w kolejności malejącej expów */
-  if (!lhead)
-    cmp = -1;
-  else if (!rhead)
-    cmp = 1;
-  else
-    cmp = MonoCmp(&lhead->m, &rhead->m);
+  cmp = MonoListsCmp(lhead, rhead);
 
   if (cmp == 0) {               /* lh == rh */
     /* lh->m += rh->m */
@@ -378,7 +393,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
   assert(!PolyIsCoeff(p));
   assert(n >= 0);
 
-  if (n == 0)
+  if (n == 0 || PolyIsEq(p, &pow))
     return pow;
 
   while (n > 1) {
@@ -411,4 +426,125 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
     changed = true;
 
   return pow;
+}
+
+Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
+{
+  size_t n = PolyDegBy(p, 0);
+  Poly* powers = NULL;
+
+  for (*count = 0; n > 0; ++*count, n /= 2);
+
+  if (*count != 0) {
+    powers = malloc(*count * sizeof(Poly));
+    CHECK_PTR(powers);
+    powers[0] = PolyClone(q);
+
+    for (size_t i = 1; i < *count; ++i) {
+      powers[i] = PolyMul(powers + i - 1, powers + i - 1);
+    }
+  }
+
+  return powers;
+}
+
+Poly PolyGetPow(Poly* powers, size_t n)
+{
+  Poly res = PolyFromCoeff(1);
+  Poly tmp;
+  size_t i = 0;
+
+  if (n == 0)
+    return PolyFromCoeff(1);
+
+  while (n > 0) {
+    if (n % 2 == 1) {
+      tmp = PolyMul(&res, powers + i);
+      PolyDestroy(&res);
+      res = tmp;
+    }
+
+    ++i;
+    n /= 2;
+  }
+
+  return res;
+}
+
+static void MonoIncorporate(Mono* m, Mono* t);
+
+/**
+ * Złączenie pełne list @p lhead i @p rhead wraz z przejęciem ich w całości.
+ * Jak @ref MonoListsMerge to było `+=`, tak to jest ''`+=+`''. Zbiera każdy
+ * jednomian z @p lhead i @p rhead à la merge sort. Gdy na trafi na parę
+ * o równych wykładnikach włącza komórkę @p rhead w @p lhead i odrzuca @p rhead.
+ * W przypadku gdy dokonanie @p lhead `+=+` @p rhead doprowadzi do wyzerowania
+ * się @p lhead to odrzuca się obydwie spośród głów i przechodzi do ogonów.
+ * @param[in,out] lhead : głowa lewej listy
+ * @param[in,out] rhead : głowa prawej listy
+ * @return głowa listy @p lhead `+=+` @p rhead
+ */
+static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
+{
+  int cmp;
+  MonoList* tmp;
+
+  if (!lhead && !rhead)
+    return NULL;
+
+  cmp = MonoListsCmp(lhead, rhead);
+
+  if (cmp == 0) {
+    MonoIncorporate(&lhead->m, &rhead->m);
+
+    if (!PolyIsZero(&lhead->m.p)) {
+      tmp = rhead->tail;
+      free(rhead);
+      lhead->tail = MonoListsIncorporate(lhead->tail, tmp);
+      return lhead;
+    } else {
+      MonoDestroy(&lhead->m);
+      tmp = lhead->tail;
+      free(lhead);
+      lhead = tmp;
+
+      tmp = rhead->tail;
+      free(rhead);
+      rhead = tmp;
+
+      return MonoListsIncorporate(lhead, rhead);
+    }
+  } else if (cmp > 0) {
+    lhead->tail = MonoListsIncorporate(lhead->tail, rhead);
+    return lhead;
+  } else {
+    rhead->tail = MonoListsIncorporate(lhead, rhead->tail);
+    return rhead;
+  }
+}
+
+Poly* PolyIncorporate(Poly* p, Poly* q)
+{
+  if (PolyIsCoeff(p)) {
+    PolyAddComp(q, p);
+    *p = *q;
+    return p;
+  } else if (PolyIsCoeff(q)) {
+    PolyAddComp(p, q);
+    return p;
+  }
+
+  p->list = MonoListsIncorporate(p->list, q->list);
+
+  if (PolyIsPseudoCoeff(p->list))
+    Decoeffise(p);
+
+  return p;
+}
+
+/**
+ * Funkcja dualna do @ref PolyIncorporate. Łączy jednomiany @p m i @p t. */
+static void MonoIncorporate(Mono* m, Mono* t)
+{
+  PolyIncorporate(&m->p, &t->p);
 }
