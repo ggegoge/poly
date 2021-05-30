@@ -168,7 +168,7 @@ static inline Mono MonoClone(const Mono* m)
 Poly PolyAdd(const Poly* p, const Poly* q);
 
 /**
- * Sumuje listę jednomianów i tworzy z nich wielomian.
+ * Sumuje tablicę jednomianów i tworzy z nich wielomian.
  * Przejmuje na własność zawartość tablicy @p monos.
  * @param[in] count : liczba jednomianów
  * @param[in] monos : tablica jednomianów
@@ -177,7 +177,7 @@ Poly PolyAdd(const Poly* p, const Poly* q);
 Poly PolyAddMonos(size_t count, const Mono monos[]);
 
 /**
- * Sumuje listę jednomianów i tworzy z nich wielomian. Przejmuje na własność
+ * Sumuje tablicę jednomianów i tworzy z nich wielomian. Przejmuje na własność
  * pamięć wskazywaną przez @p monos i jej zawartość. Może dowolnie modyfikować
  * zawartość tej pamięci. Zakładamy, że pamięć wskazywana przez @p monos
  * została zaalokowana na stercie. Jeśli @p count lub @p monos jest równe zeru
@@ -189,10 +189,10 @@ Poly PolyAddMonos(size_t count, const Mono monos[]);
 Poly PolyOwnMonos(size_t count, Mono monos[]);
 
 /**
- * Sumuje listę jednomianów i tworzy z nich wielomian. Nie modyfikuje zawartości
- * tablicy @p monos. Jeśli jest to wymagane, to wykonuje pełne kopie jednomianów
- * z tablicy @p monos. Jeśli @p count lub @p monos jest równe zeru (NULL),
- * tworzy wielomian tożsamościowo równy zeru.
+ * Sumuje tablicę jednomianów i tworzy z nich wielomian. Nie modyfikuje
+ * zawartości tablicy @p monos. Jeśli jest to wymagane, to wykonuje pełne kopie
+ * jednomianów z tablicy @p monos. Jeśli @p count lub @p monos jest równe zeru
+ * (NULL), tworzy wielomian tożsamościowo równy zeru.
  * @param[in] count : liczba jednomianów
  * @param[in] monos : tablica jednomianów
  * @return wielomian będący sumą jednomianów

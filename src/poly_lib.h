@@ -51,12 +51,11 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff);
 void PolyAddComp(Poly* p, const Poly* q);
 
 /**
- * Wtłoczenie wielomianu @p p w wielomian @p q -- @p p przejmuje całą pamięć
- * należącą do @p q i wszystkie jego jednomiany, @p q przestaje być właściwym
- * wielomianem, a staje się zaledwie częścią @p p. Efektywniejsza wersja
- * @ref PolyAddComp, które było zaledwie `+=` -- prawy wielomian pozostawał
- * bez zmian. Tutaj mamy tak jakby ''`+=+`'', łączymy @p p i @p q w całości,
- * efektywnie pamięciowo.
+ * Włączenie wielomianu @p q w wielomian @p p. Wielomian @p p przejmuje całą
+ * pamięć należącą do @p q i wszystkie jego jednomiany na własność.
+ * Efektywniejsza wersja @ref PolyAddComp, które było zaledwie `+=` -- prawy
+ * wielomian pozostawał bez zmian. Tutaj mamy tak jakby ''`+=+`'', łączymy
+ * @p p i @p q bez żadnego kopiowania.
  * @param[in,out] p : wielomian w którym zostanie wynik
  * @param[in,out] q : wielomian do pożarcia i włączenia
  * @return `p +=+ q`

@@ -474,12 +474,14 @@ Poly PolyGetPow(Poly* powers, size_t n)
 static void MonoIncorporate(Mono* m, Mono* t);
 
 /**
- * Złączenie pełne list @p lhead i @p rhead wraz z przejęciem ich w całości.
- * Jak @ref MonoListsMerge to było `+=`, tak to jest ''`+=+`''. Zbiera każdy
- * jednomian z @p lhead i @p rhead à la merge sort. Gdy na trafi na parę
- * o równych wykładnikach włącza komórkę @p rhead w @p lhead i odrzuca @p rhead.
- * W przypadku gdy dokonanie @p lhead `+=+` @p rhead doprowadzi do wyzerowania
- * się @p lhead to odrzuca się obydwie spośród głów i przechodzi do ogonów.
+ * Pełne złączenie list @p lhead i @p rhead.
+ * Jak @ref MonoListsMerge to było `+=`, tak to jest ''`+=+`'' -- w odróżnieniu
+ * od tamtej funkcji tutaj zachodzi prawdziwe złączenie list bez żadnych kopiowań.
+ * Brany jest ażdy jednomian z @p lhead i @p rhead à la merge sort. Gdy na trafi
+ * na parę o równych wykładnikach włącza zawartość prawej głowy w lewą i zwalnia
+ * odpowiednio pamięć. W przypadku gdy dokonanie @p lhead `+=+` @p rhead
+ * doprowadzi do wyzerowania się @p lhead to zwalnia pamięć zarazem @p lhead jak
+ * i @p rhead, po czym rekurencyjnie wywołuje się na ich ogonach.
  * @param[in,out] lhead : głowa lewej listy
  * @param[in,out] rhead : głowa prawej listy
  * @return głowa listy @p lhead `+=+` @p rhead
