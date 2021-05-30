@@ -216,16 +216,13 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
  * ma ''wiele'' jednomianów tj. czy użycie heurstyki liczenia optymalnych potęg
  * użyciu tablicy potęg (patrz @ref PolyPowTable) jest uzasadnione.
  *
- * _Uwaga_: przyjmuję, że wielomian ma _wiele_ jednomianów gdy ma ich nie mniej
+ * _Uwaga_: przyjmuję, że wielomian ma _wiele_ jednomianów gdy ma ich niemniej
  * niż 2. Próg ten został określony doświadczalnie.
  * @param[in] p : wielomian, który chcemy składać
  * @return czy ma wiele jednomianów */
 static bool PolyHasManyMonos(const Poly* p)
 {
-  if (PolyIsCoeff(p))
-    return false;
-
-  return p->list->tail;
+  return p->list && p->list->tail && p->list->tail->tail;
 }
 
 Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
