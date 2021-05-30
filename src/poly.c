@@ -248,8 +248,8 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
       if (PolyIsZero(&subcomposee))
         continue;
 
-      if (PolyIsCoeff(q)) 
-        pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));        
+      if (PolyIsCoeff(q))
+        pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));
       else if (tbl_heuristic)
         pow = PolyGetPow(powers, pl->m.exp);
       else
