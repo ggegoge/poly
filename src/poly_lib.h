@@ -57,9 +57,9 @@ void PolyAddComp(Poly* p, const Poly* q);
  * @ref PolyAddComp, które było zaledwie `+=` -- prawy wielomian pozostawał
  * bez zmian. Tutaj mamy tak jakby ''`+=+`'', łączymy @p p i @p q w całości,
  * efektywnie pamięciowo.
- * @param[in,out] p : wielomian @f$p@f$
- * @param[in,out] q : wielomian @f$q@f$
- * @return @f$ p +=+ q@f$
+ * @param[in,out] p : wielomian w którym zostanie wynik
+ * @param[in,out] q : wielomian do pożarcia i włączenia
+ * @return `p +=+ q`
  */
 Poly* PolyIncorporate(Poly* p, Poly* q);
 
@@ -115,7 +115,10 @@ Poly PolyPow(const Poly* p, poly_coeff_t n);
 
 /**
  * Tworzenie tablicy potęg wielomianu @p q celem podstawienia go do @p p.
- * Rozmiar tablicy zapisany zostanie pod @p count.
+ * Rozmiar tablicy zapisany zostanie pod @p count. Tablica ma formę
+ * @f$\{q,q^2,q^4,...,q^{2^k}\}@f$, gdzie @f$k=\log \deg p@f$ czyli właśnie
+ * @p count. Później można obliczać potęgi wymnażając wartości z tej tabeli
+ * korzystając z rozkładu binarnego @f$n@f$ w @f$q^n@f$.
  * @param[in] p : wielomian pod który podstawiamy @p q
  * @param[in] q : wielomian do spotęgowania
  * @param[out] count : wielkość tablicy potęg
@@ -124,7 +127,9 @@ Poly PolyPow(const Poly* p, poly_coeff_t n);
 Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count);
 
 /**
- * Dostań konkretną potęgę policzoną z pomocą tablicy @p powers.
+ * Wyliczenie konkretnej potęgi za pomocą tablicy @p powers. Korzysta z rozkładu
+ * liczb na sumę potęg dwójki stąd mając np tablicę @p powers z na przykład
+ * @f$\{q,q^2,q^4\}@f$ można policzyć @f$q^6 = q^4 \cdot q^2@f$.
  * @param[in] powers : tablica potęgowa
  * @param[in] n : wykładnik
  * @return odpowiednia potęga

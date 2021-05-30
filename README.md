@@ -155,6 +155,21 @@ list, po każdej przechodzę raz, ergo liniowość.
 
 Mnożenie jest zwykłym naiwnym algorytmem kwadratowym.
 
+Składanie wielomianów wykonywane jest reukurencyjnie 
+(\ref PolyCompose) i w dużej części opiera się na potęgowaniu
+wielomianu podstawianego pod zmienną. To potęgowanie natomiast robione
+jest na dwa sposoby:
+- gdy wielomian ma _wiele_ (\ref PolyHasManyMonos) jednomianów (co pociąga za sobą konieczność
+  wykonania licznych potęgowań na wielomianie podstawianym) obliczamy
+  za wczasu tabelę potęg dwójkowych (\ref PolyPowTable) z których później
+  obliczamy porządne konkretne potęgi (\ref PolyGetPow). Pozwala to na
+  pokaźne zaoszczędzenie na pamięci w przypadku licznego potęgowania
+  tego samego wielomianu
+- gdy natomiast wielomian ma jednomianów _niewiele_ to używamy
+  zwykłego potęgowania szybkiego (\ref PolyPow)
+  
+W każdym razie potęgowanie jest __logarytmiczne__.
+
 Operacje na stosie dziedziczą złożoność ze zwykłej
 biblioteki. Dodatkowo została zastosowana optymalizacja możliwa dzięki
 `poly_lib.h` -- operatory `+=`. Dzięki temu dodając wielomiany z góry
