@@ -92,9 +92,6 @@ o funkcjach czysto liczbowych takich jak maksimum czy potęga. Nie są w
 żaden sposób częścią _szerokiej biblioteki wielomianowej_ jak można by
 nazwać `poly_lib`.
 
-Zastosowanie biblioteki jest do zaobserwowania w dostarczonym odgórnie
-`poly_example.c`.
-
 Plik `poly_lib.c` składa się z funkcji zadeklarowanych w
 odpowiadającym sobie pliku nagłówkowym jak i niektórych dodatkowych,
 które deklaruję jako `static` albowiem nie korzystam z nich poza tym
@@ -137,6 +134,18 @@ na `line number`. Warto zacytować stosowny ustęp
 > `ThisVariableIsATemporaryCounter`. A C programmer would call that
 > variable `tmp`, which is much easier to write, and not the least more
 > difficult to understand.
+
+#### Testy
+
+Bibliotekę z poly.h testuje plik poly_test.c. Komendą `make test` można
+utworzyć plik wykonywalny `./poly_test`, który testuje różne operacje.
+
+Należy wywołać `./poly_test all` lub `./poly_test` celem puszczenia
+wszystkich testów bądź `./poly_test <nazwa testu>`, gdzie nazwy testów
+są do znalezienia we wspomnianym `poly_test.c`.
+
+O powodzeniu testu świadczy kod wyjścia równy 0. W przypadku błędu kod
+wyniesie 2.
 
 #### Złożoność i działanie
 

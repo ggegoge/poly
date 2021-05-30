@@ -4252,7 +4252,6 @@ static bool MemoryGroup(void)
 
 // Możliwe wyniki testu
 #define TEST_PASS  0
-#define TEST_FAIL  125
 #define TEST_WRONG 2
 
 // Liczba elementów tablicy x
@@ -4316,7 +4315,7 @@ int main(int argc, char* argv[])
 
   for (size_t i = 0; i < SIZE(test_list); ++i)
     if (all || strcmp(argv[1], test_list[i].name) == 0)
-      tests_ok &= test_list[i].function(); /* ? TEST_PASS : TEST_FAIL; */
+      tests_ok &= test_list[i].function();
 
   return tests_ok ? TEST_PASS : TEST_WRONG;
 }
