@@ -4,9 +4,12 @@
 ### Treść zadania
 
 Aktualna treść zadania znajduje się
-w [Moodle](https://moodle.mimuw.edu.pl), ale zarazem w plikach
-`task1.md` i `task2.md`,
-które można ujrzeć w sekcji _dodatkowe strony_ dokumentacji.
+w [Moodle](https://moodle.mimuw.edu.pl), ale zarazem w plikach z
+katalogu `task/`, które można ujrzeć w sekcji _dodatkowe strony_
+dokumentacji:
+    - \ref t1
+    - \ref t2
+    - \ref t3
 
 ### Opis programu
 

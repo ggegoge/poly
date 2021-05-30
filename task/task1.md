@@ -1,6 +1,6 @@
 
 
-# Duże zadanie, część 1
+# Duże zadanie, część 1 {#t1}
 
 
 # Spis treści
@@ -21,11 +21,11 @@
 ## Wielomiany
 
 Tegoroczne duże zadanie polega na zaimplementowaniu operacji na wielomianach rzadkich wielu
-zmiennych o współczynnikach całkowitych. Zmienne wielomianu oznaczamy \(x_0, x_1, x_2\) itd.
-Definicja wielomianu jest rekurencyjna. Wielomian jest sumą jednomianów postaci \(px^n\), gdzie \(n\)
-jest wykładnikiem tego jednomianu będącym nieujemną liczbą całkowitą, a \(p\)
-jest współczynnikiem, który jest wielomianem. Współczynnik w jednomianie zmiennej \(x_i\)
-jest sumą jednomianów zmiennej \(x_{i+1}\).
+zmiennych o współczynnikach całkowitych. Zmienne wielomianu oznaczamy @f$x_0, x_1, x_2@f$ itd.
+Definicja wielomianu jest rekurencyjna. Wielomian jest sumą jednomianów postaci @f$px^n@f$, gdzie @f$n@f$
+jest wykładnikiem tego jednomianu będącym nieujemną liczbą całkowitą, a @f$p@f$
+jest współczynnikiem, który jest wielomianem. Współczynnik w jednomianie zmiennej @f$x_i@f$
+jest sumą jednomianów zmiennej @f$x_{i+1}@f$.
 Rekurencja kończy się, gdy współczynnik jest liczbą (czyli wielomianem stałym), a nie sumą
 kolejnych jednomianów. Wykładniki jednomianów w każdej z rozważanych sum są parami
 różne. Wielomiany są rzadkie, co oznacza, że stopień wielomianu może być znacznie większy niż
