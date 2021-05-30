@@ -307,13 +307,10 @@ Poly PolyOwnMonos(size_t count, Mono monos[])
 Poly PolyCloneMonos(size_t count, const Mono monos[])
 {
   Poly p;
-  Mono* cloned;
 
   if (!count || !monos)
     return PolyZero();
 
-  cloned = CloneMonoArray(count, monos);
-
-  p = PolyOwnMonos(count, cloned);
+  p = PolyOwnMonos(count, CloneMonoArray(count, monos));
   return p;
 }
