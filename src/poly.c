@@ -210,9 +210,25 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
   return res;
 }
 
+/**
+ * Czy wielomian ma wiele jednomianów.
+ * Mała pomocnicza funkcyjka dla @ref PolyCompose -- sprawdza czy wielomian @p p
+ * ma ''wiele'' jednomianów tj. czy użycie heurstyki liczenia optymalnych potęg
+ * użyciu tablicy potęg (patrz @ref PolyPowTable) jest uzasadnione.
+ *
+ * _Uwaga_: przyjmuję, że wielomian ma _wiele_ jednomianów gdy ma ich niemniej
+ * niż 2. Próg ten został określony doświadczalnie.
+ * @param[in] p : wielomian, który chcemy składać
+ * @return czy ma wiele jednomianów */
+static bool PolyHasManyMonos(const Poly* p)
+{
+  return p->list && p->list->tail && p->list->tail->tail;
+}
+
 Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 {
   Poly* powers = NULL;
+  bool tbl_heuristic = PolyHasManyMonos(p) && !PolyIsCoeff(q);
   size_t count;
   Poly subcomposee;
   Poly composee = PolyZero();
@@ -223,7 +239,7 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
     return PolyClone(p);
 
   if (k > 0) {
-    if (!PolyIsCoeff(q))
+    if (tbl_heuristic)
       powers = PolyPowTable(p, q, &count);
 
     for (MonoList* pl = p->list; pl; pl = pl->tail) {
@@ -232,10 +248,13 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
       if (PolyIsZero(&subcomposee))
         continue;
 
-      if (!PolyIsCoeff(q))
+      if (PolyIsCoeff(q)) 
+        pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));        
+      else if (tbl_heuristic)
         pow = PolyGetPow(powers, pl->m.exp);
       else
-        pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));
+        pow = PolyPow(q, pl->m.exp);
+
 
       mul = PolyMul(&pow, &subcomposee);
       PolyIncorporate(&composee, &mul);
@@ -243,7 +262,7 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
       PolyDestroy(&pow);
     }
 
-    if (!PolyIsCoeff(q)) {
+    if (tbl_heuristic) {
       for (size_t i = 0; i < count; ++i)
         PolyDestroy(powers + i);
 
