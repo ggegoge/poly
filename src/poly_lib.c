@@ -12,11 +12,13 @@
 #include "poly.h"
 #include "poly_lib.h"
 
-/** Próg stosowania alternatywego mnożenia (@ref PolyMulBig) w potęgowaniu. */
+/** Próg stosowania alternatywego mnożenia (@ref PolyMulLong) w potęgowaniu.
+ * Wyznaczony quasi-eksperymentalnie.
+ */
 #define BIG_EXP 4000
-/** Współczynnik poszerzania tablicy jednomianów w @ref PolyMulBig */
+/** Współczynnik poszerzania tablicy jednomianów w @ref PolyMulLong */
 #define BIG_MUL_ARRAY_RESIZE 2
-/** Początkowy rozmiar tablicy jednomianów w @ref PolyMulBig. */
+/** Początkowy rozmiar tablicy jednomianów w @ref PolyMulLong. */
 #define BIG_MUL_ARRAY_INIT_SIZE 16
 
 /**
@@ -292,7 +294,7 @@ void MonoListInsert(MonoList** head, Mono* m)
 }
 
 /**
- * Tworzy tablicę na przechowywanie jednomianów przez @ref PolyMulBig.
+ * Tworzy tablicę na przechowywanie jednomianów przez @ref PolyMulLong.
  * @param[in] init_size : początkowy rozmiar tablicy
  * @return zaalokowana pamięć na tablicę jednomianów
  */
@@ -340,7 +342,7 @@ static Mono* MonosArrayAppend(size_t* len, size_t* size, Mono* m, Mono* monos)
  * @param[in] q : @f$q@f$
  * @return iloczyn @f$p\cdot q@f$ policzony innym algorytmem.
  */
-static Poly PolyMulBig(const Poly* p, const Poly* q)
+static Poly PolyMulLong(const Poly* p, const Poly* q)
 {
   Poly pq;
   /* jednomiany należące do wielomianów p, q i p * q */
@@ -463,7 +465,7 @@ bool MonoIsEq(const Mono* m, const Mono* t)
 
 /**
  * Sprawdza czy spotęgowanie wielomianu @p p do potęgi @p n to ciężka operacja.
- * Decyduje o użyciu funkcji @ref PolyMulBig przez funkcje potęgujące.
+ * Decyduje o użyciu funkcji @ref PolyMulLong przez funkcje potęgujące.
  * @param[in] p : wielomian do spotęgowania
  * @param[in] n : wykładnik
  * @return czy potęgowanie @f$p^n@f$ jest ''ciężką'' operacją.
@@ -493,13 +495,13 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 
   while (n > 1) {
     if (n % 2 == 0) {
-      tmpa = big ? PolyMulBig(&a, &a) : PolyMul(&a, &a);
+      tmpa = big ? PolyMulLong(&a, &a) : PolyMul(&a, &a);
       n /= 2;
     } else {
-      tmppow = big ? PolyMulBig(&pow, &a) : PolyMul(&pow, &a);
+      tmppow = big ? PolyMulLong(&pow, &a) : PolyMul(&pow, &a);
       PolyDestroy(&pow);
       pow = tmppow;
-      tmpa = big ? PolyMulBig(&a, &a) : PolyMul(&a, &a);
+      tmpa = big ? PolyMulLong(&a, &a) : PolyMul(&a, &a);
       n = (n - 1) / 2;
     }
 
@@ -511,7 +513,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
     a = tmpa;
   }
 
-  tmppow = big ? PolyMulBig(&pow, &a) : PolyMul(&pow, &a);
+  tmppow = big ? PolyMulLong(&pow, &a) : PolyMul(&pow, &a);
   PolyDestroy(&pow);
   pow = tmppow;
 
@@ -537,8 +539,8 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
     powers[0] = PolyClone(q);
 
     for (size_t i = 1; i < *count; ++i) {
-      powers[i] = big ? PolyMulBig(powers + i - 1,
-                                   powers + i - 1) : PolyMul(powers + i - 1, powers + i - 1);
+      powers[i] = big ? PolyMulLong(powers + i - 1, powers + i - 1)
+                  : PolyMul(powers + i - 1, powers + i - 1);
     }
   }
 
@@ -557,7 +559,7 @@ Poly PolyGetPow(Poly* powers, size_t n)
 
   while (n > 0) {
     if (n % 2 == 1) {
-      tmp = big ? PolyMulBig(&res, powers + i) : PolyMul(&res, powers + i);
+      tmp = big ? PolyMulLong(&res, powers + i) : PolyMul(&res, powers + i);
       PolyDestroy(&res);
       res = tmp;
     }
