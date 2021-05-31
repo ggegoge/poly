@@ -12,7 +12,7 @@
 #include "poly.h"
 #include "poly_lib.h"
 
-#define BIG_EXP 10000
+#define BIG_EXP 4000
 #define BIG_MUL_ARRAY_RESIZE 2
 #define BIG_MUL_ARRAY_INIT_SIZE 16
 
