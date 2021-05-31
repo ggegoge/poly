@@ -77,7 +77,6 @@ void Decoeffise(Poly* p)
   *p = np;
 }
 
-
 /**
  * Suma dwóch jednomów równych stopni, również modyfikująca pierwszy z nich
  * (analogiczny mechanizm jak opisany w `PolyAddComp` czyli operator `+=`).
@@ -291,6 +290,25 @@ void MonoListInsert(MonoList** head, Mono* m)
       free(tmp);
     }
   }
+}
+
+Mono* MonosArray(size_t init_size)
+{
+  Mono* monos = malloc(init_size * sizeof(Mono));
+  CHECK_PTR(monos);
+  return monos;
+}
+
+Mono* MonosArrayAppend(size_t* len, size_t* size, Mono* m, Mono* monos)
+{
+  if (*len >= *size) {
+    *size *= 2;
+    monos = realloc(monos, *size * sizeof(Mono));
+    CHECK_PTR(monos);
+  }
+
+  monos[(*len)++] = *m;
+  return monos;
 }
 
 Mono MonoMul(const Mono* m, const Mono* t)

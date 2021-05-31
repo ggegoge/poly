@@ -106,6 +106,9 @@ Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff);
  */
 void PolyNegComp(Poly* p);
 
+Mono* MonosArray(size_t init_size);
+Mono* MonosArrayAppend(size_t* len, size_t* size, Mono* m, Mono* monos);
+
 /**
  * Iloczyn jednomianów.
  * @param[in] m : jednomian
