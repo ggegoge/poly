@@ -12,6 +12,10 @@
 #include "poly.h"
 #include "poly_lib.h"
 
+#define BIG_EXP 10000
+#define BIG_MUL_ARRAY_RESIZE 2
+#define BIG_MUL_ARRAY_INIT_SIZE 16
+
 /**
  * Sprawdzian powodzenia (m)allokacyjnego.
  */
@@ -292,23 +296,57 @@ void MonoListInsert(MonoList** head, Mono* m)
   }
 }
 
-Mono* MonosArray(size_t init_size)
+static Mono* MonosArray(size_t init_size)
 {
   Mono* monos = malloc(init_size * sizeof(Mono));
   CHECK_PTR(monos);
   return monos;
 }
 
-Mono* MonosArrayAppend(size_t* len, size_t* size, Mono* m, Mono* monos)
+static Mono* MonosArrayAppend(size_t* len, size_t* size, Mono* m, Mono* monos)
 {
   if (*len >= *size) {
-    *size *= 2;
+    *size *= BIG_MUL_ARRAY_RESIZE;
     monos = realloc(monos, *size * sizeof(Mono));
     CHECK_PTR(monos);
   }
 
   monos[(*len)++] = *m;
   return monos;
+}
+
+static Poly PolyMulBig(const Poly* p, const Poly* q)
+{
+  Poly pq;
+  /* jednomiany należące do wielomianów p, q i p * q */
+  Mono pm, qm, pqm;
+  size_t size = BIG_MUL_ARRAY_INIT_SIZE;
+  size_t len = 0;
+  Mono* monos;
+
+  if (PolyIsCoeff(p))
+    return PolyMulCoeff(q, p->coeff);
+
+  if (PolyIsCoeff(q))
+    return PolyMulCoeff(p, q->coeff);
+
+  monos = MonosArray(size);
+
+  for (MonoList* pl = p->list; pl; pl = pl->tail) {
+    for (MonoList* ql = q->list; ql; ql = ql->tail) {
+      pm = pl->m;
+      qm = ql->m;
+      pqm = MonoMul(&pm, &qm);
+
+      if (PolyIsZero(&pqm.p))
+        MonoDestroy(&pqm);
+      else
+        monos = MonosArrayAppend(&len, &size, &pqm, monos);
+    }
+  }
+
+  pq = PolyOwnMonos(len, monos);
+  return pq;
 }
 
 Mono MonoMul(const Mono* m, const Mono* t)
@@ -401,6 +439,7 @@ bool MonoIsEq(const Mono* m, const Mono* t)
 /* ten sam algorytm co w potęgowaniu liczb stosowanym w PolyAt w pliku poly.c */
 Poly PolyPow(const Poly* p, poly_coeff_t n)
 {
+  bool big = n > BIG_EXP;
   Poly pow = PolyFromCoeff(1);
   Poly tmppow;
   /* jako, że a to na początku płytka kopia p, to muszę wiedzieć czy się
@@ -417,13 +456,13 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 
   while (n > 1) {
     if (n % 2 == 0) {
-      tmpa = PolyMul(&a, &a);
+      tmpa = big ? PolyMulBig(&a, &a) : PolyMul(&a, &a);
       n /= 2;
     } else {
-      tmppow = PolyMul(&pow, &a);
+      tmppow = big ? PolyMulBig(&pow, &a) : PolyMul(&pow, &a);
       PolyDestroy(&pow);
       pow = tmppow;
-      tmpa = PolyMul(&a, &a);
+      tmpa = big ? PolyMulBig(&a, &a) : PolyMul(&a, &a);
       n = (n - 1) / 2;
     }
 
@@ -435,7 +474,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
     a = tmpa;
   }
 
-  tmppow = PolyMul(&a, &pow);
+  tmppow = big ? PolyMulBig(&pow, &a) : PolyMul(&pow, &a);
   PolyDestroy(&pow);
   pow = tmppow;
 
@@ -450,6 +489,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
 {
   size_t n = PolyDegBy(p, 0);
+  bool big = n > BIG_EXP;
   Poly* powers = NULL;
 
   for (*count = 0; n > 0; ++*count, n /= 2);
@@ -460,7 +500,8 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
     powers[0] = PolyClone(q);
 
     for (size_t i = 1; i < *count; ++i) {
-      powers[i] = PolyMul(powers + i - 1, powers + i - 1);
+      powers[i] = big ? PolyMulBig(powers + i - 1,
+                                   powers + i - 1) : PolyMul(powers + i - 1, powers + i - 1);
     }
   }
 
@@ -469,6 +510,7 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
 
 Poly PolyGetPow(Poly* powers, size_t n)
 {
+  bool big = n > BIG_EXP;
   Poly res = PolyFromCoeff(1);
   Poly tmp;
   size_t i = 0;
@@ -478,7 +520,7 @@ Poly PolyGetPow(Poly* powers, size_t n)
 
   while (n > 0) {
     if (n % 2 == 1) {
-      tmp = PolyMul(&res, powers + i);
+      tmp = big ? PolyMulBig(&res, powers + i) : PolyMul(&res, powers + i);
       PolyDestroy(&res);
       res = tmp;
     }

@@ -60,20 +60,15 @@ static int MonoCmpQsort(const void* m, const void* t)
 
 Poly PolyMul(const Poly* p, const Poly* q)
 {
-  Poly pq;
+  Poly pq = PolyZero();
   /* jednomiany należące do wielomianów p, q i p * q */
   Mono pm, qm, pqm;
-  size_t size = 16;
-  size_t len = 0;
-  Mono* monos;
 
   if (PolyIsCoeff(p))
     return PolyMulCoeff(q, p->coeff);
 
   if (PolyIsCoeff(q))
     return PolyMulCoeff(p, q->coeff);
-
-  monos = MonosArray(size);
 
   for (MonoList* pl = p->list; pl; pl = pl->tail) {
     for (MonoList* ql = q->list; ql; ql = ql->tail) {
@@ -84,11 +79,10 @@ Poly PolyMul(const Poly* p, const Poly* q)
       if (PolyIsZero(&pqm.p))
         MonoDestroy(&pqm);
       else
-        monos = MonosArrayAppend(&len, &size, &pqm, monos);
+        MonoListInsert(&pq.list, &pqm);
     }
   }
 
-  pq = PolyOwnMonos(len, monos);
   return pq;
 }
 
