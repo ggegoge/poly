@@ -12,8 +12,11 @@
 #include "poly.h"
 #include "poly_lib.h"
 
+/** Próg stosowania alternatywego mnożenia (@ref PolyMulBig) w potęgowaniu. */
 #define BIG_EXP 4000
+/** Współczynnik poszerzania tablicy jednomianów w @ref PolyMulBig */
 #define BIG_MUL_ARRAY_RESIZE 2
+/** Początkowy rozmiar tablicy jednomianów w @ref PolyMulBig. */
 #define BIG_MUL_ARRAY_INIT_SIZE 16
 
 /**
@@ -93,14 +96,6 @@ static void MonoAddComp(Mono* m, const Mono* t)
   PolyAddComp(&m->p, &t->p);
 }
 
-/**
- * Porównanie dwu jednomianów po ich wykładnikach.
- * @param[in] m : wskaźnik na pierwszy z jednomianów
- * @param[in] t : wskaźnik na dru1gi z jednomianów
- * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
- * przypadku 1, 0 oznacza równość -- konwencja zgodna ze zwyczajową C, wystarczy
- * sprawdzić znak aby poznać porządek między dwójką jednomianów.
- */
 int MonoCmp(const Mono* m, const Mono* t)
 
 {
@@ -296,6 +291,11 @@ void MonoListInsert(MonoList** head, Mono* m)
   }
 }
 
+/**
+ * Tworzy tablicę na przechowywanie jednomianów przez @ref PolyMulBig.
+ * @param[in] init_size : początkowy rozmiar tablicy
+ * @return zaalokowana pamięć na tablicę jednomianów
+ */
 static Mono* MonosArray(size_t init_size)
 {
   Mono* monos = malloc(init_size * sizeof(Mono));
@@ -303,6 +303,17 @@ static Mono* MonosArray(size_t init_size)
   return monos;
 }
 
+/**
+ * Dodanie jednomianu @p m do tablicy @p monos. Wstawienie go na koniec tejże
+ * tablicy i jej powiększenie w razie gdy to koniczne. W takim wypadku nowy
+ * rozmiar fizyczny zostaje zapisany w @p len, a @p len trzyma liczbę zajętych
+ * miejsc.
+ * @param[in,out] len : liczba jednomianów w @p monos
+ * @param[in,out] size : wielkość zaalokowanej pamięci pod @p monos
+ * @param[in] m : jednomian do dodania
+ * @param[in,out] monos : obecna tablica
+ * @return tablica @p monos wraz z nowym jednomianem @p m.
+ */
 static Mono* MonosArrayAppend(size_t* len, size_t* size, Mono* m, Mono* monos)
 {
   if (*len >= *size) {
@@ -315,6 +326,20 @@ static Mono* MonosArrayAppend(size_t* len, size_t* size, Mono* m, Mono* monos)
   return monos;
 }
 
+/**
+ * Alternatywne mnożenie __dużych__ wielomianów. Działa dokładnie tak samo jak
+ * @ref PolyMul, ale stosuje inny mechanizm budowy wieomianu z jednomianów
+ * cząstkowych. Dokładniej mówiąc jak @ref PolyMul woła @ref MonoListInsert
+ * wiele razy co powoduje asymptotyczny wzrost złożoności do kwadratowej, tak
+ * ta funkcja najpierw wrzuca jednomiany do tablicy, a później @ref PolyOwnMonos
+ * w efektywny sposób tworzy z nich wielomian. Ta heurystyka spowalnia mnożenie
+ * małych (tj. liczących sobie niewiele jednomianów) wielomianów, ale przy
+ * długich @p p lub @p q jest bardzo korzystna. Istnieje głównie na potrzeby
+ * potęgowania.
+ * @param[in] p : @f$p@f$
+ * @param[in] q : @f$q@f$
+ * @return iloczyn @f$p\cdot q@f$ policzony innym algorytmem.
+ */
 static Poly PolyMulBig(const Poly* p, const Poly* q)
 {
   Poly pq;
@@ -436,6 +461,13 @@ bool MonoIsEq(const Mono* m, const Mono* t)
   return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
 }
 
+/**
+ * Sprawdza czy spotęgowanie wielomianu @p p do potęgi @p n to ciężka operacja.
+ * Decyduje o użyciu funkcji @ref PolyMulBig przez funkcje potęgujące.
+ * @param[in] p : wielomian do spotęgowania
+ * @param[in] n : wykładnik
+ * @return czy potęgowanie @f$p^n@f$ jest ''ciężką'' operacją.
+ */
 static inline bool PolyHeavyPower(const Poly* p, poly_coeff_t n)
 {
   return n > BIG_EXP && p->list && p->list->tail;

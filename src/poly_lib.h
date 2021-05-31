@@ -31,7 +31,8 @@ MonoList* MonoListClone(const MonoList* head);
  * @param[in] m : wskaźnik na pierwszy z jednomianów
  * @param[in] t : wskaźnik na dru1gi z jednomianów
  * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
- * przypadku 1, 0 oznacza równość.
+ * przypadku 1, 0 oznacza równość -- konwencja zgodna ze zwyczajową C, wystarczy
+ * sprawdzić znak aby poznać porządek między dwójką jednomianów.
  */
 int MonoCmp(const Mono* m, const Mono* t);
 
