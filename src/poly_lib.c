@@ -15,7 +15,7 @@
 /** Próg stosowania alternatywego mnożenia (@ref PolyMulLong) w potęgowaniu.
  * Wyznaczony quasi-eksperymentalnie.
  */
-#define BIG_EXP 4000
+#define BIG_EXP 3000
 /** Współczynnik poszerzania tablicy jednomianów w @ref PolyMulLong */
 #define BIG_MUL_ARRAY_RESIZE 2
 /** Początkowy rozmiar tablicy jednomianów w @ref PolyMulLong. */
