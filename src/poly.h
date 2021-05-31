@@ -1,7 +1,7 @@
 /** @file
   Interfejs klasy wielomianów rzadkich wielu zmiennych
 
-  @authors Jakub Pawlewicz <pan@mimuw.edu.pl>, 
+  @authors Jakub Pawlewicz <pan@mimuw.edu.pl>,
            Marcin Peczarski <marpe@mimuw.edu.pl>,
            Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
@@ -33,9 +33,9 @@ struct MonoList;
  */
 typedef struct Poly {
   /**
-  * Jeżeli `list == NULL`, wtedy jest to współczynnik będący liczbą całkowitą.
-  * W przeciwnym przypadku jest to niepusta lista jednomianów.
-  */
+   * Jeżeli `list == NULL`, wtedy jest to współczynnik będący liczbą całkowitą.
+   * W przeciwnym przypadku jest to niepusta lista jednomianów.
+   */
   poly_coeff_t coeff;
   /** To jest lista jednomianów. */
   struct MonoList* list;
@@ -91,8 +91,6 @@ static inline Poly PolyZero(void)
   return PolyFromCoeff(0);
 }
 
-static inline bool PolyIsZero(const Poly* p);
-
 /**
  * Tworzy jednomian @f$px_i^n@f$.
  * Przejmuje na własność zawartość struktury wskazywanej przez @p p.
@@ -102,7 +100,6 @@ static inline bool PolyIsZero(const Poly* p);
  */
 static inline Mono MonoFromPoly(const Poly* p, poly_exp_t n)
 {
-  assert(n == 0 || !PolyIsZero(p));
   return (Mono) {
     .p = *p, .exp = n
   };
@@ -115,7 +112,7 @@ static inline Mono MonoFromPoly(const Poly* p, poly_exp_t n)
  */
 static inline bool PolyIsCoeff(const Poly* p)
 {
-  return p->list == NULL;
+  return !p->list;
 }
 
 /**
@@ -171,7 +168,7 @@ static inline Mono MonoClone(const Mono* m)
 Poly PolyAdd(const Poly* p, const Poly* q);
 
 /**
- * Sumuje listę jednomianów i tworzy z nich wielomian.
+ * Sumuje tablicę jednomianów i tworzy z nich wielomian.
  * Przejmuje na własność zawartość tablicy @p monos.
  * @param[in] count : liczba jednomianów
  * @param[in] monos : tablica jednomianów
@@ -180,10 +177,33 @@ Poly PolyAdd(const Poly* p, const Poly* q);
 Poly PolyAddMonos(size_t count, const Mono monos[]);
 
 /**
+ * Sumuje tablicę jednomianów i tworzy z nich wielomian. Przejmuje na własność
+ * pamięć wskazywaną przez @p monos i jej zawartość. Może dowolnie modyfikować
+ * zawartość tej pamięci. Zakładamy, że pamięć wskazywana przez @p monos
+ * została zaalokowana na stercie. Jeśli @p count lub @p monos jest równe zeru
+ * (NULL), tworzy wielomian tożsamościowo równy zeru.
+ * @param[in] count : liczba jednomianów
+ * @param[in] monos : tablica jednomianów
+ * @return wielomian będący sumą jednomianów
+ */
+Poly PolyOwnMonos(size_t count, Mono monos[]);
+
+/**
+ * Sumuje tablicę jednomianów i tworzy z nich wielomian. Nie modyfikuje
+ * zawartości tablicy @p monos. Jeśli jest to wymagane, to wykonuje pełne kopie
+ * jednomianów z tablicy @p monos. Jeśli @p count lub @p monos jest równe zeru
+ * (NULL), tworzy wielomian tożsamościowo równy zeru.
+ * @param[in] count : liczba jednomianów
+ * @param[in] monos : tablica jednomianów
+ * @return wielomian będący sumą jednomianów
+ */
+Poly PolyCloneMonos(size_t count, const Mono monos[]);
+
+/**
  * Mnoży dwa wielomiany.
  * @param[in] p : wielomian @f$p@f$
  * @param[in] q : wielomian @f$q@f$
- * @return @f$p * q@f$
+ * @return @f$p \cdot q@f$
  */
 Poly PolyMul(const Poly* p, const Poly* q);
 
@@ -209,10 +229,10 @@ Poly PolySub(const Poly* p, const Poly* q);
  * Większe indeksy oznaczają zmienne wielomianów znajdujących się
  * we współczynnikach.
  * @param[in] p : wielomian
- * @param[in] var_idx : indeks zmiennej
- * @return stopień wielomianu @p p z względu na zmienną o indeksie @p var_idx
+ * @param[in] idx : indeks zmiennej
+ * @return stopień wielomianu @p p z względu na zmienną o indeksie @p idx
  */
-poly_exp_t PolyDegBy(const Poly* p, size_t var_idx);
+poly_exp_t PolyDegBy(const Poly* p, size_t idx);
 
 /**
  * Zwraca stopień wielomianu (-1 dla wielomianu tożsamościowo równego zeru).
@@ -241,5 +261,27 @@ bool PolyIsEq(const Poly* p, const Poly* q);
  * @return @f$p(x, x_0, x_1, \ldots)@f$
  */
 Poly PolyAt(const Poly* p, poly_coeff_t x);
+
+/**
+ * Złożenie wielomianu @p p z @p k wielomianem @p q i kolejnymi w tablicy.
+ * Jeśli oryginalny wielomian miał postać @f$p(x_0, x_1,\ldots, x_{l-1})@f$, to
+ * po dokonaniu złożenia z wielomianami @f$q_0, q_1,\ldots, q_{k-1}@f$ przyjmie
+ * dla @f$k \geq l@f$ postać @f$p(q_0, q_1,\ldots, q_{l-1})@f$, a dla
+ * @f$l > k@f$ te brakujące zmienne będą zmienione na 0 tj.
+ * @f$p(q_0, q_1,\ldots, q_{k-1},0\ldots,0)@f$.
+ *
+ * Z punktu widzenia techniczno--rekurencyjnego mając wielomian będący sumą
+ * jednomianów @f$ p = m_1 + m_2 + \ldots @f$ zwracam
+ * @f[ \sum_i \texttt{compose}(m_i{\to}\texttt{p, k - 1, q + 1}) \cdot q^n. @f]
+ *
+ * _Uwaga_: funkcja nie przejmuje tablicy wielomianów spod @p q na własność.
+ * @param[in] p : wielomian do podstawiania weń składowych
+ * @param[in] k : liczba wielomianów do złożenia z @p p
+ * @param[in] q : wielomian do podstawienia pod @f$x_0@f$, za nim ułożone
+ * są kolejne (_de facto_ tablica, ale implementacyjnie traktujemy to jako
+ * czysty wskaźnik).
+ * @return efekt złożenia @p p z wielomianami z @p q.
+ */
+Poly PolyCompose(const Poly* p, size_t k, const Poly* q);
 
 #endif /* __POLY_H__ */

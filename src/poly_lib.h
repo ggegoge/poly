@@ -3,7 +3,7 @@
   interfejs oraz służą do implementacji różnorakich działań na m. in. listach,
   ale także są tutaj odpowiedniki działania `+=` (tak jak w poly.h mamy `+`).
 
-  @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
+  @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
   @date kwiecień 2021
 */
@@ -36,11 +36,11 @@ MonoList* MonoListClone(const MonoList* head);
 int MonoCmp(const Mono* m, const Mono* t);
 
 /**
- * Wstawienie komórki listowej z jednomianem w odpowiednie miejsce listy.
- * @param[in] head : głowa listy
- * @param[in] new : komórka listy z nowym elementem
+ * Wstawienie jednomianu w odpowiednie miejsce listy.
+ * @param[in,out] head : głowa listy
+ * @param[in] m : nowy jednomian
  */
-void MonoListInsert(MonoList** head, MonoList* new);
+void MonoListInsert(MonoList** head, Mono* m);
 
 /**
  * Suma wielomianu i liczby całkowitej.
@@ -54,26 +54,41 @@ Poly PolyAddCoeff(const Poly* p, poly_coeff_t coeff);
  * Suma dwu wielomianów, ale w wersji `compound assignment' tj nie tworzy
  * nowego wielomianu, a jedynie modyfikuje ten ''po lewej''. Odpowiednik
  * operatora `+=`. Dla @p p i @p q wykonuje `p += q`.
- * @param[in] p : wielomian @f$ p @f$
+ * @param[in,out] p : wielomian @f$ p @f$
  * @param[in] q : wielomian @f$ q @f$
  */
 void PolyAddComp(Poly* p, const Poly* q);
 
 /**
- * Sprawdzian czy komórka listy @p ml nie jest przypadkiem ''pseudo
- * wykładnikiem''. Funkcja mówi czy nie jest to przypadkiem lista, w którą
- * zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
- * typu @f$ c * x^0 @f$.
+ * Włączenie wielomianu @p q w wielomian @p p. Wielomian @p p przejmuje całą
+ * pamięć należącą do @p q i wszystkie jego jednomiany na własność.
+ * Efektywniejsza wersja @ref PolyAddComp, które było zaledwie `+=` -- prawy
+ * wielomian pozostawał bez zmian. Tutaj mamy tak jakby ''`+=+`'', łączymy
+ * @p p i @p q bez żadnego kopiowania.
+ * @param[in,out] p : wielomian w którym zostanie wynik
+ * @param[in,out] q : wielomian do pożarcia i włączenia
+ * @return `p +=+ q`
+ */
+Poly* PolyIncorporate(Poly* p, Poly* q);
+
+/**
+ * Sprawdzian czy komórka listy @p ml nie jest przypadkiem
+ * ''pseudowspółczynnikiem''. Funkcja mówi czy nie jest to przypadkiem lista,
+ * w którą zaledwie zapakowany jest wielomian współczynnikowy -- mowa o sytuacji
+ * typu @f$ c \cdot x^0 @f$. Istnienie pseudowspółczynnika ma wbrew pozorom
+ * głęboki sens -- trzymamy listy __jednomianów__ ergo chcąc tam schować
+ * współczynnik (tj wielomian) musimy go przebrać. Stąd też wspomniana
+ * reprezentacja.
  * @param[in] ml : komórka listy jednomianów
- * @return czy to nie pseudowykładnik?
+ * @return czy to nie pseudowspółczynnik?
  */
 bool PolyIsPseudoCoeff(const MonoList* ml);
 
 /**
- * Zmiana pseudowykładnika w normalny. Funkcja bierze wielomian @p p będący
- * pseudowykładnikiem (patrz: `PolyIsPseudoCoeff` celem zrozumienia pojęcia)
- * i zmienia go w standardowy wykładnik.
- * @param[in] p : wielomian będący pseudo wykładnikiem
+ * Zmiana pseudowspółczynnika w normalny. Funkcja bierze wielomian @p p będący
+ * pseudowspółczynnikiem (patrz: @ref PolyIsPseudoCoeff celem zrozumienia
+ * pojęcia) i zmienia go w standardowy wykładnik.
+ * @param[in,out] p : wielomian będący pseudo wykładnikiem
  */
 void Decoeffise(Poly* p);
 
@@ -86,20 +101,48 @@ void Decoeffise(Poly* p);
 Poly PolyMulCoeff(const Poly* p, poly_coeff_t coeff);
 
 /**
+ * Uprzeciwnienie wielomianu @p p.
+ * @param[in,out] p : wielomian
+ */
+void PolyNegComp(Poly* p);
+
+/**
  * Iloczyn jednomianów.
  * @param[in] m : jednomian
  * @param[in] t : jednomian
- * @return iloczyn @f$ m * p @f$
+ * @return iloczyn @f$ m \cdot p @f$
  */
 Mono MonoMul(const Mono* m, const Mono* t);
 
 /**
- * Uprzeciwnienie wielomianu samego w sobie. Nie zwraca nowego wielomianu tylko
- * neguje ten otrzymany. Dokładniej rzecz biorąc neguje jego współczynniki
- * liczbowe. Coś a la `p *= -1`.
- * @param[in] p : wielomian @f$ p @f$
-*/
-void PolyNegComp(Poly* p);
+ * Podnoszenie wielomianu @p p do potęgi @p n.
+ * @param[in] p : wielomain @f$p@f$
+ * @param[in] n : wykładnik @f$n@f$
+ * @return spotęgowany wielomian @f$p^n@f$ */
+Poly PolyPow(const Poly* p, poly_coeff_t n);
+
+/**
+ * Tworzenie tablicy potęg wielomianu @p q celem podstawienia go do @p p.
+ * Rozmiar tablicy zapisany zostanie pod @p count. Tablica ma formę
+ * @f$\{q,q^2,q^4,...,q^{2^k}\}@f$, gdzie @f$k=\log \deg p@f$ czyli właśnie
+ * @p count. Później można obliczać potęgi wymnażając wartości z tej tabeli
+ * korzystając z rozkładu binarnego @f$n@f$ w @f$q^n@f$.
+ * @param[in] p : wielomian pod który podstawiamy @p q
+ * @param[in] q : wielomian do spotęgowania
+ * @param[out] count : wielkość tablicy potęg
+ * @return tablica potęg @p q celem wymnożenia ich w @p p
+ */
+Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count);
+
+/**
+ * Wyliczenie konkretnej potęgi za pomocą tablicy @p powers. Korzysta z rozkładu
+ * liczb na sumę potęg dwójki stąd mając np tablicę @p powers z na przykład
+ * @f$\{q,q^2,q^4\}@f$ można policzyć @f$q^6 = q^4 \cdot q^2@f$.
+ * @param[in] powers : tablica potęgowa
+ * @param[in] n : wykładnik
+ * @return odpowiednia potęga
+ */
+Poly PolyGetPow(Poly* powers, size_t n);
 
 /**
  * Obliczenie współczynnika wielomianu stałego.
@@ -125,6 +168,12 @@ poly_exp_t MonoListDeg(const MonoList* head);
  */
 bool MonoIsEq(const Mono* m, const Mono* t);
 
-
+/**
+ * Dokonanie głębokiej kopii tablicy @p monos.
+ * @param[in] count : wielkość tablicy
+ * @param[in] monos : rzeczona tablica
+ * @return głęboka kopia tablicy i jej wielomianów
+ */
+Mono* CloneMonoArray(size_t count, const Mono monos[]);
 
 #endif /* __POLY_LIB_H__ */

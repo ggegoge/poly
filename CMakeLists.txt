@@ -13,7 +13,7 @@ set_property(GLOBAL PROPERTY RULE_MESSAGES ON)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 # Ustawiamy wspólne opcje kompilowania dla wszystkich wariantów projektu.
-set(CMAKE_C_FLAGS "-std=c11 -Wall -Wextra")
+set(CMAKE_C_FLAGS "-std=c11 -Wall -Wextra -D_GNU_SOURCE")
 # Domyślne opcje dla wariantów Release i Debug są sensowne.
 # Jeśli to konieczne, ustawiamy tu inne.
 # set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
@@ -25,10 +25,26 @@ set(SOURCE_FILES
     src/poly.h
     src/poly_lib.c
     src/poly_lib.h
-    src/poly_example.c)
+    src/parse.h
+    src/parse.c
+    src/stack_op.h
+    src/stack_op.c
+    src/calc.c)
 
 # Wskazujemy plik wykonywalny.
 add_executable(poly ${SOURCE_FILES})
+
+# testy biblioteki poly
+set(TEST_SOURCE_FILES
+    src/poly.c
+    src/poly.h
+    src/poly_lib.c
+    src/poly_lib.h
+    src/poly_test.c)
+
+# target testowy
+add_executable(test EXCLUDE_FROM_ALL ${TEST_SOURCE_FILES})
+set_target_properties(test PROPERTIES OUTPUT_NAME poly_test)
 
 # Dodajemy obsługę Doxygena: sprawdzamy, czy jest zainstalowany i jeśli tak to:
 find_package(Doxygen)

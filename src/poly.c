@@ -1,8 +1,8 @@
 /** @file
-  Implmenetacja interfejsu z pliku poly.h dot `klasy' reprezentującej wielomiany
+  Implementacja interfejsu z pliku poly.h `klasy' reprezentującej wielomiany
   rzadkie wielu zmiennych.
 
-  @authors Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
+  @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
   @date kwiecień 2021
 */
@@ -13,16 +13,6 @@
 #include "poly.h"
 #include "poly_lib.h"
 
-/**
- * Sprawdzian powodzenia (m)allokacyjnego.
- */
-#define CHECK_PTR(p)                            \
-  do {                                          \
-    if (!p) {                                   \
-      exit(1);                                  \
-    }                                           \
-  } while (0)
-
 void PolyDestroy(Poly* p)
 {
   if (!PolyIsCoeff(p))
@@ -31,22 +21,17 @@ void PolyDestroy(Poly* p)
 
 Poly PolyClone(const Poly* p)
 {
-  Poly np;
-
-  np.coeff = p->coeff;
-  np.list = MonoListClone(p->list);
-
-  return np;
+  return (Poly) {
+    .coeff = p->coeff, .list = MonoListClone(p->list)
+  };
 }
 
 Poly PolyAdd(const Poly* p, const Poly* q)
 {
-  Poly new = PolyZero();
+  Poly new;
 
   if (PolyIsCoeff(p) && PolyIsCoeff(q))
-    return (Poly) {
-    .coeff = p->coeff + q->coeff, .list = NULL
-  };
+    return PolyFromCoeff(p->coeff + q->coeff);
 
   if (PolyIsCoeff(p))
     return PolyAddCoeff(q, p->coeff);
@@ -61,12 +46,23 @@ Poly PolyAdd(const Poly* p, const Poly* q)
   return new;
 }
 
+/**
+ * Funkcja porządkująca wielomiany dla qsorta.
+ * @param[in] m : jednomian jako `void*`
+ * @param[in] t : jednomian jako `void*`
+ * @return wynik z MonoCmp z poly_lib.c 
+ */
+static int MonoCmpQsort(const void* m, const void* t)
+{
+  int cmp = MonoCmp((Mono*) m, (Mono*) t);
+  return cmp;
+}
+
 Poly PolyMul(const Poly* p, const Poly* q)
 {
   Poly pq = PolyZero();
   /* jednomiany należące do wielomianów p, q i p * q */
   Mono pm, qm, pqm;
-  MonoList* new;
 
   if (PolyIsCoeff(p))
     return PolyMulCoeff(q, p->coeff);
@@ -74,21 +70,16 @@ Poly PolyMul(const Poly* p, const Poly* q)
   if (PolyIsCoeff(q))
     return PolyMulCoeff(p, q->coeff);
 
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail) {
-    for (MonoList* ql = q->list; ql != NULL; ql = ql->tail) {
+  for (MonoList* pl = p->list; pl; pl = pl->tail) {
+    for (MonoList* ql = q->list; ql; ql = ql->tail) {
       pm = pl->m;
       qm = ql->m;
       pqm = MonoMul(&pm, &qm);
 
       if (PolyIsZero(&pqm.p))
         MonoDestroy(&pqm);
-      else {
-        new = malloc(sizeof(MonoList));
-        CHECK_PTR(new);
-        new->m = pqm;
-        new->tail = NULL;
-        MonoListInsert(&pq.list, new);
-      }
+      else
+        MonoListInsert(&pq.list, &pqm);
     }
   }
 
@@ -102,9 +93,8 @@ Poly PolyNeg(const Poly* p)
 
 Poly PolySub(const Poly* p, const Poly* q)
 {
-  /* nq := q; nq *= -1; nq += p <---> nq := (-q) + p */
-  Poly nq = PolyClone(q);
-  PolyNegComp(&nq);
+  /* nq := -q; nq += p <---> nq := (-q) + p */
+  Poly nq = PolyNeg(q);
   PolyAddComp(&nq, p);
 
   return nq;
@@ -121,29 +111,28 @@ static inline poly_exp_t max(poly_exp_t a, poly_exp_t b)
   return (a < b) ? b : a;
 }
 
-/* co zrobić, gdy nie starczy stopni?? */
-poly_exp_t PolyDegBy(const Poly* p, size_t var_idx)
+poly_exp_t PolyDegBy(const Poly* p, size_t idx)
 {
-  poly_exp_t max_deg = -1;
+  poly_exp_t deg = -1;
 
   if (PolyIsCoeff(p))
     return PolyCoeffDeg(p);
 
   /* jesteśmy w wielomianie danej zmiennej */
-  if (var_idx == 0)
+  if (idx == 0)
     return MonoListDeg(p->list);
 
   /* stopniem względem tej zmiennej będzie największy z tych stopni znalezionych
    * rekurencyjnie */
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
-    max_deg = max(max_deg, PolyDegBy(&pl->m.p, var_idx - 1));
+  for (MonoList* pl = p->list; pl; pl = pl->tail)
+    deg = max(deg, PolyDegBy(&pl->m.p, idx - 1));
 
-  return max_deg;
+  return deg;
 }
 
 poly_exp_t PolyDeg(const Poly* p)
 {
-  poly_exp_t max_deg = -1;
+  poly_exp_t deg = -1;
 
   if (PolyIsCoeff(p))
     return PolyCoeffDeg(p);
@@ -151,10 +140,10 @@ poly_exp_t PolyDeg(const Poly* p)
   /* szukam stopnia rekurencyjnie -- stopień to jest jak gdyby zmiana wszystkich
    * zmiennych na jedną i szukanie największej potęgi, zatem to właśnie robię
    * dodając wykładniki i rekurencyjnie się zagłębiając w czeluści dalekich x */
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail)
-    max_deg = max(max_deg, pl->m.exp + PolyDeg(&pl->m.p));
+  for (MonoList* pl = p->list; pl; pl = pl->tail)
+    deg = max(deg, pl->m.exp + PolyDeg(&pl->m.p));
 
-  return max_deg;
+  return deg;
 }
 
 bool PolyIsEq(const Poly* p, const Poly* q)
@@ -169,9 +158,6 @@ bool PolyIsEq(const Poly* p, const Poly* q)
     return p->coeff == q->coeff;
   else if (PolyIsCoeff(p) || PolyIsCoeff(q))
     return false;
-
-  pl = p->list;
-  ql = q->list;
 
   for (pl = p->list, ql = q->list; pl && ql && eq; pl = pl->tail, ql = ql->tail)
     eq = MonoIsEq(&pl->m, &ql->m);
@@ -192,14 +178,12 @@ bool PolyIsEq(const Poly* p, const Poly* q)
  */
 static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
 {
-  poly_coeff_t b;
+  poly_coeff_t b = 1;
 
   assert(n >= 0);
 
-  if (n == 0)
+  if (n == 0 || a == 1)
     return 1;
-
-  b = 1;
 
   while (n > 1) {
     if (n % 2 == 0) {
@@ -223,67 +207,122 @@ Poly PolyAt(const Poly* p, poly_coeff_t x)
    * wielomian p, i dokonuję res += p * x^n -- powstaje mi suma kumulatywna
    * wielomianów wielu, która jest wynikiem */
   Poly res = PolyZero();
-  Poly mul = PolyZero();
+  Poly mul;
   poly_coeff_t coeff;
 
   if (PolyIsCoeff(p))
     return PolyClone(p);
 
-  for (MonoList* pl = p->list; pl != NULL; pl = pl->tail) {
+  for (MonoList* pl = p->list; pl; pl = pl->tail) {
     coeff = QuickPow(x, pl->m.exp);
     mul = PolyMulCoeff(&pl->m.p, coeff);
-    PolyAddComp(&res, &mul);
-    PolyDestroy(&mul);
+    PolyIncorporate(&res, &mul);
   }
 
   return res;
 }
 
 /**
- * Funkcja porządkująca wielomiany dla qsorta.
- * @param[in] m : jednomian jako `void*`
- * @param[in] t : jednomian jako `void*`
- * @return wynik z MonoCmp z poly_lib.c 
- */
-static int MonoCmpQsort(const void* m, const void* t)
+ * Czy wielomian ma wiele jednomianów.
+ * Mała pomocnicza funkcyjka dla @ref PolyCompose -- sprawdza czy wielomian @p p
+ * ma ''wiele'' jednomianów tj. czy użycie heurstyki liczenia optymalnych potęg
+ * użyciu tablicy potęg (patrz @ref PolyPowTable) jest uzasadnione.
+ *
+ * _Uwaga_: przyjmuję, że wielomian ma _wiele_ jednomianów gdy ma ich niemniej
+ * niż 2. Próg ten został określony doświadczalnie.
+ * @param[in] p : wielomian, który chcemy składać
+ * @return czy ma wiele jednomianów */
+static bool PolyHasManyMonos(const Poly* p)
 {
-  int cmp = MonoCmp((Mono*) m, (Mono*) t);
-  return cmp;
+  return p->list && p->list->tail && p->list->tail->tail;
+}
+
+Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
+{
+  Poly* powers = NULL;
+  bool tbl_heuristic = PolyHasManyMonos(p) && !PolyIsCoeff(q);
+  size_t count;
+  Poly subcomposee;
+  Poly composee = PolyZero();
+  Poly pow;
+  Poly mul;
+
+  if (PolyIsCoeff(p))
+    return PolyClone(p);
+
+  if (k > 0) {
+    if (tbl_heuristic)
+      powers = PolyPowTable(p, q, &count);
+
+    for (MonoList* pl = p->list; pl; pl = pl->tail) {
+      subcomposee = PolyCompose(&pl->m.p, k - 1, q + 1);
+
+      if (PolyIsZero(&subcomposee))
+        continue;
+
+      if (PolyIsCoeff(q))
+        pow = PolyFromCoeff(QuickPow(q->coeff, pl->m.exp));
+      else if (tbl_heuristic)
+        pow = PolyGetPow(powers, pl->m.exp);
+      else
+        pow = PolyPow(q, pl->m.exp);
+
+
+      mul = PolyMul(&pow, &subcomposee);
+      PolyIncorporate(&composee, &mul);
+      PolyDestroy(&subcomposee);
+      PolyDestroy(&pow);
+    }
+
+    if (tbl_heuristic) {
+      for (size_t i = 0; i < count; ++i)
+        PolyDestroy(powers + i);
+
+      free(powers);
+    }
+  }
+
+  return composee;
 }
 
 Poly PolyAddMonos(size_t count, const Mono monos[])
 {
-  MonoList* head = NULL;
-  MonoList* elem;
   Poly sum = PolyZero();
-  Mono* sorted = malloc(count * sizeof(Mono));
-  CHECK_PTR(sorted);
+  Mono m;
 
-  for (size_t i = 0; i < count; ++i)
-    sorted[i] = monos[i];
-
-  /* ustawiam jednomiany od najmniejszego exp do największego.
-   * tym samym idąc w głąb mamy coraz większe, a większe chcemy mieć na
-   * początku listy. zatem każdy kolejny będzie de facto wstawiany na jej sam
-   * początek jako większy od poprzedniego. */
-  qsort(sorted, count, sizeof(Mono), MonoCmpQsort);
-  for (size_t i = 0; i < count; ++i) {    
-    if (PolyIsZero(&sorted[i].p))
+  for (size_t i = 0; i < count; ++i) {
+    if (PolyIsZero(&monos[i].p))
       continue;
 
-    elem = malloc(sizeof(MonoList));
-    CHECK_PTR(elem);
-
-    elem->m = sorted[i];
-    elem->tail = head;
-    MonoListInsert(&head, elem);
+    m = monos[i];
+    MonoListInsert(&sum.list, &m);
   }
-
-  free(sorted);
-  sum.list = head;
 
   if (PolyIsPseudoCoeff(sum.list))
     Decoeffise(&sum);
 
   return sum;
+}
+
+Poly PolyOwnMonos(size_t count, Mono monos[])
+{
+  Poly p;
+
+  if (!count || !monos)
+    return PolyZero();
+
+  p = PolyAddMonos(count, monos);
+  free(monos);
+  return p;
+}
+
+Poly PolyCloneMonos(size_t count, const Mono monos[])
+{
+  Poly p;
+
+  if (!count || !monos)
+    return PolyZero();
+
+  p = PolyOwnMonos(count, CloneMonoArray(count, monos));
+  return p;
 }
