@@ -50,7 +50,7 @@ Poly PolyAdd(const Poly* p, const Poly* q)
  * Funkcja porządkująca wielomiany dla qsorta.
  * @param[in] m : jednomian jako `void*`
  * @param[in] t : jednomian jako `void*`
- * @return wynik z MonoCmp z poly_lib.c 
+ * @return wynik z MonoCmp z poly_lib.c
  */
 static int MonoCmpQsort(const void* m, const void* t)
 {
@@ -66,14 +66,15 @@ Poly PolyMul(const Poly* p, const Poly* q)
   size_t size = 16;
   size_t len = 0;
   Mono* monos;
-  
+
   if (PolyIsCoeff(p))
     return PolyMulCoeff(q, p->coeff);
 
   if (PolyIsCoeff(q))
     return PolyMulCoeff(p, q->coeff);
-  
+
   monos = MonosArray(size);
+
   for (MonoList* pl = p->list; pl; pl = pl->tail) {
     for (MonoList* ql = q->list; ql; ql = ql->tail) {
       pm = pl->m;
@@ -87,9 +88,7 @@ Poly PolyMul(const Poly* p, const Poly* q)
     }
   }
 
-  qsort(monos, len, sizeof(Mono), MonoCmpQsort);
-  pq = PolyAddMonos(len, monos);
-  free(monos);
+  pq = PolyOwnMonos(len, monos);
   return pq;
 }
 
@@ -315,10 +314,13 @@ Poly PolyOwnMonos(size_t count, Mono monos[])
 {
   Poly p;
 
-  if (!count || !monos)
-    return PolyZero();
+  if (!count || !monos) {
+    p = PolyZero();
+  } else {
+    qsort(monos, count, sizeof(Mono), MonoCmpQsort);
+    p = PolyAddMonos(count, monos);
+  }
 
-  p = PolyAddMonos(count, monos);
   free(monos);
   return p;
 }
