@@ -439,7 +439,7 @@ bool MonoIsEq(const Mono* m, const Mono* t)
 /* ten sam algorytm co w potęgowaniu liczb stosowanym w PolyAt w pliku poly.c */
 Poly PolyPow(const Poly* p, poly_coeff_t n)
 {
-  bool big = n > BIG_EXP;
+  bool big = n > BIG_EXP && p->list && p->list->tail;
   Poly pow = PolyFromCoeff(1);
   Poly tmppow;
   /* jako, że a to na początku płytka kopia p, to muszę wiedzieć czy się
@@ -489,7 +489,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
 {
   size_t n = PolyDegBy(p, 0);
-  bool big = n > BIG_EXP;
+  bool big = n > BIG_EXP && q->list && q->list->tail;
   Poly* powers = NULL;
 
   for (*count = 0; n > 0; ++*count, n /= 2);
@@ -510,7 +510,7 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
 
 Poly PolyGetPow(Poly* powers, size_t n)
 {
-  bool big = n > BIG_EXP;
+  bool big = n > BIG_EXP && powers->list && powers->list->tail;
   Poly res = PolyFromCoeff(1);
   Poly tmp;
   size_t i = 0;
