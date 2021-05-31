@@ -5,7 +5,7 @@
 
   @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
-  @date kwiecień 2021
+  @date kwiecień i maj 2021
 */
 
 #ifndef __POLY_LIB_H__
