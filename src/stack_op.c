@@ -124,7 +124,9 @@ bool Add(struct Stack* stack)
   if (stack->height < 2)
     return false;
 
-  PolyAddComp(Cadr(stack), Car(stack));
+  PolyIncorporate(Cadr(stack), Car(stack));
+  /* Pop niszczy wielomian na czubku, więc podstawiam tam figuranckie 0 */
+  *Car(stack) = PolyZero();
   Pop(stack);
 
   return true;
