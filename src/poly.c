@@ -54,8 +54,7 @@ Poly PolyAdd(const Poly* p, const Poly* q)
  */
 static int MonoCmpQsort(const void* m, const void* t)
 {
-  int cmp = MonoCmp((Mono*) m, (Mono*) t);
-  return cmp;
+  return MonoCmp((Mono*)m, (Mono*)t);
 }
 
 Poly PolyMul(const Poly* p, const Poly* q)

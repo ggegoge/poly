@@ -112,16 +112,12 @@ int MonoCmp(const Mono* m, const Mono* t)
  */
 static int MonoListsCmp(const MonoList* lhead, const MonoList* rhead)
 {
-  int cmp;
-
   if (!lhead)
-    cmp = -1;
+    return -1;
   else if (!rhead)
-    cmp = 1;
+    return 1;
   else
-    cmp = MonoCmp(&lhead->m, &rhead->m);
-
-  return cmp;
+    return MonoCmp(&lhead->m, &rhead->m);
 }
 
 /**
@@ -582,7 +578,7 @@ static void MonoIncorporate(Mono* m, Mono* t);
  * @param[in,out] rhead : głowa prawej listy
  * @return głowa listy @p lhead `+=+` @p rhead
  */
-static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
+static MonoList* MonoListsJoin(MonoList* lhead, MonoList* rhead)
 {
   int cmp;
   MonoList* tmp;
@@ -598,7 +594,7 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
     if (!PolyIsZero(&lhead->m.p)) {
       tmp = rhead->tail;
       free(rhead);
-      lhead->tail = MonoListsIncorporate(lhead->tail, tmp);
+      lhead->tail = MonoListsJoin(lhead->tail, tmp);
       return lhead;
     } else {
       MonoDestroy(&lhead->m);
@@ -610,13 +606,13 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
       free(rhead);
       rhead = tmp;
 
-      return MonoListsIncorporate(lhead, rhead);
+      return MonoListsJoin(lhead, rhead);
     }
   } else if (cmp > 0) {
-    lhead->tail = MonoListsIncorporate(lhead->tail, rhead);
+    lhead->tail = MonoListsJoin(lhead->tail, rhead);
     return lhead;
   } else {
-    rhead->tail = MonoListsIncorporate(lhead, rhead->tail);
+    rhead->tail = MonoListsJoin(lhead, rhead->tail);
     return rhead;
   }
 }
@@ -632,7 +628,7 @@ Poly* PolyIncorporate(Poly* p, Poly* q)
     return p;
   }
 
-  p->list = MonoListsIncorporate(p->list, q->list);
+  p->list = MonoListsJoin(p->list, q->list);
 
   if (PolyIsPseudoCoeff(p->list))
     Decoeffise(p);
@@ -644,5 +640,6 @@ Poly* PolyIncorporate(Poly* p, Poly* q)
  * Funkcja dualna do @ref PolyIncorporate. Łączy jednomiany @p m i @p t. */
 static void MonoIncorporate(Mono* m, Mono* t)
 {
+  assert(m->exp == t->exp);
   PolyIncorporate(&m->p, &t->p);
 }
