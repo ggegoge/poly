@@ -476,7 +476,7 @@ static void MonoIncorporate(Mono* m, Mono* t);
 /**
  * Pełne złączenie list @p lhead i @p rhead.
  * Jak @ref MonoListsMerge to było `+=`, tak to jest ''`+=+`'' -- w odróżnieniu
- * od tamtej funkcji tutaj zachodzi prawdziwe złączenie list bez żadnych kopiowań.
+ * od tamtej funkcji tutaj zachodzi prawdziwe złączenie list bez kopiowań.
  * Brany jest ażdy jednomian z @p lhead i @p rhead à la merge sort. Gdy na trafi
  * na parę o równych wykładnikach włącza zawartość prawej głowy w lewą i zwalnia
  * odpowiednio pamięć. W przypadku gdy dokonanie @p lhead `+=+` @p rhead
@@ -486,7 +486,7 @@ static void MonoIncorporate(Mono* m, Mono* t);
  * @param[in,out] rhead : głowa prawej listy
  * @return głowa listy @p lhead `+=+` @p rhead
  */
-static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
+static MonoList* MonoListsJoin(MonoList* lhead, MonoList* rhead)
 {
   int cmp;
   MonoList* tmp;
@@ -502,7 +502,7 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
     if (!PolyIsZero(&lhead->m.p)) {
       tmp = rhead->tail;
       free(rhead);
-      lhead->tail = MonoListsIncorporate(lhead->tail, tmp);
+      lhead->tail = MonoListsJoin(lhead->tail, tmp);
       return lhead;
     } else {
       MonoDestroy(&lhead->m);
@@ -514,13 +514,13 @@ static MonoList* MonoListsIncorporate(MonoList* lhead, MonoList* rhead)
       free(rhead);
       rhead = tmp;
 
-      return MonoListsIncorporate(lhead, rhead);
+      return MonoListsJoin(lhead, rhead);
     }
   } else if (cmp > 0) {
-    lhead->tail = MonoListsIncorporate(lhead->tail, rhead);
+    lhead->tail = MonoListsJoin(lhead->tail, rhead);
     return lhead;
   } else {
-    rhead->tail = MonoListsIncorporate(lhead, rhead->tail);
+    rhead->tail = MonoListsJoin(lhead, rhead->tail);
     return rhead;
   }
 }
@@ -533,10 +533,11 @@ Poly* PolyIncorporate(Poly* p, Poly* q)
     return p;
   } else if (PolyIsCoeff(q)) {
     PolyAddComp(p, q);
+    *q = *p;
     return p;
   }
 
-  p->list = MonoListsIncorporate(p->list, q->list);
+  p->list = q->list = MonoListsJoin(p->list, q->list);
 
   if (PolyIsPseudoCoeff(p->list))
     Decoeffise(p);
