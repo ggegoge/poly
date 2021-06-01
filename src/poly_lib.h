@@ -65,7 +65,8 @@ void PolyAddComp(Poly* p, const Poly* q);
  * pamięć należącą do @p q i wszystkie jego jednomiany na własność.
  * Efektywniejsza wersja @ref PolyAddComp, które było zaledwie `+=` -- prawy
  * wielomian pozostawał bez zmian. Tutaj mamy tak jakby ''`+=+`'', łączymy
- * @p p i @p q bez żadnego kopiowania.
+ * @p p i @p q bez żadnego kopiowania. Po wykonaniu tej operacji wielomiany
+ * @p p i @p q są tymi samymi strukturami.
  * @param[in,out] p : wielomian w którym zostanie wynik
  * @param[in,out] q : wielomian do pożarcia i włączenia
  * @return `p +=+ q`

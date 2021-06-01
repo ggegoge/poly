@@ -625,10 +625,11 @@ Poly* PolyIncorporate(Poly* p, Poly* q)
     return p;
   } else if (PolyIsCoeff(q)) {
     PolyAddComp(p, q);
+    *q = *p;
     return p;
   }
 
-  p->list = MonoListsJoin(p->list, q->list);
+  p->list = q->list = MonoListsJoin(p->list, q->list);
 
   if (PolyIsPseudoCoeff(p->list))
     Decoeffise(p);
