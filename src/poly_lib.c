@@ -12,7 +12,8 @@
 #include "poly.h"
 #include "poly_lib.h"
 
-/** Próg stosowania alternatywego mnożenia (@ref PolyMulLong) w potęgowaniu.
+/**
+ * Próg stosowania alternatywego mnożenia (@ref PolyMulLong) w potęgowaniu.
  * Wyznaczony quasi-eksperymentalnie.
  */
 #define BIG_EXP 3000
@@ -33,9 +34,6 @@
 
 void MonoListDestroy(MonoList* head)
 {
-  /* robię schemat typu `fold_right' -- idę najpierw rekurencyjnie na sam koniec
-   * listy, a następnie cofając się najpierw usuwam trzymany w liście jednomian
-   * i później zwalniam tę komórkę listy. */
   if (!head)
     return;
 
@@ -452,15 +450,13 @@ poly_exp_t MonoListDeg(const MonoList* head)
 
 poly_exp_t PolyCoeffDeg(const Poly* p)
 {
-  /* wielomian stały ma stopień 0 o ile nie jest tożsamościowo równy 0, wtedy
-   * jego stopień wynosi -1 */
   assert(PolyIsCoeff(p));
   return PolyIsZero(p) ? -1 : 0;
 }
 
 bool MonoIsEq(const Mono* m, const Mono* t)
 {
-  return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
+  return m->exp == t->exp && PolyIsEq(&m->p, &t->p);
 }
 
 /**
@@ -576,7 +572,7 @@ static void MonoIncorporate(Mono* m, Mono* t);
 /**
  * Pełne złączenie list @p lhead i @p rhead.
  * Jak @ref MonoListsMerge to było `+=`, tak to jest ''`+=+`'' -- w odróżnieniu
- * od tamtej funkcji tutaj zachodzi prawdziwe złączenie list bez żadnych kopiowań.
+ * od tamtej funkcji tutaj zachodzi prawdziwe złączenie list bez kopiowań.
  * Brany jest ażdy jednomian z @p lhead i @p rhead à la merge sort. Gdy na trafi
  * na parę o równych wykładnikach włącza zawartość prawej głowy w lewą i zwalnia
  * odpowiednio pamięć. W przypadku gdy dokonanie @p lhead `+=+` @p rhead
