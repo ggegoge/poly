@@ -539,7 +539,7 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
   return powers;
 }
 
-Poly PolyGetPow(Poly* powers, size_t n)
+Poly PolyGetPow(const Poly powers[], size_t n)
 {
   bool big = PolyHeavyPower(powers, n);
   Poly res = PolyFromCoeff(1);

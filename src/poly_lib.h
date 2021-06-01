@@ -144,7 +144,7 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count);
  * @param[in] n : wykładnik
  * @return odpowiednia potęga
  */
-Poly PolyGetPow(Poly* powers, size_t n);
+Poly PolyGetPow(const Poly powers[], size_t n);
 
 /**
  * Obliczenie współczynnika wielomianu stałego.
