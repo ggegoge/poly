@@ -276,6 +276,11 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 
       free(powers);
     }
+  } else if (k == 0) {
+    for (MonoList* pl = p->list; pl; pl = pl->tail) {
+      if (pl->m.exp == 0)
+        composee = PolyFromCoeff(1);
+    }
   }
 
   return composee;
