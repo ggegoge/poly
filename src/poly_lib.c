@@ -114,6 +114,7 @@ static inline int MonoCmp(const Mono* m, const Mono* t)
 static int MonoListsCmp(const MonoList* lhead, const MonoList* rhead)
 {
   int cmp;
+  assert(lhead || rhead);
 
   if (!lhead)
     cmp = -1;
@@ -422,8 +423,6 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 
   if (changed)
     PolyDestroy(&a);
-  else
-    changed = true;
 
   return pow;
 }
