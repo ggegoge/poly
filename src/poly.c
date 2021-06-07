@@ -236,7 +236,7 @@ static bool PolyHasManyMonos(const Poly* p)
 Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
 {
   Poly* powers = NULL;
-  bool tbl_heuristic = PolyHasManyMonos(p) && !PolyIsCoeff(q);
+  bool tbl_heuristic = PolyHasManyMonos(p) && k > 0 && !PolyIsCoeff(q);
   size_t count;
   Poly subcomposee;
   Poly composee = PolyZero();
@@ -279,7 +279,7 @@ Poly PolyCompose(const Poly* p, size_t k, const Poly* q)
   } else if (k == 0) {
     for (MonoList* pl = p->list; pl; pl = pl->tail) {
       if (pl->m.exp == 0)
-        composee = PolyFromCoeff(1);
+        composee = PolyCompose(&pl->m.p, k, q);
     }
   }
 
