@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <sys/types.h>
 
 #include "stack_op.h"
 #include "poly.h"
