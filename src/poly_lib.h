@@ -27,6 +27,16 @@ void MonoListDestroy(MonoList* head);
 MonoList* MonoListClone(const MonoList* head);
 
 /**
+ * Porównanie dwu jednomianów po ich wykładnikach.
+ * @param[in] m : wskaźnik na pierwszy z jednomianów
+ * @param[in] t : wskaźnik na dru1gi z jednomianów
+ * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
+ * przypadku 1, 0 oznacza równość -- konwencja zgodna ze zwyczajową C, wystarczy
+ * sprawdzić znak aby poznać porządek między dwójką jednomianów.
+ */
+int MonoCmp(const Mono* m, const Mono* t);
+
+/**
  * Wstawienie jednomianu w odpowiednie miejsce listy.
  * @param[in,out] head : głowa listy
  * @param[in] m : nowy jednomian
@@ -55,7 +65,8 @@ void PolyAddComp(Poly* p, const Poly* q);
  * pamięć należącą do @p q i wszystkie jego jednomiany na własność.
  * Efektywniejsza wersja @ref PolyAddComp, które było zaledwie `+=` -- prawy
  * wielomian pozostawał bez zmian. Tutaj mamy tak jakby ''`+=+`'', łączymy
- * @p p i @p q bez żadnego kopiowania.
+ * @p p i @p q bez żadnego kopiowania. Po wykonaniu tej operacji wielomiany
+ * @p p i @p q są tymi samymi strukturami.
  * @param[in,out] p : wielomian w którym zostanie wynik
  * @param[in,out] q : wielomian do pożarcia i włączenia
  * @return `p +=+ q`
@@ -133,7 +144,7 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count);
  * @param[in] n : wykładnik
  * @return odpowiednia potęga
  */
-Poly PolyGetPow(Poly* powers, size_t n);
+Poly PolyGetPow(const Poly powers[], size_t n);
 
 /**
  * Obliczenie współczynnika wielomianu stałego.

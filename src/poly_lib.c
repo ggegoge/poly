@@ -13,6 +13,16 @@
 #include "poly_lib.h"
 
 /**
+ * Próg stosowania alternatywego mnożenia (@ref PolyMulLong) w potęgowaniu.
+ * Wyznaczony quasi-eksperymentalnie.
+ */
+#define BIG_EXP 3000
+/** Współczynnik poszerzania tablicy jednomianów w @ref PolyMulLong */
+#define BIG_MUL_ARRAY_RESIZE 2
+/** Początkowy rozmiar tablicy jednomianów w @ref PolyMulLong. */
+#define BIG_MUL_ARRAY_INIT_SIZE 16
+
+/**
  * Sprawdzian powodzenia (m)allokacyjnego.
  */
 #define CHECK_PTR(p)                            \
@@ -24,9 +34,6 @@
 
 void MonoListDestroy(MonoList* head)
 {
-  /* robię schemat typu `fold_right' -- idę najpierw rekurencyjnie na sam koniec
-   * listy, a następnie cofając się najpierw usuwam trzymany w liście jednomian
-   * i później zwalniam tę komórkę listy. */
   if (!head)
     return;
 
@@ -77,7 +84,6 @@ void Decoeffise(Poly* p)
   *p = np;
 }
 
-
 /**
  * Suma dwóch jednomów równych stopni, również modyfikująca pierwszy z nich
  * (analogiczny mechanizm jak opisany w `PolyAddComp` czyli operator `+=`).
@@ -90,15 +96,8 @@ static void MonoAddComp(Mono* m, const Mono* t)
   PolyAddComp(&m->p, &t->p);
 }
 
-/**
- * Porównanie dwu jednomianów po ich wykładnikach.
- * @param[in] m : wskaźnik na pierwszy z jednomianów
- * @param[in] t : wskaźnik na dru1gi z jednomianów
- * @return -1 gdy wykładnik @p m jest mniejszy od wykładnika @p t, w przeciwnym
- * przypadku 1, 0 oznacza równość -- konwencja zgodna ze zwyczajową C, wystarczy
- * sprawdzić znak aby poznać porządek między dwójką jednomianów.
- */
-static inline int MonoCmp(const Mono* m, const Mono* t)
+int MonoCmp(const Mono* m, const Mono* t)
+
 {
   return (m->exp > t->exp) - (m->exp < t->exp);
 }
@@ -113,17 +112,12 @@ static inline int MonoCmp(const Mono* m, const Mono* t)
  */
 static int MonoListsCmp(const MonoList* lhead, const MonoList* rhead)
 {
-  int cmp;
-  assert(lhead || rhead);
-
   if (!lhead)
-    cmp = -1;
+    return -1;
   else if (!rhead)
-    cmp = 1;
+    return 1;
   else
-    cmp = MonoCmp(&lhead->m, &rhead->m);
-
-  return cmp;
+    return MonoCmp(&lhead->m, &rhead->m);
 }
 
 /**
@@ -293,6 +287,89 @@ void MonoListInsert(MonoList** head, Mono* m)
   }
 }
 
+/**
+ * Tworzy tablicę na przechowywanie jednomianów przez @ref PolyMulLong.
+ * @param[in] init_size : początkowy rozmiar tablicy
+ * @return zaalokowana pamięć na tablicę jednomianów
+ */
+static Mono* MonosArray(size_t init_size)
+{
+  Mono* monos = malloc(init_size * sizeof(Mono));
+  CHECK_PTR(monos);
+  return monos;
+}
+
+/**
+ * Dodanie jednomianu @p m do tablicy @p monos. Wstawienie go na koniec tejże
+ * tablicy i jej powiększenie w razie gdy to koniczne. W takim wypadku nowy
+ * rozmiar fizyczny zostaje zapisany w @p len, a @p len trzyma liczbę zajętych
+ * miejsc.
+ * @param[in,out] len : liczba jednomianów w @p monos
+ * @param[in,out] size : wielkość zaalokowanej pamięci pod @p monos
+ * @param[in] m : jednomian do dodania
+ * @param[in,out] monos : obecna tablica
+ * @return tablica @p monos wraz z nowym jednomianem @p m.
+ */
+static Mono* MonosArrayAppend(size_t* len, size_t* size, Mono* m, Mono* monos)
+{
+  if (*len >= *size) {
+    *size *= BIG_MUL_ARRAY_RESIZE;
+    monos = realloc(monos, *size * sizeof(Mono));
+    CHECK_PTR(monos);
+  }
+
+  monos[(*len)++] = *m;
+  return monos;
+}
+
+/**
+ * Alternatywne mnożenie __dużych__ wielomianów. Działa dokładnie tak samo jak
+ * @ref PolyMul, ale stosuje inny mechanizm budowy wieomianu z jednomianów
+ * cząstkowych. Dokładniej mówiąc jak @ref PolyMul woła @ref MonoListInsert
+ * wiele razy co powoduje asymptotyczny wzrost złożoności do kwadratowej, tak
+ * ta funkcja najpierw wrzuca jednomiany do tablicy, a później @ref PolyOwnMonos
+ * w efektywny sposób tworzy z nich wielomian. Ta heurystyka spowalnia mnożenie
+ * małych (tj. liczących sobie niewiele jednomianów) wielomianów, ale przy
+ * długich @p p lub @p q jest bardzo korzystna. Istnieje głównie na potrzeby
+ * potęgowania.
+ * @param[in] p : @f$p@f$
+ * @param[in] q : @f$q@f$
+ * @return iloczyn @f$p\cdot q@f$ policzony innym algorytmem.
+ */
+static Poly PolyMulLong(const Poly* p, const Poly* q)
+{
+  Poly pq;
+  /* jednomiany należące do wielomianów p, q i p * q */
+  Mono pm, qm, pqm;
+  size_t size = BIG_MUL_ARRAY_INIT_SIZE;
+  size_t len = 0;
+  Mono* monos;
+
+  if (PolyIsCoeff(p))
+    return PolyMulCoeff(q, p->coeff);
+
+  if (PolyIsCoeff(q))
+    return PolyMulCoeff(p, q->coeff);
+
+  monos = MonosArray(size);
+
+  for (MonoList* pl = p->list; pl; pl = pl->tail) {
+    for (MonoList* ql = q->list; ql; ql = ql->tail) {
+      pm = pl->m;
+      qm = ql->m;
+      pqm = MonoMul(&pm, &qm);
+
+      if (PolyIsZero(&pqm.p))
+        MonoDestroy(&pqm);
+      else
+        monos = MonosArrayAppend(&len, &size, &pqm, monos);
+    }
+  }
+
+  pq = PolyOwnMonos(len, monos);
+  return pq;
+}
+
 Mono MonoMul(const Mono* m, const Mono* t)
 {
   Mono mt;
@@ -369,20 +446,31 @@ poly_exp_t MonoListDeg(const MonoList* head)
 
 poly_exp_t PolyCoeffDeg(const Poly* p)
 {
-  /* wielomian stały ma stopień 0 o ile nie jest tożsamościowo równy 0, wtedy
-   * jego stopień wynosi -1 */
   assert(PolyIsCoeff(p));
   return PolyIsZero(p) ? -1 : 0;
 }
 
 bool MonoIsEq(const Mono* m, const Mono* t)
 {
-  return (m->exp == t->exp) && PolyIsEq(&m->p, &t->p);
+  return m->exp == t->exp && PolyIsEq(&m->p, &t->p);
+}
+
+/**
+ * Sprawdza czy spotęgowanie wielomianu @p p do potęgi @p n to ciężka operacja.
+ * Decyduje o użyciu funkcji @ref PolyMulLong przez funkcje potęgujące.
+ * @param[in] p : wielomian do spotęgowania
+ * @param[in] n : wykładnik
+ * @return czy potęgowanie @f$p^n@f$ jest ''ciężką'' operacją.
+ */
+static inline bool PolyHeavyPower(const Poly* p, poly_coeff_t n)
+{
+  return n > BIG_EXP && p->list && p->list->tail;
 }
 
 /* ten sam algorytm co w potęgowaniu liczb stosowanym w PolyAt w pliku poly.c */
 Poly PolyPow(const Poly* p, poly_coeff_t n)
 {
+  bool big = PolyHeavyPower(p, n);
   Poly pow = PolyFromCoeff(1);
   Poly tmppow;
   /* jako, że a to na początku płytka kopia p, to muszę wiedzieć czy się
@@ -399,13 +487,13 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 
   while (n > 1) {
     if (n % 2 == 0) {
-      tmpa = PolyMul(&a, &a);
+      tmpa = big ? PolyMulLong(&a, &a) : PolyMul(&a, &a);
       n /= 2;
     } else {
-      tmppow = PolyMul(&pow, &a);
+      tmppow = big ? PolyMulLong(&pow, &a) : PolyMul(&pow, &a);
       PolyDestroy(&pow);
       pow = tmppow;
-      tmpa = PolyMul(&a, &a);
+      tmpa = big ? PolyMulLong(&a, &a) : PolyMul(&a, &a);
       n = (n - 1) / 2;
     }
 
@@ -417,7 +505,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
     a = tmpa;
   }
 
-  tmppow = PolyMul(&a, &pow);
+  tmppow = big ? PolyMulLong(&pow, &a) : PolyMul(&pow, &a);
   PolyDestroy(&pow);
   pow = tmppow;
 
@@ -430,6 +518,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
 {
   size_t n = PolyDegBy(p, 0);
+  bool big = PolyHeavyPower(q, n);
   Poly* powers = NULL;
 
   for (*count = 0; n > 0; ++*count, n /= 2);
@@ -440,15 +529,17 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
     powers[0] = PolyClone(q);
 
     for (size_t i = 1; i < *count; ++i) {
-      powers[i] = PolyMul(powers + i - 1, powers + i - 1);
+      powers[i] = big ? PolyMulLong(powers + i - 1, powers + i - 1)
+                  : PolyMul(powers + i - 1, powers + i - 1);
     }
   }
 
   return powers;
 }
 
-Poly PolyGetPow(Poly* powers, size_t n)
+Poly PolyGetPow(const Poly powers[], size_t n)
 {
+  bool big = PolyHeavyPower(powers, n);
   Poly res = PolyFromCoeff(1);
   Poly tmp;
   size_t i = 0;
@@ -458,7 +549,7 @@ Poly PolyGetPow(Poly* powers, size_t n)
 
   while (n > 0) {
     if (n % 2 == 1) {
-      tmp = PolyMul(&res, powers + i);
+      tmp = big ? PolyMulLong(&res, powers + i) : PolyMul(&res, powers + i);
       PolyDestroy(&res);
       res = tmp;
     }
@@ -548,5 +639,6 @@ Poly* PolyIncorporate(Poly* p, Poly* q)
  * Funkcja dualna do @ref PolyIncorporate. Łączy jednomiany @p m i @p t. */
 static void MonoIncorporate(Mono* m, Mono* t)
 {
+  assert(m->exp == t->exp);
   PolyIncorporate(&m->p, &t->p);
 }

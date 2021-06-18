@@ -46,6 +46,17 @@ Poly PolyAdd(const Poly* p, const Poly* q)
   return new;
 }
 
+/**
+ * Funkcja porządkująca wielomiany dla qsorta.
+ * @param[in] m : jednomian jako `void*`
+ * @param[in] t : jednomian jako `void*`
+ * @return wynik z MonoCmp z poly_lib.c
+ */
+static int MonoCmpQsort(const void* m, const void* t)
+{
+  return MonoCmp((Mono*)m, (Mono*)t);
+}
+
 Poly PolyMul(const Poly* p, const Poly* q)
 {
   Poly pq = PolyZero();
@@ -190,10 +201,7 @@ static poly_coeff_t QuickPow(poly_coeff_t a, poly_coeff_t n)
 Poly PolyAt(const Poly* p, poly_coeff_t x)
 {
   /* zamieniam wszystkie x_0 na x i potęguję je przez odpowiednie wykładniki.
-   * Wynik traktować mogę jako mnożenie wielomianu wokół x_1 przez skalar. Robię
-   * więc tak: tworzę wielomian wynikowy res, z każdego jednomianu wybieram jego
-   * wielomian p, i dokonuję res += p * x^n -- powstaje mi suma kumulatywna
-   * wielomianów wielu, która jest wynikiem */
+   * sumuję m->p * x^n -- powstaje mi suma kumulatywna wielomianów wielu */
   Poly res = PolyZero();
   Poly mul;
   poly_coeff_t coeff;
@@ -301,10 +309,13 @@ Poly PolyOwnMonos(size_t count, Mono monos[])
 {
   Poly p;
 
-  if (!count || !monos)
-    return PolyZero();
+  if (!count || !monos) {
+    p = PolyZero();
+  } else {
+    qsort(monos, count, sizeof(Mono), MonoCmpQsort);
+    p = PolyAddMonos(count, monos);
+  }
 
-  p = PolyAddMonos(count, monos);
   free(monos);
   return p;
 }
