@@ -462,7 +462,7 @@ bool MonoIsEq(const Mono* m, const Mono* t)
  * @param[in] n : wykładnik
  * @return czy potęgowanie @f$p^n@f$ jest ''ciężką'' operacją.
  */
-static inline bool PolyHeavyPower(const Poly* p, poly_coeff_t n)
+static inline bool PolyBigPower(const Poly* p, poly_coeff_t n)
 {
   return n > BIG_EXP && p->list && p->list->tail;
 }
@@ -470,7 +470,7 @@ static inline bool PolyHeavyPower(const Poly* p, poly_coeff_t n)
 /* ten sam algorytm co w potęgowaniu liczb stosowanym w PolyAt w pliku poly.c */
 Poly PolyPow(const Poly* p, poly_coeff_t n)
 {
-  bool big = PolyHeavyPower(p, n);
+  bool big = PolyBigPower(p, n);
   Poly pow = PolyFromCoeff(1);
   Poly tmppow;
   /* jako, że a to na początku płytka kopia p, to muszę wiedzieć czy się
@@ -518,7 +518,7 @@ Poly PolyPow(const Poly* p, poly_coeff_t n)
 Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
 {
   size_t n = PolyDegBy(p, 0);
-  bool big = PolyHeavyPower(q, n);
+  bool big = PolyBigPower(q, n);
   Poly* powers = NULL;
 
   for (*count = 0; n > 0; ++*count, n /= 2);
@@ -539,7 +539,7 @@ Poly* PolyPowTable(const Poly* p, const Poly* q, size_t* count)
 
 Poly PolyGetPow(const Poly powers[], size_t n)
 {
-  bool big = PolyHeavyPower(powers, n);
+  bool big = PolyBigPower(powers, n);
   Poly res = PolyFromCoeff(1);
   Poly tmp;
   size_t i = 0;
