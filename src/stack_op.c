@@ -3,7 +3,7 @@
 
   @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
-  @date maj 2021
+  @date maj i czerwiec 2021
 */
 
 #include <stdlib.h>

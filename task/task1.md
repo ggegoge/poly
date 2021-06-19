@@ -1,6 +1,6 @@
 
 
-# Duże zadanie, część 1 {#t1}
+# Duże zadanie, część 1
 
 
 # Spis treści

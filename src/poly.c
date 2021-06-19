@@ -4,7 +4,7 @@
 
   @author Grzegorz Cichosz <g.cichosz@students.mimuw.edu.pl>
   @copyright Uniwersytet Warszawski
-  @date kwiecień i maj 2021
+  @date kwiecień -- czerwiec 2021
 */
 
 #include <stdlib.h>

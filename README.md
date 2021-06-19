@@ -5,11 +5,7 @@
 
 Aktualna treść zadania znajduje się
 w [Moodle](https://moodle.mimuw.edu.pl), ale zarazem w plikach z
-katalogu `task/`, które można ujrzeć w sekcji _dodatkowe strony_
-dokumentacji:
-    - \ref t1
-    - \ref t2
-    - \ref t3
+katalogu `task/`, które można ujrzeć w sekcji _dodatkowe strony_.
 
 ### Opis programu
 
@@ -34,29 +30,27 @@ dodanie opcji `-p` lub `---pretty` która uruchamia przyjemniejszy
 interfejs użytkowniczy. Działają też wtedy komendy pisane małymi
 literami co ułatwia użytek.
 
+
     λ ./poly --pretty
-    ---< Poly Calc >-----------< v. 0.4 >----
-    |1|> (1,1)
-    |2|> 1
-    |3|> add
-    |4|> print
-    (1,0)+(1,1)
-    |5|> clone
-    |6|> mul
-    |7|> print
-    (1,0)+(2,1)+(1,2)
-    |8|> at 3
-    |9|> print
-    16
-    |10|> is_zero
-    0
-    |11|> clone
-    |12|> neg
-    |13|> add
-    |14|> is_zero
+    ---< Poly Calc >-----------< v. 1.0 >----
+    |1|> (1,1)+(1,0)
+    |2|> clone
+    |3|> clone
+    |4|> mul
+    |5|> mul
+    |6|> print
+    (1,0)+(3,1)+(3,2)+(1,3)
+    |7|> (1,1)+(1,0)
+    |8|> (1,3)
+    |9|> compose 1
+    |10|> print
+    (1,0)+(3,1)+(3,2)+(1,3)
+    |11|> is_eq
     1
-    |15|> pop
-    |16|> 
+    |12|> 
+    |13|> pop
+    |14|> pop
+
 
 Jest to jednak jedynie __dodatek__, oficjalna wersja zakłada używanie
 samego `./poly`.
@@ -193,4 +187,4 @@ różowy kolor.
 ------------
 
 \author Grzegorz Cichosz
-\date kwiecień i maj 2021
+\date kwiecień, maj i czerwiec 2021

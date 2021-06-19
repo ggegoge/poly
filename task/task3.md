@@ -1,6 +1,6 @@
 
 
-# Duże zadanie, część 3 {#t3}
+# Duże zadanie, część 3
 
 
 # Spis treści
