@@ -1,10 +1,19 @@
 
+# Polynomials
+
+The hereby presented code was written as a part of the 
+**Individual Programming Project** course at the university of Warsaw. 
+It is a C library for various operations on multivariable polynomials.
+
+Further description in Polish below.
+
+----------------------------------------
+
 ## Wielomiany
 
 ### Treść zadania
 
-Aktualna treść zadania znajduje się
-w [Moodle](https://moodle.mimuw.edu.pl), ale zarazem w plikach z
+Aktualna treść zadania znajduje się w plikach z
 katalogu `task/`, które można ujrzeć w sekcji _dodatkowe strony_.
 
 ### Opis programu
